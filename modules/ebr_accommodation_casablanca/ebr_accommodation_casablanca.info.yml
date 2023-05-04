@@ -1,4 +1,4 @@
-name: 'Accommodation: Casablanca PMS'
+name: 'EBR Accommodation: Casablanca PMS'
 type: module
 description: 'Provides contextual call-to-action links for Casablanca PMS entites.'
 package: Entity business rules

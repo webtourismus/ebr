@@ -1,4 +1,4 @@
-name: 'Accommodation: EasyBooking PMS'
+name: 'EBR Accommodation: EasyBooking PMS'
 type: module
 description: 'Provides contextual call-to-action links for EasyBooking PMS entites.'
 package: Entity business rules

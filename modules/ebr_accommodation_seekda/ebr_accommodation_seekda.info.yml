@@ -1,4 +1,4 @@
-name: 'Accommodation: Seekda CM'
+name: 'EBR Accommodation: Seekda CM'
 type: module
 description: 'Provides contextual call-to-action links for Seekda entites.'
 package: Entity business rules

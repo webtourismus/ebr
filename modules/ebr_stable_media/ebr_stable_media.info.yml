@@ -1,4 +1,4 @@
-name: 'Permalinks for media entities'
+name: 'EBR Stable Media: Permalinks for media entities'
 type: module
 description: 'Provides an UI to create stable download links for PDF documents and similar media.'
 package: Entity business rules
