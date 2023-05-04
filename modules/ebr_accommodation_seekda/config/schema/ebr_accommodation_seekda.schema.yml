@@ -1,0 +1,13 @@
+system.site:
+  type: config_object
+  mapping:
+    seekda:
+      type: mapping
+      label: 'Seekda'
+      mapping:
+        kube_domain:
+          type: uri
+          label: 'KUBE Domain'
+        property_code:
+          type: string
+          label: 'Seekda property code'

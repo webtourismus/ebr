@@ -1,0 +1,14 @@
+edit entity business rules internal_id field:
+  title: 'Edit internal id field'
+  restrict access: true
+view entity business rules internal_id field:
+  title: 'View internal id field'
+edit entity business rules remote_id field:
+  title: 'Edit remote id field'
+view entity business rules remote_id field:
+  title: 'View remote id field'
+edit entity business rules remote_datasource field:
+  title: 'Edit remote datasource field'
+  restrict access: true
+view entity business rules remote_datasource field:
+  title: 'View remote datasource field'

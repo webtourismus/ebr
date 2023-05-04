@@ -1,0 +1,218 @@
+<?php
+
+declare(strict_types=1);
+
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\ebr_teaser\Entity\TeaserableInterface;
+use Drupal\ebr_teaser\Entity\ParagraphTeaserableInterface;
+use Drupal\Core\Template\Attribute;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
+use Drupal\ebr_teaser\Entity\ParagraphTeaserBase;
+use Drupal\ebr_teaser\Entity\NodeTeaserBase;
+use Drupal\node\Entity\NodeType;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\ebr\Entity\ActionableInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\media\MediaInterface;
+use Drupal\ebr_teaser\Entity\ReadmoreActionableInterface;
+
+function ebr_teaser_entity_bundle_info_alter(array &$bundles): void {
+  if (isset($bundles['paragraph']['linkblock'])) {
+    $bundles['paragraph']['linkblock']['class'] = ParagraphTeaserBase::class;
+  }
+  if (isset($bundles['paragraph']['icon'])) {
+    $bundles['paragraph']['icon']['class'] = ParagraphTeaserBase::class;
+  }
+  foreach (NodeType::loadMultiple() as $bundle) {
+    if (isset($bundles['node'][$bundle->id()])) {
+      $bundles['node']['page']['class'] = NodeTeaserBase::class;
+    }
+  }
+}
+
+/**
+ * Replace Drupal's default implementation of "read more" links as extra field.
+ *
+ * @see ebr_teaser_entity_bundle_field_info()
+ * @see \Drupal\ebr_teaser\Entity\NodeReadmoreActionableTrait
+ */
+function ebr_teaser_entity_extra_field_info_alter(&$info) {
+  // Force node title to always be at the top of the list by default.
+  foreach (NodeType::loadMultiple() as $bundle) {
+    if (isset($info['node'][$bundle->id()]['display']['links'])) {
+      unset($info['node'][$bundle->id()]['display']['links']);
+    }
+  }
+}
+
+function ebr_teaser_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  $fields = [];
+
+  if ($entity_type->id() == 'node') {
+    foreach (NodeTeaserBase::getDefaultActions() as $actionId) {
+      $fields[ActionableInterface::ACTION_FIELD_PREFIX . $actionId] = BaseFieldDefinition::create('action_link')
+        ->setName(ActionableInterface::ACTION_FIELD_PREFIX . $actionId)
+        ->setLabel(t('Action link @type', ['@type' => NodeTeaserBase::getDefaultActionLabel($actionId)]))
+        ->setComputed(TRUE)
+        ->setClass('\Drupal\ebr\Plugin\Field\SingleComputedItemList')
+        ->setSettings([
+          'action_type' => $actionId,
+        ])
+        ->setDisplayConfigurable('view', TRUE)
+        // visible by default, we hide them later in hook_install in banner view modes
+        ->setDisplayOptions('view', [
+          'label' => 'hidden',
+        ]);
+    }
+  }
+
+  return $fields;
+}
+
+function ebr_teaser_preprocess_node(&$variables):void {
+  _ebr_teaser_prepocess_teaserable_entity($variables, $variables['node']);
+}
+
+function ebr_teaser_preprocess_paragraph(&$variables): void {
+  _ebr_teaser_prepocess_teaserable_entity($variables, $variables['paragraph']);
+}
+
+function _ebr_teaser_prepocess_teaserable_entity(array &$variables, ContentEntityInterface $entity) {
+  if (!$entity instanceof TeaserableInterface) {
+    return;
+  }
+  if (!(($variables['attributes'] ?? []) instanceof Attribute)) {
+    $variables['attributes'] = new Attribute($variables['attributes'] ?? []);
+  }
+  $variables['attributes']->addClass("teaserable");
+  $variables['attributes']->addClass("teaserable--view-mode--{$variables['view_mode']}");
+
+  if ($entity instanceof ParagraphTeaserableInterface) {
+    $teaserEntity = $entity->getReferencedEntity();
+  }
+  else {
+    $teaserEntity = $entity;
+  }
+  if (!$teaserEntity instanceof ContentEntityInterface) {
+    $variables['attributes']->addClass("teaserable--non-entity");
+    return;
+  }
+
+  $variables['attributes']->addClass("teaserable--entity--{$teaserEntity->getEntityTypeId()}");
+  $variables['attributes']->addClass("teaserable--type--{$teaserEntity->bundle()}");
+}
+
+function ebr_teaser_entity_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
+  $viewMode = $build['#view_mode'] ?? EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE;
+  if ($entity instanceof TeaserableInterface && $entity->isTeaserableViewmode($viewMode)) {
+    if ($entity->getTeaserTitleField() instanceof FieldItemListInterface) {
+      $build[$entity->getTeaserTitleField()->getName()] = $entity->getRenderedTeaserTitle($viewMode);
+    }
+    if ($entity->getTeaserSubtitleField() instanceof FieldItemListInterface) {
+      $build[$entity->getTeaserSubtitleField()->getName()] = $entity->getRenderedTeaserSubTitle($viewMode);
+    }
+    if ($entity->getTeaserImagesField() instanceof FieldItemListInterface) {
+      $build[$entity->getTeaserImagesField()->getName()] = $entity->getRenderedTeaserImages($viewMode);
+    }
+    if ($entity->getTeaserTextField() instanceof FieldItemListInterface) {
+      $build[$entity->getTeaserTextField()->getName()] = $entity->getRenderedTeaserText($viewMode);
+    }
+  }
+
+  if ($entity instanceof ParagraphTeaserableInterface &&
+    !$entity->isFieldSuppressed('field_link') &&
+    $entity->getReferencedEntity() instanceof ActionableInterface
+  ) {
+    foreach ($entity->getReferencedEntity()->getActionFieldnames() as $actionId) {
+      // @TODO
+    }
+  }
+}
+
+/**
+ * Add a set of default CSS classes to all fields.
+ */
+function ebr_teaser_preprocess_field(&$variables, $hook): void {
+  $entity = $variables['element']['#object'];
+  if (!(($variables['attributes'] ?? []) instanceof Attribute)) {
+    $variables['attributes'] = new Attribute($variables['attributes'] ?? []);
+  }
+  if (
+    $variables['field_name'] == 'field_link' &&
+    $entity instanceof ParagraphTeaserableInterface
+  ) {
+    foreach($variables['items'] as $key => $item) {
+      if (!isset($variables['items'][$key]['content']['#options']['attributes'])) {
+        $variables['items'][$key]['content']['#options']['attributes'] = ['class' => []];
+      }
+      elseif (!isset($variables['items'][$key]['content']['#options']['attributes']['class'])) {
+        $variables['items'][$key]['content']['#options']['attributes']['class'] = [];
+      }
+      elseif (is_string($variables['items'][$key]['content']['#options']['attributes']['class'])) {
+        $variables['items'][$key]['content']['#options']['attributes']['class'] = [$variables['items'][$key]['content']['#options']['attributes']['class']];
+      }
+      $variables['items'][$key]['content']['#options']['attributes']['data-action-link-entity'] = $entity->getEntityTypeId();
+      $variables['items'][$key]['content']['#options']['attributes']['data-action-link-bundle'] = $entity->bundle();
+      $variables['items'][$key]['content']['#options']['attributes']['data-action-link-type'] = ReadmoreActionableInterface::ACTION_READMORE;
+      $variables['items'][$key]['content']['#options']['attributes']['class'][] = 'action-link-more';
+    }
+  }
+
+
+  $variables['attributes']->addClass("field--entity--" . $variables['entity_type']);
+  $variables['attributes']->addClass("field--bundle--" . $entity->bundle());
+  $variables['attributes']->addClass("field--name--" . $variables['field_name']);
+  $variables['attributes']->addClass("field--type--" . $variables['field_type']);
+  $viewMode = $variables['element']['#view_mode'];
+  $variables['attributes']->addClass("field--view-mode--{$viewMode}");
+
+  $hostEntity = $variables['element']['#object'];
+  $teaserEntity = NULL;
+  if ($hostEntity instanceof TeaserableInterface) {
+    $teaserEntity = $hostEntity;
+  }
+  elseif ($hostEntity instanceof MediaInterface &&
+    $hostEntity?->_referringItem?->getEntity() instanceof TeaserableInterface
+  ) {
+    $teaserEntity = $hostEntity->_referringItem->getEntity();
+  }
+  else {
+    return;
+  }
+
+  if (
+    ($hostEntity instanceof TeaserableInterface && $hostEntity->isTeaserableViewmode($viewMode)) ||
+    ($teaserEntity->isTeaserableViewmode($viewMode))
+  ) {
+    // Teaserable entities are additionally labelled with their normalized field name from the interface,
+    // which might be different than the actual field name from which the value is retrieved.
+    $field = $variables['element']['#items'];
+
+    if ($teaserEntity->getTeaserTitleField() === $field) {
+      $variables['attributes']->addClass("field--teaserable--title");
+      return;
+    }
+
+    if ($teaserEntity->getTeaserSubtitleField() === $field) {
+      $variables['attributes']->addClass("field--teaserable--subtitle");
+      return;
+    }
+
+    if ($teaserEntity->getTeaserTextField() === $field) {
+      $variables['attributes']->addClass("field--teaserable--text");
+      return;
+    }
+
+    $teaserImageField = $teaserEntity->getTeaserImagesField();
+    if (
+      $teaserImageField === $field ||
+      ($hostEntity instanceof MediaInterface && in_array($hostEntity->id(), array_column($teaserImageField->getValue(), 'target_id')))
+    ) {
+      $variables['attributes']->addClass("field--teaserable--image");
+      return;
+    }
+  }
+}

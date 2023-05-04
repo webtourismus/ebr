@@ -1,0 +1,16 @@
+system.site:
+  type: config_object
+  mapping:
+    casablanca:
+      type: mapping
+      label: 'EasyBooking'
+      mapping:
+        info_link:
+          type: uri
+          label: 'Web widgets info link'
+        customer_id:
+          type: string
+          label: 'Customer ID'
+        serial_nr:
+          type: string
+          label: 'Serial number'

@@ -1,0 +1,58 @@
+<?php
+use Drupal\Core\Entity\EntityFormInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\ebr_stable_media\Plugin\Derivative\StableMediaEditLinkDeriver;
+
+function ebr_stable_media_page_attachments_alter(&$page) {
+  if (_gin_toolbar_gin_is_active()) {
+    $page['#attached']['library'][] = 'ebr_stable_media/toolbar';
+  }
+}
+
+
+function ebr_stable_media_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
+  \Drupal::service('ebr.service')->renderRule(
+    $form,
+    'stable_media_link',
+    t('Media permalinks'),
+    t('Media entities where field "<code>internal_id</code>" starts with "<code>' . StableMediaEditLinkDeriver::STABLE_MEDIA_PREFIX . '</code>" generate a link in the editor menu.'),
+  );
+  \Drupal::service('ebr.service')->renderRule(
+    $form,
+    'stable_media_link',
+    t('Media permalinks'),
+    t('A hint how to use those permalinks is shown in the media edit form.'),
+  );
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function ebr_stable_media_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (!($form_state->getFormObject() instanceof EntityFormInterface)) {
+    return;
+  }
+  $entity = $form_state->getFormObject()->getEntity();
+  if ($form_id != "media_{$entity->bundle()}_edit_form") {
+    return;
+  }
+  if (!$entity->hasField('internal_id') ||
+    $entity->get('internal_id')->isEmpty() ||
+    strpos($entity->get('internal_id')->value, StableMediaEditLinkDeriver::STABLE_MEDIA_PREFIX) !== 0
+  ) {
+    return;
+  }
+
+  $message = [
+    '#theme' => 'status_messages',
+    '#message_list' => [
+      'info' => [
+        t("Use the URL <input size=\"23\" readonly value=\"@url\" class=\"text-center border-none bg-transparent p-0 text-[unset]\"> to create permalinks to this document. Permalinks never change, even after uploading a new file.",
+          ['@url' => "/media/{$entity->id()}/download?inline"],
+        )
+      ],
+    ]
+  ];
+
+  array_unshift($form, $message);
+}

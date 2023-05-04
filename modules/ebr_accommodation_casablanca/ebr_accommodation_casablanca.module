@@ -1,0 +1,140 @@
+<?php
+
+declare(strict_types=1);
+
+use Drupal\ebr_accommodation\Entity\AccommodationBase;
+use Drupal\ebr_accommodation_casablanca\Entity\AccommodationCasablanca;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\Entity\BaseFieldOverride;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\link\LinkItemInterface;
+use Drupal\ebr\EntityBusinessrules;
+
+/**
+ * Implements hook_uninstall().
+ */
+function ebr_accommodation_casablanca_uninstall(): void{
+  $config = \Drupal::configFactory()->getEditable('system.site');
+  $config->clear('casablanca');
+  $config->save(TRUE);
+}
+
+/**
+ * Implements hook_entity_bundle_info_alter().
+ */
+function ebr_accommodation_casablanca_entity_bundle_info_alter(array &$bundles): void {
+  if (isset($bundles['node'][AccommodationBase::BUNDLE_ROOM])) {
+    $bundles['node'][AccommodationBase::BUNDLE_ROOM]['class'] = AccommodationCasablanca::class;
+  }
+  if (isset($bundles['node'][AccommodationBase::BUNDLE_PACKAGE])) {
+    $bundles['node'][AccommodationBase::BUNDLE_PACKAGE]['class'] = AccommodationCasablanca::class;
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_field_info().
+ */
+function ebr_accommodation_casablanca_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  $fields = [];
+
+  // Whether the hook implementation was called for our group type.
+  if ($entity_type->id() == 'node' &&
+    in_array($bundle, [AccommodationBase::BUNDLE_PACKAGE, AccommodationBase::BUNDLE_ROOM]) &&
+    !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE])
+  ) {
+    // Overrride base ebr_accommodation field
+    $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE], $bundle);
+    $field->setDefaultValue(AccommodationCasablanca::DATASOURCE);
+    $field->setDescription(t('If value is "<code>@remote_datasource</code>", rooms and packages with an "<code>remote_id</code>" receive a booking link.', ["@remote_datasource" => AccommodationCasablanca::DATASOURCE]));
+    $fields[EntityBusinessrules::FIELD_REMOTE_DATASOURCE] = $field;
+
+    $config = \Drupal::configFactory()->getEditable('system.site');
+    $infolink = $config->get('casablanca.info_link');
+    if ($infolink) {
+      $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_ID], $bundle);
+      $field->setDescription(t('@pms @type ID, see <a href="@url" target="_blank">@short_url</a>',
+        [
+          '@pms' => AccommodationCasablanca::NAME,
+          '@type' => \Drupal::entityTypeManager()
+            ->getStorage($entity_type->getBundleEntityType())
+            ->load($bundle)
+            ->label(),
+          '@url' => $infolink,
+          '@short_url' => str_replace('https://', '', $infolink),
+        ]
+      ));
+      $fields[EntityBusinessrules::FIELD_REMOTE_ID] = $field;
+    }
+  }
+
+  return $fields;
+}
+
+function ebr_accommodation_casablanca_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
+  \Drupal::service('ebr.service')->renderRule(
+    $form,
+    'accommodation',
+    t('Accommodation'),
+    t('Node types "<code>room</code>" and "<code>package</code>" where field "<code>remote_datasource</code>" is "<code>@remote_datasource</code>", will receive action links decorated with contextual query parameters for @pms.',
+    [
+      "@remote_datasource" => AccommodationCasablanca::DATASOURCE,
+      "@pms" => AccommodationCasablanca::NAME,
+    ]),
+  );
+  $config = \Drupal::configFactory()->getEditable('system.site');
+  $infolink = $config->get('casablanca.info_link');
+  $form['casablanca'] = [
+    '#type' => 'details',
+    '#title' => AccommodationCasablanca::NAME,
+    '#open' => strpos($infolink ?? '', AccommodationCasablanca::INFOLINK_PREFIX) !== 0,
+    '#tree' => TRUE,
+  ];
+  $form['casablanca']['info_link'] = [
+    '#type' => 'url',
+    '#title' => t('Web widgets info link'),
+    '#description' => t(
+      'A site provided by @pms, showing IDs of room types and packages. These are used for action links, controlled by field "<code>remote_id</code>".',
+      ['@pms' => AccommodationCasablanca::NAME]
+    ),
+    '#placeholder' => AccommodationCasablanca::INFOLINK_PREFIX . 'XXXXXXXXXX',
+    '#required' => TRUE,
+    '#default_value' => $infolink,
+    '#link_type' => LinkItemInterface::LINK_EXTERNAL,
+  ];
+  $form['#validate'][] = 'ebr_accommodation_casablanca_site_settings_validate';
+  $form['#submit'][] = 'ebr_accommodation_casablanca_site_settings_submit';
+}
+
+/**
+ * Submit form callback for system site settings form.
+ */
+function ebr_accommodation_casablanca_site_settings_submit(&$form, FormStateInterface $form_state): void {
+  \Drupal::service('config.factory')
+    ->getEditable('system.site')
+    ->set('casablanca.info_link', $form_state->getValue(['casablanca', 'info_link']))
+    ->save();
+}
+
+/**
+ * Validate form callback for system site settings form.
+ */
+function ebr_accommodation_casablanca_site_settings_validate(&$form, FormStateInterface $form_state): void {
+  $infolink = $form_state->getValue(['casablanca', 'info_link']);
+  if (empty($infolink)) {
+    $form_state->setErrorByName(
+      'casablanca][info_link',
+      t('@fieldname must not be empty.', ['@fieldname' => t('Web widgets info link')])
+    );
+    return;
+  }
+  if ($test = !preg_match('|^https://booking\.casablanca\.at/Info/[^/\?#]+$|', $infolink)) {
+    $form_state->setErrorByName(
+      'casablanca][info_link',
+      t('@fieldname must be a link in the form of %url',
+        [ '@fieldname' => t('Web widgets info link'),
+          '%url' => AccommodationCasablanca::INFOLINK_PREFIX . 'XXXXXXXXXX',
+        ]
+      )
+    );
+  }
+}

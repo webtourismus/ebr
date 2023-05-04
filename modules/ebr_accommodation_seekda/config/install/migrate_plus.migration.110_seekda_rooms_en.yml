@@ -1,0 +1,85 @@
+id: 110_seekda_rooms_en
+label: '110 - Seekda rooms base data (english translation)'
+migration_group: seekda
+langcode: en
+status: true
+source:
+  plugin: url
+  headers:
+    Accept: application/json
+  data_fetcher_plugin: http
+  data_parser_plugin: json
+  urls:
+    callback: ebr_accommodation_seekda_migration_110_seekda_rooms_en
+  item_selector: /result/rooms
+  track_changes: true
+  fields:
+    -
+      name: room_code
+      label: 'Kognitiv room code'
+      selector: code
+    -
+      name: room_title
+      label: 'Room name'
+      selector: title
+    -
+      name: room_description
+      label: 'Room description'
+      selector: description
+    -
+      name: std_occupancy
+      label: 'Standard room occupancy'
+      selector: std_occupancy
+    -
+      name: max_occupancy
+      label: 'Maximum room occupancy'
+      selector: max_occupancy
+    -
+      name: rates
+      label: Prices
+      selector: rates
+  ids:
+    room_code:
+      type: string
+
+process:
+  type:
+    plugin: default_value
+    default_value: room
+  title: room_title
+  langcode:
+    plugin: default_value
+    default_value: en
+  content_translation_source:
+    plugin: default_value
+    default_value: de
+  nid:
+    plugin: migration_lookup
+    source: room_code
+    migration: 100_seekda_rooms_de
+    no_stub: true
+  uid:
+    plugin: default_value
+    default_value: 1
+  sticky:
+    plugin: default_value
+    default_value: 0
+  promote:
+    plugin: default_value
+    default_value: 0
+  body/value: room_description
+  body/format:
+    plugin: default_value
+    default_value: basic_html
+
+destination:
+  plugin: 'entity:node'
+  translations: true
+  overwrite_properties:
+    - title
+    - body
+    - field_price
+
+migration_dependencies:
+  required:
+    - 100_seekda_rooms_de

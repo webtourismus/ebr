@@ -1,0 +1,4 @@
+services:
+  ebr.service:
+    class: Drupal\ebr\EntityBusinessrules
+    arguments: ['@entity_type.manager', '@current_user']

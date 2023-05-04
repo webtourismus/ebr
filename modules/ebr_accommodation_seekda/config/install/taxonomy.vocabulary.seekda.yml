@@ -1,0 +1,6 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Seekda'
+vid: seekda
+description: 'Seekda channel manager'

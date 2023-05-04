@@ -1,0 +1,24 @@
+{{ attach_library('ebr_accommodation_easybooking/pricecomparison') }}
+
+<div id="ebPriceOmeter"></div>
+
+<script type="text/javascript">
+  function ebPriceOmeterLoadedCheck() {
+    if (typeof jQuery != "undefined") {
+      if (jQuery.fn.ebPriceOmeter) {
+        jQuery("#ebPriceOmeter").ebPriceOmeter({
+          customerId: "{{- drupal_config('system.site', 'easybooking.customer_id') -}}",
+          serialNo: "{{- drupal_config('system.site', 'easybooking.serial_nr') -}}",
+          localeId: "{{- entity.getWidgetLangId(langcode) -}}",
+          showHeading: "off",
+          bookingPage: "popup",
+          bookingEngine: 2
+        });
+      } else {
+        setTimeout(ebPriceOmeterLoadedCheck, 200);
+      }
+    } else {
+      setTimeout(ebPriceOmeterLoadedCheck, 200);
+    }
+  }
+</script>

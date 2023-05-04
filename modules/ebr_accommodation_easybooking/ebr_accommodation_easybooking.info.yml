@@ -1,0 +1,9 @@
+name: 'Accommodation: EasyBooking PMS'
+type: module
+description: 'Provides contextual call-to-action links for EasyBooking PMS entites.'
+package: Entity business rules
+core_version_requirement: ^9 || ^10
+dependencies:
+  - ebr:ebr
+  - ebr:ebr_accommodation
+  - twig_tweak:twig_tweak

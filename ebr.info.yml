@@ -1,0 +1,8 @@
+name: Entities business rules
+type: module
+description: 'Adds base fields "remote_id", "remote_datasource", "internal_id" to nodes, terms and media to provide business rules like contextual action links for entites.'
+package: Entity business rules
+core_version_requirement: ^10
+configure: system.site_information_settings
+dependencies:
+  - drupal:link

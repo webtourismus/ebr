@@ -1,0 +1,20 @@
+{{ attach_library('ebr_accommodation_easybooking/availability') }}
+
+<div id="ebAvailability"></div>
+
+<script type="text/javascript">
+  function ebAvailabilityLoadedCheck() {
+    if (typeof jQuery !== "undefined") {
+      if (jQuery.fn.ebAvailabilityCalendar) {
+        jQuery("#ebAvailability").ebAvailabilityCalendar({
+          customerId: "{{- drupal_config('system.site', 'easybooking.customer_id') -}}",
+          serialNo: "{{- drupal_config('system.site', 'easybooking.serial_nr') -}}",
+          localeId: "{{- entity.getWidgetLangId(langcode) -}}",
+          categories: "{{ entity.get('remote_id').0.value }}",
+          startDate: "default",
+          showForm: true
+        });
+      } else { setTimeout(ebAvailabilityLoadedCheck, 200); }
+    } else { setTimeout(ebAvailabilityLoadedCheck, 200); }
+  }
+</script>

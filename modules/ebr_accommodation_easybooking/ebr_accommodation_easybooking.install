@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+use Drupal\ebr_accommodation_easybooking\Entity\AccommodationEasybooking;
+use Drupal\ebr\Entity\WidgetableInterface;
+
+/**
+ * Implements hook_post_update().
+ */
+function ebr_accommodation_easybooking_install(): void {
+  $repo = \Drupal::service('entity_display.repository');
+
+  foreach (AccommodationEasybooking::getPotentialWidgets() as $widgetType) {
+    $repo->getViewDisplay('node', AccommodationEasybooking::BUNDLE_ROOM, 'full')
+      ->setComponent(WidgetableInterface::WIDGET_FIELD_PREFIX . $widgetType, [
+        'region' => 'content',
+      ])->save();
+  }
+}

@@ -1,0 +1,128 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Drupal\ebr_accommodation\Entity;
+
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Url;
+use Drupal\ebr\Entity\ActionableInterface;
+use Drupal\ebr\EntityBusinessrules;
+use Drupal\ebr_teaser\Entity\ReadmoreActionTrait;
+use Drupal\ebr_teaser\Entity\NodeTeaserableTrait;
+use Drupal\ebr_teaser\Entity\TeaserableInterface;
+use Drupal\node\Entity\Node;
+use Drupal\node\NodeInterface;
+
+/**
+ * Business rules for accomodation node bundles "room" and "package".
+ */
+class AccommodationBase extends Node implements ActionableInterface, TeaserableInterface {
+  use NodeTeaserableTrait;
+  use ReadmoreActionTrait {
+    getDefaultActions as protected getReadmoreActions;
+    getDefaultActionLabel as protected getReadmoreActionLabel;
+    getActionUrl as protected getReadmoreActionUrl;
+  }
+
+  /**
+   * The "remote_datasource" field value for actionable accommodation entites.
+   *
+   * This datasource value has no special rules tied to external PMS,
+   * and typically uses internal webforms for action links.
+   */
+  public const DATASOURCE = '_dummy';
+
+  /**
+   * Accomodation nodes are rentable entities and can be booked.
+   */
+  public const ACTION_BOOK = 'book';
+
+  /**
+   * Accomodation nodes are product-like entities and can be enquired.
+   */
+  public const ACTION_ENQUIRY = 'enquiry';
+
+  /**
+   * Accomodation node type "room".
+   */
+  public const BUNDLE_ROOM = 'room';
+
+  /**
+   * Accomodation node type "package".
+   */
+  public const BUNDLE_PACKAGE = 'package';
+
+  /**
+   * @inheritDoc
+   */
+  public static function getDefaultActions(): array {
+    return array_merge(static::getReadmoreActions(), [static::ACTION_BOOK, static::ACTION_ENQUIRY]);
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public static function getDefaultActionLabel(string $actionId): TranslatableMarkup|string|NULL {
+    return match($actionId) {
+      static::ACTION_BOOK => new TranslatableMarkup('Book', [], ['context' => 'accommodation']),
+      static::ACTION_ENQUIRY => new TranslatableMarkup('Enquiry'),
+      default => self::getReadmoreActionLabel($actionId),
+    };
+  }
+
+
+  /**
+   * @inheritDoc
+   */
+  public function getActionUrl(string $actionId): ?Url {
+    if (array_key_exists($actionId, $this->actionUrls)) {
+      return $this->actionUrls[$actionId];
+    }
+    if (!in_array($actionId, $this->getDefaultActions())) {
+      return $this->actionUrls[$actionId] = NULL;
+    }
+    if (in_array($actionId, $this->getReadmoreActions())) {
+      return $this->getReadmoreActionUrl($actionId);
+    }
+    if ($this->get(EntityBusinessrules::FIELD_REMOTE_DATASOURCE)->isEmpty()) {
+      return $this->actionUrls[$actionId] = NULL;
+    }
+    if ($actionId == static::ACTION_BOOK && $this->get(EntityBusinessrules::FIELD_REMOTE_ID)->isEmpty()) {
+      return $this->actionUrls[$actionId] = NULL;
+    }
+    $query = $this->entityTypeManager()->getStorage('node')->getQuery();
+    $query->accessCheck(TRUE);
+    $query->condition(EntityBusinessrules::FIELD_INTERNAL_ID, $actionId);
+    $query->condition('status', 1);
+    $query->sort('nid');
+    $nodeIds = $query->execute();
+    $nodeId = reset($nodeIds);
+    if (empty($nodeId)) {
+      return $this->actionUrls[$actionId] = NULL;
+    }
+    $node = Node::load($nodeId);
+    if (!($node instanceof NodeInterface)) {
+      return $this->actionUrls[$actionId] = NULL;
+    }
+    return $this->actionUrls[$actionId] = Url::fromRoute(
+      'entity.node.canonical',
+      [
+        'node' => $node->id(),
+      ],
+      [
+        'query' => [
+          "{$this->bundle()}" => $this->id(),
+        ],
+        'attributes' => [
+          'data-action-link-entity' => $this->getEntityTypeId(),
+          'data-action-link-bundle' => $this->bundle(),
+          'data-action-link-type' => $actionId,
+          'class' => [
+            "action-link-{$actionId}"
+          ]
+        ]
+      ],
+    );
+  }
+}

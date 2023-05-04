@@ -1,0 +1,176 @@
+<?php
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityFormInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\ebr\EntityBusinessrules;
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function ebr_entity_base_field_info(EntityTypeInterface $entity_type): array {
+  if (!in_array($entity_type->id(), \Drupal::service('ebr.service')->getEntityTypes())) {
+    return [];
+  }
+
+  $fields = [];
+  $fields[EntityBusinessrules::FIELD_INTERNAL_ID] = BaseFieldDefinition::create('string')
+    ->setLabel(t('Internal ID'))
+    ->setDescription(t('An unique machine name to mark special entities used elsewhere in code or templates.'))
+    ->setTranslatable(FALSE)
+    ->setRevisionable(FALSE)
+    ->setRequired(FALSE)
+    ->setSetting('max_length', 255)
+    ->setDisplayConfigurable('form', TRUE)
+    ->setDisplayOptions('form', [
+      'region' => 'hidden',
+    ])->setDisplayConfigurable('view', FALSE)
+    ->addConstraint('UniqueField', [])
+    ->setPropertyConstraints(
+      'value', ['Regex' => [
+        'pattern' => '/^[a-z0-9_-]*$/',
+        'message' => t('In field @label only lowercase letters, numbers, underscore and minus are allowed.', ['@label' => t('Internal ID')]),
+      ]]
+    );
+  $fields[EntityBusinessrules::FIELD_REMOTE_DATASOURCE] = BaseFieldDefinition::create('string')
+    ->setLabel(t('Remote datasource'))
+    ->setDescription(t('A machine name to define the remote system used for synching and/or outbound contextual links.'))
+    ->setTranslatable(FALSE)
+    ->setRevisionable(FALSE)
+    ->setRequired(FALSE)
+    ->setSetting('max_length', 255)
+    ->setDisplayConfigurable('form', TRUE)
+    ->setDisplayOptions('form', [
+      'region' => 'hidden',
+    ])->setDisplayConfigurable('view', FALSE)
+    ->setPropertyConstraints(
+      'value', ['Regex' => [
+        'pattern' => '/^[a-z0-9_-]*$/',
+        'message' => t('In field @label only lowercase letters, numbers, underscore and minus are allowed.', ['@label' => t('Remote datasource')]),
+      ]]
+    );
+  $fields[EntityBusinessrules::FIELD_REMOTE_ID] = BaseFieldDefinition::create('string')
+    ->setLabel(t('Remote ID'))
+    ->setDescription(t('An external identifier to mark content for import synching and/or outbound contextual links.'))
+    ->setTranslatable(FALSE)
+    ->setRevisionable(FALSE)
+    ->setRequired(FALSE)
+    ->setSetting('max_length', 255)
+    ->setDisplayConfigurable('form', TRUE)
+    ->setDisplayOptions('form', [
+      'region' => 'hidden',
+    ])->setDisplayConfigurable('view', FALSE);
+  return $fields;
+}
+
+
+/**
+ * Implements hook_form_alter().
+ */
+function ebr_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (!($form_state->getFormObject() instanceof EntityFormInterface)) {
+    return;
+  }
+  $entity = $form_state->getFormObject()->getEntity();
+  if (!in_array($entity->getEntityTypeId(), \Drupal::service('ebr.service')->getEntityTypes())) {
+    return;
+  }
+
+  if (strpos($form_id, "{$entity->getEntityTypeId()}_{$entity->bundle()}_form") !== FALSE ||
+    strpos($form_id, "{$entity->getEntityTypeId()}_{$entity->bundle()}_edit_form") !== FALSE
+  ) {
+    $hasMetaData = FALSE;
+
+    foreach (\Drupal::service('ebr.service')->getFieldNames() as $field) {
+      if (!array_key_exists($field, $form)) {
+        continue;
+      }
+      if (\Drupal::currentUser()->hasPermission("edit entity business rules {$field} field")) {
+        $form[$field]['#group'] = 'machine_data';
+        $hasMetaData = TRUE;
+      }
+      elseif (\Drupal::currentUser()->hasPermission("view entity business rules {$field} field") &&
+        !$entity->get($field)->isEmpty()
+      ) {
+        $form[$field]['#group'] = 'machine_data';
+        $form[$field]['#type'] = 'item';
+        $hasMetaData = TRUE;
+      }
+      else {
+        $form[$field]['#access'] = FALSE;
+      }
+    }
+
+    if ($hasMetaData) {
+      $form['machine_data'] = [
+        '#type' => 'details',
+        '#title' => t('External data'),
+        '#open' => FALSE,
+        '#group' => array_key_exists('advanced', $form) ? 'advanced' : NULL,
+        '#weight' => 9999,
+      ];
+    }
+  }
+
+  if (strpos($form_id, "{$entity->getEntityTypeId()}_{$entity->bundle()}_delete_form") !== FALSE) {
+    $form['#validate'][] = '_ebr_delete_validation';
+  }
+}
+
+/**
+ * Prevents UID 1 from deleting entities with "interal_id".
+ */
+function _ebr_delete_validation(&$form, FormStateInterface $form_state) {
+  $entity = $form_state->getFormObject()->getEntity();
+  if ($entity->get(EntityBusinessrules::FIELD_INTERNAL_ID)->isEmpty()) {
+    return;
+  }
+  $form_state->setError(
+    $form, t('@bundle "@label" can not be deleted because it has an internal ID.', [
+      '@bundle' => $entity->bundle(),
+      '@label' => (string) $entity->label(),
+    ])
+  );
+}
+
+/**
+ * Implements hook_entity_access().
+ */
+function ebr_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  if ($operation == 'delete' && in_array($entity->getEntityTypeId(), \Drupal::service('ebr.service')->getEntityTypes())) {
+    if ($entity->hasField(EntityBusinessrules::FIELD_INTERNAL_ID) && !$entity->get(EntityBusinessrules::FIELD_INTERNAL_ID)->isEmpty()) {
+      return AccessResult::forbidden();
+    }
+  }
+
+  return AccessResult::neutral();
+}
+
+function ebr_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
+  \Drupal::service('ebr.service')->renderBusinessRulesContainer($form);
+  \Drupal::service('ebr.service')->renderRule(
+    $form,
+    'all_entities',
+    t('All entities'),
+    t('Entities where field "<code>internal_id</code>" is not empty can not be deleted.'),
+  );
+
+}
+
+/**
+ * Implements hook_field_formatter_info_alter().
+ */
+function ebr_field_formatter_info_alter(array &$info) {
+  $info['link']['field_types'][] = 'action_link';
+}
+
+/**
+ * Implements hook_field_widget_info_alter().
+ */
+function ebr_field_widget_info_alter(array &$info) {
+  $info['link_default']['field_types'][] = 'action_link';
+}

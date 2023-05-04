@@ -1,0 +1,5 @@
+toolbar:
+  version: 0.0.1
+  css:
+    theme:
+      css/toolbar.css: {}

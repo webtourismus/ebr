@@ -1,0 +1,10 @@
+system.site:
+  type: config_object
+  mapping:
+    casablanca:
+      type: mapping
+      label: 'Casablanca'
+      mapping:
+        info_link:
+          type: uri
+          label: 'Web widgets info link'

@@ -1,0 +1,6 @@
+services:
+  ebr_accommodation.path_processor:
+    class: \Drupal\ebr_accommodation\PathProcessor\OutboundPathProcessor
+    arguments: ['@request_stack']
+    tags:
+      - { name: path_processor_outbound, priority: 3000 }

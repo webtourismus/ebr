@@ -1,0 +1,15 @@
+{
+  "name": "webtourismus/ebr",
+  "description": "Adds base fields 'remote_id', 'remote_datasource', 'internal_id' to nodes, terms and media to provide business rules like contextual action links for entites.",
+  "type": "drupal-module",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Reinhard Hutter",
+      "email": "reinhard.hutter@webtourismus.at"
+    }
+  ],
+  "require": {
+    "drupal/core": "^10"
+  }
+}

@@ -1,0 +1,186 @@
+id: 100_seekda_rooms_de
+label: '100 - Seekda rooms base data (german)'
+migration_group: seekda
+langcode: en
+status: true
+source:
+  plugin: url
+  headers:
+    Accept: application/json
+  data_fetcher_plugin: http
+  data_parser_plugin: json
+  urls:
+    callback: ebr_accommodation_seekda_migration_100_seekda_rooms_de
+  item_selector: /result/rooms
+  track_changes: true
+  fields:
+    -
+      name: room_code
+      label: 'Kognitiv room code'
+      selector: code
+    -
+      name: room_title
+      label: 'Room name'
+      selector: title
+    -
+      name: room_description
+      label: 'Room description'
+      selector: description
+    -
+      name: std_occupancy
+      label: 'Standard room occupancy'
+      selector: std_occupancy
+    -
+      name: max_occupancy
+      label: 'Maximum room occupancy'
+      selector: max_occupancy
+    -
+      name: images
+      label: Images
+      selector: imagesInfo
+    -
+      name: rates
+      label: Prices
+      selector: rates
+  constants:
+    remote_datasource: seekda
+    images_upload_directory: 'public://seekda/'
+  ids:
+    room_code:
+      type: string
+
+process:
+  type:
+    plugin: default_value
+    default_value: room
+  title: room_title
+  langcode:
+    plugin: default_value
+    default_value: de
+  uid:
+    plugin: default_value
+    default_value: 1
+  sticky:
+    plugin: default_value
+    default_value: 0
+  promote:
+    plugin: default_value
+    default_value: 0
+  body/value: room_description
+  body/format:
+    plugin: default_value
+    default_value: basic_html
+  remote_datasource: constants/remote_datasource
+  remote_id: room_code
+  field_images:
+    -
+      plugin: sub_process
+      source: images
+      include_source: true
+      source_key: root
+      process:
+        remote_datasource: root/constants/remote_datasource
+        images_upload_directory: root/constants/images_upload_directory
+        image_source_url: url
+        title: title
+        image_basename:
+          -
+            plugin: callback
+            callable: parse_url
+            source: url
+          -
+            plugin: extract
+            index:
+              - path
+          -
+            plugin: callback
+            callable: basename
+          -
+            plugin: callback
+            callable: urldecode
+    -
+      plugin: sub_process
+      process:
+        remote_datasource: remote_datasource
+        image_source_url: image_source_url
+        title: title
+        image_basename: image_basename
+        media_title_fallback:
+          -
+            plugin: callback
+            callable: pathinfo
+            source: image_basename
+          -
+            plugin: extract
+            index:
+              - filename
+        image_target_uri:
+          -
+            plugin: concat
+            source:
+              - images_upload_directory
+              - image_basename
+    -
+      plugin: sub_process
+      process:
+        remote_datasource: remote_datasource
+        image_source_url: image_source_url
+        media_entity_title:
+          plugin: null_coalesce
+          source:
+            - title
+            - media_title_fallback
+        image_file_id:
+          -
+            plugin: download
+            file_exists: 'use existing'
+            source:
+              - image_source_url
+              - image_target_uri
+          -
+            plugin: entity_generate
+            entity_type: file
+            bundle: 1
+            bundle_key: status
+            value_key: uri
+            ignore_case: false
+            access_check: false
+            default_values:
+              langcode: de
+              status: 1
+              uid: 1
+            values:
+              filename: image_basename
+              uri: image_target_uri
+    -
+      plugin: sub_process
+      process:
+        target_id:
+          plugin: entity_generate
+          entity_type: media
+          bundle: image
+          bundle_key: bundle
+          value_key: remote_id
+          source: image_source_url
+          ignore_case: false
+          access_check: false
+          default_values:
+            bundle: image
+            langcode: de
+            status: 1
+            uid: 1
+          values:
+            name: media_entity_title
+            remote_id: image_source_url
+            remote_datasource: remote_datasource
+            field_media_image/target_id: image_file_id
+
+destination:
+  plugin: 'entity:node'
+  overwrite_properties:
+    - title
+    - body
+    - remote_datasource
+    - remote_id
+    - field_images
+    - field_price

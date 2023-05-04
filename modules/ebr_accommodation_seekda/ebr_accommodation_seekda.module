@@ -1,0 +1,252 @@
+<?php
+
+declare(strict_types=1);
+
+use Drupal\ebr_accommodation\Entity\AccommodationBase;
+use Drupal\ebr_accommodation_seekda\Entity\AccommodationSeekda;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\Entity\BaseFieldOverride;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\link\LinkItemInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\ebr\EntityBusinessrules;
+
+function ebr_accommodation_seekda_install() {
+  $datasource = AccommodationSeekda::DATASOURCE;
+  $targetDir = \Drupal::service('file_system')->realpath("public://{$datasource}/") . '/';
+  if (!file_exists($targetDir)) {
+    mkdir($targetDir, 0775);
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function ebr_accommodation_seekda_uninstall(): void{
+  $config = \Drupal::configFactory()->getEditable('system.site');
+  $config->clear('seekda');
+  $config->save(TRUE);
+
+  $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadByProperties([
+    'vid' => AccommodationSeekda::DATASOURCE
+  ]);
+  foreach ($terms as $term) {
+    $term->delete();
+  }
+  $vocabulary = Vocabulary::load(AccommodationSeekda::DATASOURCE);
+  if ($vocabulary) {
+    $vocabulary->delete();
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_info_alter().
+ */
+function ebr_accommodation_seekda_entity_bundle_info_alter(array &$bundles): void {
+  if (isset($bundles['node'][AccommodationBase::BUNDLE_ROOM])) {
+    $bundles['node'][AccommodationBase::BUNDLE_ROOM]['class'] = AccommodationSeekda::class;
+  }
+  if (isset($bundles['node'][AccommodationBase::BUNDLE_PACKAGE])) {
+    $bundles['node'][AccommodationBase::BUNDLE_PACKAGE]['class'] = AccommodationSeekda::class;
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_field_info().
+ */
+function ebr_accommodation_seekda_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  $fields = [];
+
+  // Whether the hook implementation was called for our group type.
+  if ($entity_type->id() == 'node' &&
+    in_array($bundle, [AccommodationBase::BUNDLE_PACKAGE, AccommodationBase::BUNDLE_ROOM]) &&
+    !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE])
+  ) {
+    // Overrride base ebr_accommodation field
+    $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE], $bundle);
+    $field->setDefaultValue(AccommodationSeekda::DATASOURCE);
+    $field->setDescription(t('If value is "<code>@remote_datasource</code>", rooms and packages with an "<code>remote_id</code>" receive a booking link.', ["@remote_datasource" => AccommodationSeekda::DATASOURCE]));
+    $fields[EntityBusinessrules::FIELD_REMOTE_DATASOURCE] = $field;
+  }
+
+  $propertyCode = \Drupal::configFactory()->get('system.site')->get('seekda.property_code');
+
+  if ($entity_type->id() == 'node' &&
+    $bundle == AccommodationBase::BUNDLE_ROOM &&
+    !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE]) &&
+    $propertyCode
+  ) {
+    $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_ID], $bundle);
+    $field->setDescription(t('@pms @type ID, see <a href="@url" target="_blank">@short_url</a>',
+      [
+        '@pms' => AccommodationSeekda::NAME,
+        '@type' => \Drupal::entityTypeManager()
+          ->getStorage($entity_type->getBundleEntityType())
+          ->load($bundle)
+          ->label(),
+        '@url' => "https://hotels.kognitiv.com/master/hotel/{$propertyCode}/categories",
+        '@short_url' => 'hotels.kognitiv.com > Property > Room types',
+      ]
+    ));
+    $fields[EntityBusinessrules::FIELD_REMOTE_ID] = $field;
+
+    foreach (AccommodationSeekda::getDefaultWidgets() as $widgetType) {
+    }
+  }
+
+  if (
+    $entity_type->id() == 'node' &&
+    $bundle == AccommodationBase::BUNDLE_PACKAGE &&
+    !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE]) &&
+    $propertyCode
+  ) {
+    $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_ID], $bundle);
+    $field->setDescription(t('@pms @type ID, see <a href="@url" target="_blank">@short_url</a>',
+      [
+        '@pms' => AccommodationSeekda::NAME,
+        '@type' => \Drupal::entityTypeManager()
+          ->getStorage($entity_type->getBundleEntityType())
+          ->load($bundle)
+          ->label(),
+        '@url' => "https://hotels.kognitiv.com/master/hotel/{$propertyCode}/offers",
+        '@short_url' => 'hotels.kognitiv.com > Marketing > Offers',
+      ]
+    ));
+    $fields[EntityBusinessrules::FIELD_REMOTE_ID] = $field;
+  }
+
+  return $fields;
+}
+
+function ebr_accommodation_seekda_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
+  \Drupal::service('ebr.service')->renderRule(
+    $form,
+    'accommodation',
+    t('Accommodation'),
+    t('Node types "<code>room</code>" where field "<code>remote_datasource</code>" is "<code>@remote_datasource</code>", will receive extra fields showing web widgets by @pms.',
+      [
+        "@remote_datasource" => AccommodationSeekda::DATASOURCE,
+        "@pms" => AccommodationSeekda::NAME,
+      ]),
+  );
+  $config = \Drupal::configFactory()->getEditable('system.site');
+  $propertyCode = $config->get('seekda.property_code');
+  $kubeDomain = $config->get('seekda.kube_domain');
+  $form['seekda'] = [
+    '#type' => 'details',
+    '#title' => AccommodationSeekda::NAME,
+    '#open' => ($propertyCode && $kubeDomain) ? FALSE : TRUE,
+    '#tree' => TRUE,
+  ];
+  $form['seekda']['property_code'] = [
+    '#type' => 'textfield',
+    '#title' => t('Seekda property code'),
+    '#description' => t('You can find your property code at hotels.kognitiv.com, on the top right of the screen, in brackets next to your company name.'),
+    '#placeholder' => 'S012345',
+    '#pattern' => '[a-zA-Z0-9_\-]+',
+    '#required' => TRUE,
+    '#default_value' => $propertyCode,
+  ];
+  $form['seekda']['kube_domain'] = [
+    '#type' => 'url',
+    '#title' => t('KUBE Domain'),
+    '#description' => t('You can find your domain at hotels.kognitiv.com > Booking Engine > Domain Setup.'),
+    '#placeholder' => 'https://booking.your-domain.com',
+    '#required' => TRUE,
+    '#default_value' => $kubeDomain,
+    '#link_type' => LinkItemInterface::LINK_EXTERNAL,
+  ];
+  $form['#validate'][] = 'ebr_accommodation_seekda_site_settings_validate';
+  $form['#submit'][] = 'ebr_accommodation_seekda_site_settings_submit';
+}
+
+/**
+ * Submit form callback for system site settings form.
+ */
+function ebr_accommodation_seekda_site_settings_submit(&$form, FormStateInterface $form_state): void {
+  \Drupal::service('config.factory')
+    ->getEditable('system.site')
+    ->set('seekda.property_code', $form_state->getValue(['seekda', 'property_code']))
+    ->set('seekda.kube_domain', $form_state->getValue(['seekda', 'kube_domain']))
+    ->save();
+}
+
+/**
+ * Validate form callback for system site settings form.
+ */
+function ebr_accommodation_seekda_site_settings_validate(&$form, FormStateInterface $form_state): void {
+  $propertyCode = $form_state->getValue(['seekda', 'property_code']);
+  $kubeDomain = $form_state->getValue(['seekda', 'kube_domain']);
+  if (empty($propertyCode)) {
+    $form_state->setErrorByName(
+      'seekda][property_code',
+      t('@fieldname must not be empty.', ['@fieldname' => t('Seekda property code')])
+    );
+  }
+  if (empty($kubeDomain)) {
+    $form_state->setErrorByName(
+      'seekda][kube_domain',
+      t('@fieldname must not be empty.', ['@fieldname' => t('KUBE Domain')])
+    );
+    return;
+  }
+  if (!preg_match('|^[a-zA-Z0-9_\-]+$|', $propertyCode)) {
+    $form_state->setErrorByName(
+      'seekda][property_code',
+      t('In field @label only letters, numbers, underscore and minus are allowed.', ['@label' => t('Seekda property code')]),
+    );
+  }
+  $domain = parse_url($kubeDomain);
+  if (($domain['scheme'] ?? '') != 'https' || empty($domain['host'])) {
+    $form_state->setErrorByName(
+      'seekda][kube_domain',
+      t('@fieldname must be a link in the form of %url',
+        ['@fieldname' => t('KUBE Domain'),
+          '%url' => 'https://sub.domain.com',
+        ]
+      )
+    );
+  }
+}
+
+function ebr_accommodation_seekda_theme($existing, $type, $theme, $path) {
+  $suggestions = [];
+  $datasource = AccommodationSeekda::DATASOURCE;
+  foreach(AccommodationSeekda::getDefaultWidgets() as $widgetType) {
+    $suggestions["{$datasource}_{$widgetType}"] = [
+      'variables' => [
+        'label' => NULL,
+        'widget_type' => $widgetType,
+        'entity' => NULL,
+      ]
+    ];
+  }
+  return $suggestions;
+}
+
+/**
+ * Callback function for Migration import (rooms german)
+ *
+ * @return string[] URLs of Seekda JSON API endpoints
+ */
+function ebr_accommodation_seekda_migration_100_seekda_rooms_de(): array {
+  return _ebr_accommodation_seekda_migration_seekda('de');
+}
+
+/**
+ * Callback function for Migration import (rooms english)
+ *
+ * @return string[] URLs of Seekda JSON API endpoints
+ */
+function ebr_accommodation_seekda_migration_110_seekda_rooms_en(): array {
+  return _ebr_accommodation_seekda_migration_seekda('en');
+}
+
+function _ebr_accommodation_seekda_migration_seekda(string $langcode, int $months = 14): array {
+  $config = \Drupal::configFactory()->getEditable('system.site');
+  $propertyCode = $config->get('seekda.property_code');
+  $apiToken = \Drupal::service('seekda.service')->getAccessToken();
+  $url = "https://switch.seekda.com/switch/latest/json/ratesAverage.json?skd-property-code={$propertyCode}&token={$apiToken}&skd-language-code={$langcode}&skd-packages=true&skd-months={$months}";
+  return [$url];
+}

@@ -1,0 +1,180 @@
+<?php
+
+declare(strict_types=1);
+
+use Drupal\ebr_accommodation\Entity\AccommodationBase;
+use Drupal\ebr_accommodation_easybooking\Entity\AccommodationEasybooking;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\Entity\BaseFieldOverride;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\link\LinkItemInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\ebr\EntityBusinessrules;
+use Drupal\ebr\Entity\WidgetableInterface;
+
+/**
+ * Implements hook_uninstall().
+ */
+function ebr_accommodation_easybooking_uninstall(): void{
+  $config = \Drupal::configFactory()->getEditable('system.site');
+  $config->clear('easybooking');
+  $config->save(TRUE);
+}
+
+/**
+ * Implements hook_entity_bundle_info_alter().
+ */
+function ebr_accommodation_easybooking_entity_bundle_info_alter(array &$bundles): void {
+  if (isset($bundles['node'][AccommodationBase::BUNDLE_ROOM])) {
+    $bundles['node'][AccommodationBase::BUNDLE_ROOM]['class'] = AccommodationEasybooking::class;
+  }
+  if (isset($bundles['node'][AccommodationBase::BUNDLE_PACKAGE])) {
+    $bundles['node'][AccommodationBase::BUNDLE_PACKAGE]['class'] = AccommodationEasybooking::class;
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_field_info().
+ */
+function ebr_accommodation_easybooking_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  $fields = [];
+
+  // Whether the hook implementation was called for our group type.
+  if ($entity_type->id() == 'node' &&
+    in_array($bundle, [AccommodationBase::BUNDLE_PACKAGE, AccommodationBase::BUNDLE_ROOM]) &&
+    !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE])
+  ) {
+    // Overrride base ebr_accommodation field
+    $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE], $bundle);
+    $field->setDefaultValue(AccommodationEasybooking::DATASOURCE);
+    $field->setDescription(t('If value is "<code>@remote_datasource</code>", rooms and packages with an "<code>remote_id</code>" receive a booking link.', ["@remote_datasource" => AccommodationEasybooking::DATASOURCE]));
+    $fields[EntityBusinessrules::FIELD_REMOTE_DATASOURCE] = $field;
+
+    $config = \Drupal::configFactory()->get('system.site');
+    $infolink = $config->get('easybooking.info_link');
+    if ($infolink) {
+      // Overrride base ebr_accommodation field
+      $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_ID], $bundle);
+      $field->setDescription(t('@pms @type ID, see <a href="@url" target="_blank">@short_url</a>',
+        [
+          '@pms' => AccommodationEasybooking::NAME,
+          '@type' => \Drupal::entityTypeManager()
+            ->getStorage($entity_type->getBundleEntityType())
+            ->load($bundle)
+            ->label(),
+          '@url' => $infolink,
+          '@short_url' => str_replace('https://www.', '', $infolink),
+        ]
+      ));
+      $fields[EntityBusinessrules::FIELD_REMOTE_ID] = $field;
+    }
+  }
+
+  if ($entity_type->id() == 'node' &&
+    $bundle == AccommodationBase::BUNDLE_ROOM &&
+    !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE])
+  ) {
+    // Add additional computed fields
+    foreach (AccommodationEasybooking::getDefaultWidgets() as $widgetId) {
+      $fields[WidgetableInterface::WIDGET_FIELD_PREFIX . $widgetId] = BaseFieldDefinition::create('widget_string')
+        ->setName(WidgetableInterface::WIDGET_FIELD_PREFIX . $widgetId)
+        ->setLabel(AccommodationEasybooking::getDefaultWidgetLabel($widgetId))
+        ->setComputed(TRUE)
+        ->setClass('\Drupal\ebr\Plugin\Field\SingleComputedItemList')
+        ->setDisplayConfigurable('view', TRUE)
+        ->setSettings([
+          'widget_type' => $widgetId,
+        ]);
+    }
+  }
+
+  return $fields;
+}
+
+function ebr_accommodation_easybooking_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
+  \Drupal::service('ebr.service')->renderRule(
+    $form,
+    'accommodation',
+    t('Accommodation'),
+    t('Node types "<code>room</code>" where field "<code>remote_datasource</code>" is "<code>@remote_datasource</code>", will receive extra fields showing web widgets by @pms.',
+      [
+        "@remote_datasource" => AccommodationEasybooking::DATASOURCE,
+        "@pms" => AccommodationEasybooking::NAME,
+      ]),
+  );
+  $config = \Drupal::configFactory()->getEditable('system.site');
+  $infolink = $config->get('easybooking.info_link');
+  $form['easybooking'] = [
+    '#type' => 'details',
+    '#title' => AccommodationEasybooking::NAME,
+    '#open' => strpos($infolink ?? '', AccommodationEasybooking::INFOLINK_PREFIX) !== 0,
+    '#tree' => TRUE,
+  ];
+  $form['easybooking']['info_link'] = [
+    '#type' => 'url',
+    '#title' => t('Web widgets info link'),
+    '#description' => t(
+      'A site provided by @pms, showing IDs of room types and packages. These are used for action links, controlled by field "<code>remote_id</code>".',
+      ['@pms' => AccommodationEasybooking::NAME]
+    ),
+    '#placeholder' => AccommodationEasybooking::INFOLINK_PREFIX . '?...&cid=1234&serialNo=1111-2222-3333-4444-5555-6666-7777...',
+    '#required' => TRUE,
+    '#default_value' => $infolink,
+    '#link_type' => LinkItemInterface::LINK_EXTERNAL,
+  ];
+  $form['#validate'][] = 'ebr_accommodation_easybooking_site_settings_validate';
+  $form['#submit'][] = 'ebr_accommodation_easybooking_site_settings_submit';
+}
+
+/**
+ * Submit form callback for system site settings form.
+ */
+function ebr_accommodation_easybooking_site_settings_submit(&$form, FormStateInterface $form_state): void {
+  $infolink = $form_state->getValue(['easybooking', 'info_link']);
+  preg_match('|^https://www\.easy-booking\.at/preview/\?.*&cid=(\d{1,5}).*&serialNo=(\d{4}-\d{4}-\d{4})-\d{4}-\d{4}-\d{4}-\d{4}.*$|', $infolink, $ids);
+  \Drupal::service('config.factory')
+    ->getEditable('system.site')
+    ->set('easybooking.info_link', $infolink)
+    ->set('easybooking.customer_id', $ids[1])
+    ->set('easybooking.serial_nr', $ids[2])
+    ->save();
+}
+
+/**
+ * Validate form callback for system site settings form.
+ */
+function ebr_accommodation_easybooking_site_settings_validate(&$form, FormStateInterface $form_state): void {
+  $infolink = $form_state->getValue(['easybooking', 'info_link']);
+  if (empty($infolink)) {
+    $form_state->setErrorByName(
+      'easybooking][info_link',
+      t('@fieldname must not be empty.', ['@fieldname' => t('Web widgets info link')])
+    );
+    return;
+  }
+  if ($test = !preg_match('|^https://www\.easy-booking\.at/preview/\?.*&cid=\d{1,5}.*&serialNo=\d{4}-\d{4}-\d{4}-\d{4}-\d{4}-\d{4}-\d{4}.*$|', $infolink)) {
+    $form_state->setErrorByName(
+      'easybooking][info_link',
+      t('@fieldname must be a link in the form of %url',
+        ['@fieldname' => t('Web widgets info link'),
+          '%url' => AccommodationEasybooking::INFOLINK_PREFIX . '?...&cid=1234&serialNo=1111-2222-3333-4444-5555-6666-7777...',
+        ]
+      )
+    );
+  }
+}
+
+function ebr_accommodation_easybooking_theme($existing, $type, $theme, $path) {
+  $suggestions = [];
+  $datasource = AccommodationEasybooking::DATASOURCE;
+  foreach(AccommodationEasybooking::getDefaultWidgets() as $widgetId) {
+    $suggestions["{$datasource}_{$widgetId}"] = [
+      'variables' => [
+        'label' => NULL,
+        'widget_type' => $widgetId,
+        'entity' => NULL,
+      ]
+    ];
+  }
+  return $suggestions;
+}

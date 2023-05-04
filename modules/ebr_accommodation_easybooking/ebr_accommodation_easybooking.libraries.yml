@@ -1,0 +1,26 @@
+rates:
+  version: 1.0.0
+  js:
+    '//www.easy-booking.at/ebPlugins/prices/jquery.easybooking.pricelist.v2.js': {external: true, minified: true}
+    'js/easybooking-rates.js': {}
+  dependencies:
+    - core/jquery
+    - core/once
+
+availability:
+  version: 1.0.0
+  js:
+    '//www.easy-booking.at/ebPlugins/availability/jquery.easybooking.availability.js': {external: true, minified: true}
+    'js/easybooking-availability.js': {}
+  dependencies:
+    - core/jquery
+    - core/once
+
+pricecomparison:
+  version: 1.0.0
+  js:
+    '//www.easy-booking.at/ebPlugins/priceOMeter/jquery.easybooking.priceometer.js': {external: true, minified: true}
+    'js/easybooking-pricecomparison.js': {}
+  dependencies:
+    - core/jquery
+    - core/once

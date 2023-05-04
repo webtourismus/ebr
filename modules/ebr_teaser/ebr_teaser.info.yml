@@ -1,0 +1,8 @@
+name: 'Accommodation: Teaserable content entities'
+type: module
+description: 'Provides templating tools to create reusable designs for teaser-like content entity templates'
+package: Entity business rules
+core_version_requirement: ^9 || ^10
+dependencies:
+  - ebr:ebr
+  - paragraphs:paragraphs

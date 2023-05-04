@@ -1,0 +1,8 @@
+name: 'Accommodation: Casablanca PMS'
+type: module
+description: 'Provides contextual call-to-action links for Casablanca PMS entites.'
+package: Entity business rules
+core_version_requirement: ^9 || ^10
+dependencies:
+  - ebr:ebr
+  - ebr:ebr_accommodation
