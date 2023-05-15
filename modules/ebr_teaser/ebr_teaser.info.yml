@@ -6,3 +6,4 @@ core_version_requirement: ^9 || ^10
 dependencies:
   - ebr:ebr
   - paragraphs:paragraphs
+  - view_mode_switch:view_mode_switch

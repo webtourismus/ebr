@@ -128,6 +128,8 @@ trait ParagraphTeaserableTrait {
         $displayOptions
       );
       $build['#is_teaserable'] = TRUE;
+      // when fields are rendered in isolation, Drupal sets the '#view_mode' to '_custom'
+      $build['#view_mode'] = $viewMode;
       return $build;
     }
 
@@ -156,6 +158,8 @@ trait ParagraphTeaserableTrait {
           ->viewField($referencedField, $displayOptions);
         $build['#is_teaserable'] = TRUE;
         $build['#referencing_object'] = $this;
+        // when fields are rendered in isolation, Drupal sets the '#view_mode' to '_custom'
+        $build['#view_mode'] = $viewMode;
         return $build;
       }
       $this->logger()->error("Paragraph host field paragraph.{$this->bundle()}.{$ownFieldDefinition->getName()} has no matching responsive image style '{$viewMode}' for {$this->getReferencedEntity()->getEntityTypeId()}.{$this->getReferencedEntity()->bundle()}.{$referencedFieldDefinition->getName()}");
@@ -177,6 +181,8 @@ trait ParagraphTeaserableTrait {
     );
     $build['#is_teaserable'] = TRUE;
     $build['#referencing_object'] = $this;
+    // when fields are rendered in isolation, Drupal sets the '#view_mode' to '_custom'
+    $build['#view_mode'] = $viewMode;
     return $build;
   }
 

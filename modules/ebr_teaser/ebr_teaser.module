@@ -169,50 +169,11 @@ function ebr_teaser_preprocess_field(&$variables, $hook): void {
   $viewMode = $variables['element']['#view_mode'];
   $variables['attributes']->addClass("field--view-mode--{$viewMode}");
 
-  $hostEntity = $variables['element']['#object'];
-  $teaserEntity = NULL;
-  if ($hostEntity instanceof TeaserableInterface) {
-    $teaserEntity = $hostEntity;
-  }
-  elseif ($hostEntity instanceof MediaInterface &&
-    $hostEntity?->_referringItem?->getEntity() instanceof TeaserableInterface
-  ) {
-    $teaserEntity = $hostEntity->_referringItem->getEntity();
-  }
-  else {
-    return;
-  }
-
-  if (
-    ($hostEntity instanceof TeaserableInterface && $hostEntity->isTeaserableViewmode($viewMode)) ||
-    ($teaserEntity->isTeaserableViewmode($viewMode))
-  ) {
+  if ($entity instanceof TeaserableInterface && $entity->isTeaserableViewmode($viewMode)) {
     // Teaserable entities are additionally labelled with their normalized field name from the interface,
     // which might be different than the actual field name from which the value is retrieved.
-    $field = $variables['element']['#items'];
-
-    if ($teaserEntity->getTeaserTitleField() === $field) {
-      $variables['attributes']->addClass("field--teaserable--title");
-      return;
-    }
-
-    if ($teaserEntity->getTeaserSubtitleField() === $field) {
-      $variables['attributes']->addClass("field--teaserable--subtitle");
-      return;
-    }
-
-    if ($teaserEntity->getTeaserTextField() === $field) {
-      $variables['attributes']->addClass("field--teaserable--text");
-      return;
-    }
-
-    $teaserImageField = $teaserEntity->getTeaserImagesField();
-    if (
-      $teaserImageField === $field ||
-      ($hostEntity instanceof MediaInterface && in_array($hostEntity->id(), array_column($teaserImageField->getValue(), 'target_id')))
-    ) {
-      $variables['attributes']->addClass("field--teaserable--image");
-      return;
+    if (isset($variables['element']['#teaser_fieldname'])) {
+      $variables['attributes']->addClass("field--teaserable--{$variables['element']['#teaser_fieldname']}");
     }
   }
 }

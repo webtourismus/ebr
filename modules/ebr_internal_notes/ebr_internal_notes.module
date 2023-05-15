@@ -1,0 +1,49 @@
+<?php
+
+declare(strict_types=1);
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Form\FormStateInterface;
+
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function ebr_internal_notes_entity_base_field_info(EntityTypeInterface $entity_type): array {
+  if ($entity_type->id() != 'node') {
+    return [];
+  }
+  $fields = [];
+  $fields['internal_notes'] = BaseFieldDefinition::create('string_long')
+    ->setLabel(t('Internal notes'))
+    ->setTranslatable(FALSE)
+    ->setRevisionable(TRUE)
+    ->setRequired(FALSE)
+    ->setDisplayConfigurable('form', FALSE)
+    ->setDisplayOptions('form', [
+      'region' => 'content',
+      'type' => 'string_textarea',
+      'settings' => [
+        'rows' => 3,
+      ],
+    ])
+    ->setDisplayConfigurable('view', FALSE)
+    ->setDisplayOptions('view', [
+      'region' => 'hidden',
+    ]);
+  return $fields;
+}
+
+/**
+ * Move "internal notes" input field to the sidebar
+ */
+function ebr_internal_notes_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (strpos($form_id, 'node') === FALSE) {
+    return;
+  }
+
+  if (array_key_exists('internal_notes', $form)) {
+    $form['internal_notes']['#group'] = 'meta';
+  }
+}
