@@ -1,17 +1,19 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Drupal\ebr;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * The EntityBusinessrules service.
  */
 class EntityBusinessrules {
+  use StringTranslationTrait;
 
   /**
    * Entity types having fields allowing custom business rules.
@@ -46,7 +48,6 @@ class EntityBusinessrules {
    */
   protected EntityTypeManagerInterface $entityTypeManager;
 
-
   /**
    * The constructor.
    */
@@ -62,8 +63,11 @@ class EntityBusinessrules {
     return self::ENTITY_TYPES;
   }
 
+  /**
+   * Returns the (machine) field names provided by EBR.
+   */
   public function getFieldNames(): array {
-    return [self::FIELD_INTERNAL_ID, self::FIELD_REMOTE_ID, SELF::FIELD_REMOTE_DATASOURCE];
+    return [self::FIELD_INTERNAL_ID, self::FIELD_REMOTE_ID, self::FIELD_REMOTE_DATASOURCE];
   }
 
   /**
@@ -74,12 +78,10 @@ class EntityBusinessrules {
   public function renderBusinessRulesContainer(array &$systemSiteInformationSettingsForm) {
     $systemSiteInformationSettingsForm['entity_businessrules'] = [
       '#type' => 'details',
-      '#title' => t('Content with special rules'),
+      '#title' => $this->t('Content with special rules'),
       '#open' => FALSE,
     ];
-    /**
-     * @see \Drupal\ebr\EntityBusinessrules::renderRule()
-     */
+    // @see \Drupal\ebr\EntityBusinessrules::renderRule()
     $systemSiteInformationSettingsForm['entity_businessrules']['rules'] = [
       '#type' => 'container',
     ];
@@ -105,10 +107,10 @@ class EntityBusinessrules {
     ];
 
     $header = [
-      t('type'),
-      t('ID'),
-      t('Title'),
-      t('Internal ID'),
+      $this->t('type'),
+      $this->t('ID'),
+      $this->t('Title'),
+      $this->t('Internal ID'),
     ];
     $rows = [];
     foreach ($internalContent as $entityTypeId => $entityIds) {
@@ -136,17 +138,15 @@ class EntityBusinessrules {
    *   The site settings form render array.
    * @param string $ruleId
    *   An ID used to group multiple $ruleDescriptions.
-   * @param TranslatableMarkup|string $ruleTitle
+   * @param \Drupal\Core\StringTranslation\TranslatableMarkup|string $ruleTitle
    *   The title for a rule.
-   * @param TranslatableMarkup|string $ruleDescription
+   * @param \Drupal\Core\StringTranslation\TranslatableMarkup|string $ruleDescription
    *   The text description for a rule.
-   * @return void
    */
   public function renderRule(array &$systemSiteInformationSettingsForm,
     string $ruleId,
     TranslatableMarkup|string $ruleTitle,
-    TranslatableMarkup|string $ruleDescription)
-  {
+    TranslatableMarkup|string $ruleDescription):void {
     if (!array_key_exists('rules', $systemSiteInformationSettingsForm['entity_businessrules'] ?? [])) {
       return;
     }
@@ -167,4 +167,5 @@ class EntityBusinessrules {
     }
     $systemSiteInformationSettingsForm['entity_businessrules']['rules'][$ruleId]['item_list']['#items'][] = $ruleDescription;
   }
+
 }

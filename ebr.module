@@ -1,5 +1,12 @@
 <?php
 
+declare(strict_types = 1);
+
+/**
+ * @file
+ * Main module file.
+ */
+
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityFormInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -31,14 +38,21 @@ function ebr_entity_base_field_info(EntityTypeInterface $entity_type): array {
     ])->setDisplayConfigurable('view', FALSE)
     ->addConstraint('UniqueField', [])
     ->setPropertyConstraints(
-      'value', ['Regex' => [
-        'pattern' => '/^[a-z0-9_-]*$/',
-        'message' => t('In field @label only lowercase letters, numbers, underscore and minus are allowed.', ['@label' => t('Internal ID')]),
-      ]]
+      'value', [
+        'Regex' => [
+          'pattern' => '/^[a-z0-9_-]*$/',
+          'message' => t(
+            'In field @label only lowercase letters, numbers, underscore and minus are allowed.',
+            ['@label' => t('Internal ID')]
+          ),
+        ],
+      ]
     );
   $fields[EntityBusinessrules::FIELD_REMOTE_DATASOURCE] = BaseFieldDefinition::create('string')
     ->setLabel(t('Remote datasource'))
-    ->setDescription(t('A machine name to define the remote system used for synching and/or outbound contextual links.'))
+    ->setDescription(
+      t('A machine name to define the remote system used for synching and/or outbound contextual links.')
+    )
     ->setTranslatable(FALSE)
     ->setRevisionable(FALSE)
     ->setRequired(FALSE)
@@ -48,10 +62,15 @@ function ebr_entity_base_field_info(EntityTypeInterface $entity_type): array {
       'region' => 'hidden',
     ])->setDisplayConfigurable('view', FALSE)
     ->setPropertyConstraints(
-      'value', ['Regex' => [
-        'pattern' => '/^[a-z0-9_-]*$/',
-        'message' => t('In field @label only lowercase letters, numbers, underscore and minus are allowed.', ['@label' => t('Remote datasource')]),
-      ]]
+      'value', [
+        'Regex' => [
+          'pattern' => '/^[a-z0-9_-]*$/',
+          'message' => t(
+            'In field @label only lowercase letters, numbers, underscore and minus are allowed.',
+            ['@label' => t('Remote datasource')]
+          ),
+        ],
+      ]
     );
   $fields[EntityBusinessrules::FIELD_REMOTE_ID] = BaseFieldDefinition::create('string')
     ->setLabel(t('Remote ID'))
@@ -66,7 +85,6 @@ function ebr_entity_base_field_info(EntityTypeInterface $entity_type): array {
     ])->setDisplayConfigurable('view', FALSE);
   return $fields;
 }
-
 
 /**
  * Implements hook_form_alter().
@@ -141,8 +159,12 @@ function _ebr_delete_validation(&$form, FormStateInterface $form_state) {
  * Implements hook_entity_access().
  */
 function ebr_entity_access(EntityInterface $entity, $operation, AccountInterface $account) {
-  if ($operation == 'delete' && in_array($entity->getEntityTypeId(), \Drupal::service('ebr.service')->getEntityTypes())) {
-    if ($entity->hasField(EntityBusinessrules::FIELD_INTERNAL_ID) && !$entity->get(EntityBusinessrules::FIELD_INTERNAL_ID)->isEmpty()) {
+  if ($operation == 'delete' &&
+    in_array($entity->getEntityTypeId(), \Drupal::service('ebr.service')->getEntityTypes())
+  ) {
+    if ($entity->hasField(EntityBusinessrules::FIELD_INTERNAL_ID) &&
+      !$entity->get(EntityBusinessrules::FIELD_INTERNAL_ID)->isEmpty()
+    ) {
       return AccessResult::forbidden();
     }
   }
@@ -150,6 +172,9 @@ function ebr_entity_access(EntityInterface $entity, $operation, AccountInterface
   return AccessResult::neutral();
 }
 
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
 function ebr_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
   \Drupal::service('ebr.service')->renderBusinessRulesContainer($form);
   \Drupal::service('ebr.service')->renderRule(

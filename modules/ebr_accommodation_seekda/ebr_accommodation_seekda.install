@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions.
+ */
+
+declare(strict_types = 1);
+
+use Drupal\ebr_accommodation_seekda\Entity\AccommodationSeekda;
+use Drupal\taxonomy\Entity\Vocabulary;
+
+/**
+ * Implements hook_install().
+ */
+function ebr_accommodation_seekda_install() {
+  $datasource = AccommodationSeekda::DATASOURCE;
+  $targetDir = \Drupal::service('file_system')->realpath("public://{$datasource}/") . '/';
+  if (!file_exists($targetDir)) {
+    mkdir($targetDir, 0775);
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function ebr_accommodation_seekda_uninstall(): void {
+  $config = \Drupal::configFactory()->getEditable('system.site');
+  $config->clear('seekda');
+  $config->save(TRUE);
+
+  $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadByProperties([
+    'vid' => AccommodationSeekda::DATASOURCE,
+  ]);
+  foreach ($terms as $term) {
+    $term->delete();
+  }
+  $vocabulary = Vocabulary::load(AccommodationSeekda::DATASOURCE);
+  if ($vocabulary) {
+    $vocabulary->delete();
+  }
+}

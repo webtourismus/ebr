@@ -1,11 +1,15 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Main module file.
+ */
+
+declare(strict_types = 1);
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
-
 
 /**
  * Implements hook_entity_base_field_info().
@@ -36,7 +40,7 @@ function ebr_internal_notes_entity_base_field_info(EntityTypeInterface $entity_t
 }
 
 /**
- * Move "internal notes" input field to the sidebar
+ * Move "internal notes" input field to the sidebar.
  */
 function ebr_internal_notes_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   if (strpos($form_id, 'node') === FALSE) {

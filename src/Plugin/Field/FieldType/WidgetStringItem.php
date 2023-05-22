@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ebr\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\Plugin\Field\FieldType\StringLongItem;
 use Drupal\ebr\EntityBusinessrules;
-use Drupal\ebr\Entity\WidgetableInterface;
 
 /**
  * Renders a web widget by using the computed value as Twig template name.
@@ -62,7 +63,7 @@ class WidgetStringItem extends StringLongItem {
    */
   protected function ensureCalculated() {
     if (!$this->isCalculated) {
-      /** @var WidgetableInterface $entity */
+      /** @var \Drupal\ebr\Entity\WidgetableInterface $entity */
       $entity = $this->getEntity();
       if (!$entity->isNew()) {
         $widgetType = $this->getSetting('widget_type');
@@ -73,7 +74,7 @@ class WidgetStringItem extends StringLongItem {
         ];
         if ($widgetType && $datasource && $remoteId) {
           $value = [
-            // the value is the name of the twig template containing the widget code
+            // The value is the name of the twig template containing the widget code.
             'value' => "{$datasource}_{$widgetType}",
           ];
         }
@@ -82,4 +83,5 @@ class WidgetStringItem extends StringLongItem {
       $this->isCalculated = TRUE;
     }
   }
+
 }

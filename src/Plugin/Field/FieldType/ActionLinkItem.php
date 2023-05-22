@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ebr\Plugin\Field\FieldType;
 
-use Drupal\ebr\Entity\ActionableInterface;
 use Drupal\link\LinkItemInterface;
 use Drupal\link\Plugin\Field\FieldType\LinkItem;
 
@@ -40,7 +41,6 @@ class ActionLinkItem extends LinkItem {
     ] + parent::defaultFieldSettings();
   }
 
-
   /**
    * {@inheritdoc}
    */
@@ -70,7 +70,7 @@ class ActionLinkItem extends LinkItem {
    */
   protected function ensureCalculated() {
     if (!$this->isCalculated) {
-      /** @var ActionableInterface $entity */
+      /** @var \Drupal\ebr\Entity\ActionableInterface $entity */
       $entity = $this->getEntity();
       if (!$entity->isNew()) {
         $actionId = $this->getSetting('action_type');
@@ -89,4 +89,5 @@ class ActionLinkItem extends LinkItem {
       $this->isCalculated = TRUE;
     }
   }
+
 }

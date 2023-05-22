@@ -1,6 +1,11 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Main module file.
+ */
+
+declare(strict_types = 1);
 
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
 use Drupal\ebr_accommodation_seekda\Entity\AccommodationSeekda;
@@ -8,37 +13,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\link\LinkItemInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\ebr\EntityBusinessrules;
-
-function ebr_accommodation_seekda_install() {
-  $datasource = AccommodationSeekda::DATASOURCE;
-  $targetDir = \Drupal::service('file_system')->realpath("public://{$datasource}/") . '/';
-  if (!file_exists($targetDir)) {
-    mkdir($targetDir, 0775);
-  }
-}
-
-/**
- * Implements hook_uninstall().
- */
-function ebr_accommodation_seekda_uninstall(): void{
-  $config = \Drupal::configFactory()->getEditable('system.site');
-  $config->clear('seekda');
-  $config->save(TRUE);
-
-  $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadByProperties([
-    'vid' => AccommodationSeekda::DATASOURCE
-  ]);
-  foreach ($terms as $term) {
-    $term->delete();
-  }
-  $vocabulary = Vocabulary::load(AccommodationSeekda::DATASOURCE);
-  if ($vocabulary) {
-    $vocabulary->delete();
-  }
-}
 
 /**
  * Implements hook_entity_bundle_info_alter().
@@ -63,7 +38,7 @@ function ebr_accommodation_seekda_entity_bundle_field_info(EntityTypeInterface $
     in_array($bundle, [AccommodationBase::BUNDLE_PACKAGE, AccommodationBase::BUNDLE_ROOM]) &&
     !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE])
   ) {
-    // Overrride base ebr_accommodation field
+    // Overrride base ebr_accommodation field.
     $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE], $bundle);
     $field->setDefaultValue(AccommodationSeekda::DATASOURCE);
     $field->setDescription(t('If value is "<code>@remote_datasource</code>", rooms and packages with an "<code>remote_id</code>" receive a booking link.', ["@remote_datasource" => AccommodationSeekda::DATASOURCE]));
@@ -91,8 +66,9 @@ function ebr_accommodation_seekda_entity_bundle_field_info(EntityTypeInterface $
     ));
     $fields[EntityBusinessrules::FIELD_REMOTE_ID] = $field;
 
-    foreach (AccommodationSeekda::getDefaultWidgets() as $widgetType) {
-    }
+    // @todo Implement rating widget.
+    // foreach (AccommodationSeekda::getDefaultWidgets() as $widgetType) {
+    // }
   }
 
   if (
@@ -119,6 +95,9 @@ function ebr_accommodation_seekda_entity_bundle_field_info(EntityTypeInterface $
   return $fields;
 }
 
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
 function ebr_accommodation_seekda_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
   \Drupal::service('ebr.service')->renderRule(
     $form,
@@ -202,7 +181,8 @@ function ebr_accommodation_seekda_site_settings_validate(&$form, FormStateInterf
     $form_state->setErrorByName(
       'seekda][kube_domain',
       t('@fieldname must be a link in the form of %url',
-        ['@fieldname' => t('KUBE Domain'),
+        [
+          '@fieldname' => t('KUBE Domain'),
           '%url' => 'https://sub.domain.com',
         ]
       )
@@ -210,39 +190,43 @@ function ebr_accommodation_seekda_site_settings_validate(&$form, FormStateInterf
   }
 }
 
+/**
+ * Implements hook_theme().
+ */
 function ebr_accommodation_seekda_theme($existing, $type, $theme, $path) {
   $suggestions = [];
   $datasource = AccommodationSeekda::DATASOURCE;
-  foreach(AccommodationSeekda::getDefaultWidgets() as $widgetType) {
+  foreach (AccommodationSeekda::getDefaultWidgets() as $widgetType) {
     $suggestions["{$datasource}_{$widgetType}"] = [
       'variables' => [
         'label' => NULL,
         'widget_type' => $widgetType,
         'entity' => NULL,
-      ]
+      ],
     ];
   }
   return $suggestions;
 }
 
 /**
- * Callback function for Migration import (rooms german)
- *
- * @return string[] URLs of Seekda JSON API endpoints
+ * Callback function for Migration import (rooms german).
  */
 function ebr_accommodation_seekda_migration_100_seekda_rooms_de(): array {
   return _ebr_accommodation_seekda_migration_seekda('de');
 }
 
 /**
- * Callback function for Migration import (rooms english)
- *
- * @return string[] URLs of Seekda JSON API endpoints
+ * Callback function for Migration import (rooms english).
  */
 function ebr_accommodation_seekda_migration_110_seekda_rooms_en(): array {
   return _ebr_accommodation_seekda_migration_seekda('en');
 }
 
+/**
+ * Returns a personalized endpoint URL for migration import.
+ *
+ * @internal
+ */
 function _ebr_accommodation_seekda_migration_seekda(string $langcode, int $months = 14): array {
   $config = \Drupal::configFactory()->getEditable('system.site');
   $propertyCode = $config->get('seekda.property_code');

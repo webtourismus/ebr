@@ -1,13 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Drupal\ebr_teaser\Entity;
 
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
-use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityViewBuilderInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldType\EntityReferenceItem;
@@ -16,28 +15,31 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\ebr\Entity\ActionableInterface;
 use Drupal\link\LinkItemInterface;
-use Psr\Log\LoggerInterface;
 
+/**
+ * Methods for ParagraphTeaserableInterface.
+ */
 trait ParagraphTeaserableTrait {
   use StringTranslationTrait;
 
-  protected function entityRepository(): EntityRepositoryInterface {
-    return \Drupal::service('entity.repository');
-  }
-
+  /**
+   * Shortcut to the viewBuilder service.
+   */
   protected function viewBuilder(): EntityViewBuilderInterface {
     return $this->entityTypeManager()->getViewBuilder('paragraph');
   }
 
-  protected function logger(): LoggerInterface {
-    return \Drupal::logger('landle');
-  }
-
+  /**
+   * {@inheritDoc}
+   */
   public function isTeaserableViewmode(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): bool {
-    // a paragraph teaserable'ness is defined on bunble level, not on view mode level.
+    // A paragraph teaserable'ness is defined on bunble level, not on view mode level.
     return TRUE;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function isFieldSuppressed(string $fieldName): bool {
     if ($this->hasField('field_suppress_fields')) {
       $suppressedFields = array_column($this->get('field_suppress_fields')->getValue(), 'target_id');
@@ -46,6 +48,9 @@ trait ParagraphTeaserableTrait {
     return FALSE;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function getReferencingField(): ?FieldItemListInterface {
     if ($this->hasField('field_link')) {
       return $this->get('field_link');
@@ -53,6 +58,9 @@ trait ParagraphTeaserableTrait {
     return NULL;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function getReferencedEntity(): ?TeaserableInterface {
     if ($this?->getReferencingField()?->isEmpty() ?? TRUE) {
       return NULL;
@@ -66,7 +74,7 @@ trait ParagraphTeaserableTrait {
     }
     elseif ($fieldItem instanceof LinkItemInterface) {
       /**
-       * @var $url \Drupal\Core\Url
+       * @var \Drupal\Core\Url $url
        */
       $url = $fieldItem->getUrl();
       if (!$url->isRouted()) {
@@ -80,7 +88,8 @@ trait ParagraphTeaserableTrait {
         $referencedEntity = $this->entityTypeManager()
           ->getStorage($possiblyAnEntityType)
           ->load($possiblyAnEntityId);
-      } catch (InvalidPluginDefinitionException | PluginNotFoundException $e) {
+      }
+      catch (InvalidPluginDefinitionException | PluginNotFoundException $e) {
         return NULL;
       }
     }
@@ -89,12 +98,14 @@ trait ParagraphTeaserableTrait {
       return NULL;
     }
     if ($referencedEntity->isTranslatable()) {
-      $referencedEntity = $this->entityRepository()->getTranslationFromContext($referencedEntity);
+      $referencedEntity = \Drupal::service('entity.repository')->getTranslationFromContext($referencedEntity);
     }
     return $referencedEntity;
   }
 
   /**
+   * Shared render function for all fields.
+   *
    * Teaserable fields should always be rendered with the view mode of the host entity, even if the field values
    * are sourced from the referenced entity. This also means that - in case of referenced field - they must be of the
    * same type.
@@ -105,8 +116,7 @@ trait ParagraphTeaserableTrait {
   protected function renderFieldWithReferenceFallback(
     string $viewMode,
     ?FieldItemListInterface $ownField,
-    ?FieldItemListInterface $referencedField): ?array
-  {
+    ?FieldItemListInterface $referencedField): ?array {
     if (!($ownField instanceof FieldItemListInterface)) {
       return NULL;
     }
@@ -115,7 +125,7 @@ trait ParagraphTeaserableTrait {
     }
     $ownFieldDefinition = $ownField->getFieldDefinition();
     if (!$ownField->isEmpty()) {
-      // case 1: render own field
+      // Case 1: render own field.
       $displayOptions = $this->entityTypeManager()
         ->getStorage('entity_view_display')
         ->load("paragraph.{$this->bundle()}.{$viewMode}")
@@ -128,7 +138,7 @@ trait ParagraphTeaserableTrait {
         $displayOptions
       );
       $build['#is_teaserable'] = TRUE;
-      // when fields are rendered in isolation, Drupal sets the '#view_mode' to '_custom'
+      // When fields are rendered in isolation, Drupal sets the '#view_mode' to '_custom'.
       $build['#view_mode'] = $viewMode;
       return $build;
     }
@@ -150,19 +160,19 @@ trait ParagraphTeaserableTrait {
           'label' => 'hidden',
           'type' => 'responsive_image',
           'settings' => [
-            'repsonsive_image_style' => $responsiveImageStyle
-          ]
+            'repsonsive_image_style' => $responsiveImageStyle,
+          ],
         ];
         $build = $this->entityTypeManager()
           ->getViewBuilder($this->getReferencedEntity()->getEntityTypeId())
           ->viewField($referencedField, $displayOptions);
         $build['#is_teaserable'] = TRUE;
         $build['#referencing_object'] = $this;
-        // when fields are rendered in isolation, Drupal sets the '#view_mode' to '_custom'
+        // When fields are rendered in isolation, Drupal sets the '#view_mode' to '_custom'.
         $build['#view_mode'] = $viewMode;
         return $build;
       }
-      $this->logger()->error("Paragraph host field paragraph.{$this->bundle()}.{$ownFieldDefinition->getName()} has no matching responsive image style '{$viewMode}' for {$this->getReferencedEntity()->getEntityTypeId()}.{$this->getReferencedEntity()->bundle()}.{$referencedFieldDefinition->getName()}");
+      \Drupal::logger('ebr_teaser')->error("Paragraph host field paragraph.{$this->bundle()}.{$ownFieldDefinition->getName()} has no matching responsive image style '{$viewMode}' for {$this->getReferencedEntity()->getEntityTypeId()}.{$this->getReferencedEntity()->bundle()}.{$referencedFieldDefinition->getName()}");
       return NULL;
     }
 
@@ -181,11 +191,14 @@ trait ParagraphTeaserableTrait {
     );
     $build['#is_teaserable'] = TRUE;
     $build['#referencing_object'] = $this;
-    // when fields are rendered in isolation, Drupal sets the '#view_mode' to '_custom'
+    // When fields are rendered in isolation, Drupal sets the '#view_mode' to '_custom'.
     $build['#view_mode'] = $viewMode;
     return $build;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function getTeaserTitleField(): ?FieldItemListInterface {
     if ($this->isFieldSuppressed('field_title')) {
       return NULL;
@@ -196,6 +209,9 @@ trait ParagraphTeaserableTrait {
     return $this->get('field_title');
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function getTeaserSubtitleField(): ?FieldItemListInterface {
     if ($this->isFieldSuppressed('field_subtitle')) {
       return NULL;
@@ -206,6 +222,9 @@ trait ParagraphTeaserableTrait {
     return $this->get('field_subtitle');
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function getTeaserImagesField(): ?FieldItemListInterface {
     if ($this->isFieldSuppressed('field_images')) {
       return NULL;
@@ -216,6 +235,9 @@ trait ParagraphTeaserableTrait {
     return $this->get('field_images');
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function getTeaserTextField(): ?FieldItemListInterface {
     if ($this->isFieldSuppressed('field_text')) {
       return NULL;
@@ -226,6 +248,9 @@ trait ParagraphTeaserableTrait {
     return $this->get('field_text');
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function getRenderedTeaserTitle(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
     $build = $this->renderFieldWithReferenceFallback($viewMode, $this->get('field_title'), $this->getReferencedEntity()?->getTeaserTitleField());
     if ($build['#is_teaserable'] ?? FALSE) {
@@ -234,6 +259,9 @@ trait ParagraphTeaserableTrait {
     return $build;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function getRenderedTeaserSubTitle(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
     $build = $this->renderFieldWithReferenceFallback($viewMode, $this->get('field_subtitle'), $this->getReferencedEntity()?->getTeaserSubtitleField());
     if ($build['#is_teaserable'] ?? FALSE) {
@@ -242,6 +270,9 @@ trait ParagraphTeaserableTrait {
     return $build;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function getRenderedTeaserImages(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
     $build = $this->renderFieldWithReferenceFallback($viewMode, $this->get('field_images'), $this->getReferencedEntity()?->getTeaserImagesField());
     if ($build['#is_teaserable'] ?? FALSE) {
@@ -250,6 +281,9 @@ trait ParagraphTeaserableTrait {
     return $build;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function getRenderedTeaserText(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
     $build = $this->renderFieldWithReferenceFallback($viewMode, $this->get('field_text'), $this->getReferencedEntity()?->getTeaserTextField());
     if ($build['#is_teaserable'] ?? FALSE) {
@@ -259,6 +293,8 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
+   * Shim for \Drupal\ebr\Entity\ActionableInterface::getActionFieldnames().
+   *
    * Paragraphs do not implement ActionableInterface, but their referenced
    * entities might do so. Therefore we provide passthrough functions for
    * some actionable methods for usage in Twig templates.
@@ -275,8 +311,9 @@ trait ParagraphTeaserableTrait {
     return $result;
   }
 
-
   /**
+   * Shim for \Drupal\ebr\Entity\ActionableInterface::getActionLabel().
+   *
    * Paragraphs do not implement ActionableInterface, but their referenced
    * entities might do so. Therefore we provide passthrough functions for
    * some actionable methods for usage in Twig templates.
@@ -289,6 +326,8 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
+   * Shim for \Drupal\ebr\Entity\ActionableInterface::getActionUrl().
+   *
    * Paragraphs do not implement ActionableInterface, but their referenced
    * entities might do so. Therefore we provide passthrough functions for
    * some actionable methods for usage in Twig templates.
@@ -309,4 +348,5 @@ trait ParagraphTeaserableTrait {
     }
     return NULL;
   }
+
 }

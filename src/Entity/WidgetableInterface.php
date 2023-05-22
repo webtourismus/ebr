@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Drupal\ebr\Entity;
 
@@ -24,8 +24,6 @@ interface WidgetableInterface extends ContentEntityInterface {
    * This function is used to provide a default set of configurable fields
    * in field UI. For the real computed set of actually existing widgets,
    * use getWidgetFieldnames() instead!
-   *
-   * @return string[]
    */
   public static function getDefaultWidgets(): array;
 
@@ -55,13 +53,13 @@ interface WidgetableInterface extends ContentEntityInterface {
    * Returns values required to build the widgets render array.
    *
    * @return mixed[]
-   *  An array of mixed values indexed by the Twig variable name.
+   *   An array of mixed values indexed by the Twig variable name.
    */
   public function getWidgetVariables(string $widgetId): ?array;
-
 
   /**
    * Returns a web widget as render array.
    */
   public function getRenderedWidget(string $widgetId, string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array;
+
 }

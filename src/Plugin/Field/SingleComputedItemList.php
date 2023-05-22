@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Drupal\ebr\Plugin\Field;
 
@@ -38,4 +38,5 @@ class SingleComputedItemList extends FieldItemList {
       $this->list[0] = $this->createItem(0);
     }
   }
+
 }

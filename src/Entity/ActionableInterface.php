@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Drupal\ebr\Entity;
 
@@ -25,8 +25,6 @@ interface ActionableInterface extends ContentEntityInterface {
    * This function is used to provide a default set of configurable fields
    * in field UI. For the real computed set of actually existing actions,
    * use getActionFieldnames() instead!
-   *
-   * @return string[]
    */
   public static function getDefaultActions(): array;
 
@@ -61,4 +59,5 @@ interface ActionableInterface extends ContentEntityInterface {
    * Returns an call-to-action as render array.
    */
   public function getRenderedAction(string $actionId, string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array;
+
 }

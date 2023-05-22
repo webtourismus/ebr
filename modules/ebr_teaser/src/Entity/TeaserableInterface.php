@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Drupal\ebr_teaser\Entity;
 
@@ -9,6 +9,8 @@ use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 
 /**
+ * An interface unifying teaser viewmodes and teaser-like entities such as paragraphs.
+ *
  * Provides a homogenous, core set of semantic field getters for inhomogenous
  * entities. Use this interface so different entites can use a shared teaser
  * template by using the interface's getters instead of entity field names.
@@ -32,7 +34,6 @@ interface TeaserableInterface extends ContentEntityInterface {
    * All viewsmodes starting with this prefix are considered egilible by default.
    */
   public const TEASER_VIEWMODE_PREFIX = 'teaser';
-
 
   /**
    * Returns true if the viewmode should invoke the teaserable behaviors.
@@ -83,4 +84,5 @@ interface TeaserableInterface extends ContentEntityInterface {
    * Return the render array for the text field.
    */
   public function getRenderedTeaserText(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array;
+
 }

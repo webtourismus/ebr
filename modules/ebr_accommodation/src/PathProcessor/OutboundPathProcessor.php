@@ -1,13 +1,13 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Drupal\ebr_accommodation\PathProcessor;
 
+use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\PathProcessor\OutboundPathProcessorInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\ebr\Entity\ActionableInterface;
-use Drupal\node\Entity\Node;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -20,28 +20,35 @@ use Symfony\Component\HttpFoundation\RequestStack;
  */
 class OutboundPathProcessor implements OutboundPathProcessorInterface {
 
+  /**
+   * The request stack.
+   */
   protected RequestStack $requestStack;
 
   /**
-   * The constructor.
-   *
-   * @param RequestStack $request_stack
+   * The entity type manager.
    */
-  public function __construct(RequestStack $request_stack) {
-    $this->requestStack = $request_stack;
+  protected EntityTypeManager $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(RequestStack $requestStack, EntityTypeManager $entityTypeManager) {
+    $this->requestStack = $requestStack;
+    $this->entityTypeManager = $entityTypeManager;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function processOutbound($path, &$options = array(), Request $request = NULL, BubbleableMetadata $bubbleable_metadata = NULL) {
+  public function processOutbound($path, &$options = [], Request $request = NULL, BubbleableMetadata $bubbleable_metadata = NULL) {
     if (empty($request)) {
       $request = $this->requestStack->getCurrentRequest();
     }
     $contextNode = $request->attributes->get('node');
 
     if (is_numeric($contextNode)) {
-      $contextNode = Node::load($contextNode);
+      $contextNode = $this->entityTypeManager->getStorage('node')->load($contextNode);
     }
 
     if (!($contextNode instanceof ActionableInterface)) {
@@ -66,4 +73,5 @@ class OutboundPathProcessor implements OutboundPathProcessorInterface {
     }
     return $path;
   }
+
 }

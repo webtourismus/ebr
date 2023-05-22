@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\ebr_stable_media\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\media\MediaInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -18,22 +19,21 @@ class StableMediaEditLinkDeriver extends DeriverBase implements ContainerDeriver
   public const STABLE_MEDIA_PREFIX = 'download_';
 
   /**
-   * @var EntityTypeManagerInterface $entityTypeManager.
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
   /**
-   * The constructor.
-   *
-   * @param \Drupal\Core\Entity\EntityTypeManager $entityTypeManager
-   *   The entity type manager.
+   * {@inheritDoc}
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager) {
     $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
-   * {@inheritdoc}
+   * {@inheritDoc}
    */
   public static function create(ContainerInterface $container, $base_plugin_id) {
     return new static(
@@ -42,7 +42,7 @@ class StableMediaEditLinkDeriver extends DeriverBase implements ContainerDeriver
   }
 
   /**
-   * {@inheritdoc}
+   * {@inheritDoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
     $links = [];
@@ -54,8 +54,8 @@ class StableMediaEditLinkDeriver extends DeriverBase implements ContainerDeriver
 
     // We assume we don't have too many...
     $mediaEntities = $this->entityTypeManager->getStorage('media')->loadMultiple($mediaIds);
-    /** @var MediaInterface $media */
-    foreach ($mediaEntities as $id => $media) {
+    /** @var \Drupal\media\MediaInterface $media */
+    foreach ($mediaEntities as $media) {
       $linkId = 'ebr.stable_media:' . $media->get('internal_id')->value;
       $weight = $media->hasField('field_weight') ? (int) $media->get('field_weight')->value : 0;
       $links[$linkId] = [
@@ -70,4 +70,5 @@ class StableMediaEditLinkDeriver extends DeriverBase implements ContainerDeriver
 
     return $links;
   }
+
 }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Drupal\ebr_accommodation_casablanca\Entity;
 
@@ -9,7 +9,7 @@ use Drupal\ebr_accommodation\Entity\AccommodationBase;
 use Drupal\Core\Url;
 
 /**
- * Summary of Room
+ * Summary of Room.
  */
 class AccommodationCasablanca extends AccommodationBase {
 
@@ -32,7 +32,7 @@ class AccommodationCasablanca extends AccommodationBase {
   public const INFOLINK_PREFIX = 'https://booking.casablanca.at/Info/';
 
   /**
-   * @inheritDoc
+   * {@inheritDoc}
    */
   public function getActionUrl(string $actionId): ?Url {
     $url = parent::getActionUrl($actionId);
@@ -53,4 +53,5 @@ class AccommodationCasablanca extends AccommodationBase {
     $url->setOption('query', $queryParams);
     return $url;
   }
+
 }

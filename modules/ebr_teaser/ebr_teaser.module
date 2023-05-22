@@ -1,6 +1,11 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Main module file.
+ */
+
+declare(strict_types = 1);
 
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\ebr_teaser\Entity\TeaserableInterface;
@@ -16,9 +21,11 @@ use Drupal\node\Entity\NodeType;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\ebr\Entity\ActionableInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\media\MediaInterface;
 use Drupal\ebr_teaser\Entity\ReadmoreActionableInterface;
 
+/**
+ * Implements hook_entity_bundle_info_alter().
+ */
 function ebr_teaser_entity_bundle_info_alter(array &$bundles): void {
   if (isset($bundles['paragraph']['linkblock'])) {
     $bundles['paragraph']['linkblock']['class'] = ParagraphTeaserBase::class;
@@ -48,6 +55,9 @@ function ebr_teaser_entity_extra_field_info_alter(&$info) {
   }
 }
 
+/**
+ * Implements hook_entity_bundle_field_info().
+ */
 function ebr_teaser_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
   $fields = [];
 
@@ -62,7 +72,7 @@ function ebr_teaser_entity_bundle_field_info(EntityTypeInterface $entity_type, $
           'action_type' => $actionId,
         ])
         ->setDisplayConfigurable('view', TRUE)
-        // visible by default, we hide them later in hook_install in banner view modes
+        // Visible by default, we hide them later in hook_install in banner view modes.
         ->setDisplayOptions('view', [
           'label' => 'hidden',
         ]);
@@ -72,14 +82,23 @@ function ebr_teaser_entity_bundle_field_info(EntityTypeInterface $entity_type, $
   return $fields;
 }
 
+/**
+ * Implements hook_preprocess_node().
+ */
 function ebr_teaser_preprocess_node(&$variables):void {
   _ebr_teaser_prepocess_teaserable_entity($variables, $variables['node']);
 }
 
+/**
+ * Implements hook_preprocess_paragraph().
+ */
 function ebr_teaser_preprocess_paragraph(&$variables): void {
   _ebr_teaser_prepocess_teaserable_entity($variables, $variables['paragraph']);
 }
 
+/**
+ * Shared internal function preprocessing teaserable entities.
+ */
 function _ebr_teaser_prepocess_teaserable_entity(array &$variables, ContentEntityInterface $entity) {
   if (!$entity instanceof TeaserableInterface) {
     return;
@@ -105,6 +124,9 @@ function _ebr_teaser_prepocess_teaserable_entity(array &$variables, ContentEntit
   $variables['attributes']->addClass("teaserable--type--{$teaserEntity->bundle()}");
 }
 
+/**
+ * Implements hook_entity_view_alter().
+ */
 function ebr_teaser_entity_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
   $viewMode = $build['#view_mode'] ?? EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE;
   if ($entity instanceof TeaserableInterface && $entity->isTeaserableViewmode($viewMode)) {
@@ -121,15 +143,6 @@ function ebr_teaser_entity_view_alter(array &$build, EntityInterface $entity, En
       $build[$entity->getTeaserTextField()->getName()] = $entity->getRenderedTeaserText($viewMode);
     }
   }
-
-  if ($entity instanceof ParagraphTeaserableInterface &&
-    !$entity->isFieldSuppressed('field_link') &&
-    $entity->getReferencedEntity() instanceof ActionableInterface
-  ) {
-    foreach ($entity->getReferencedEntity()->getActionFieldnames() as $actionId) {
-      // @TODO
-    }
-  }
 }
 
 /**
@@ -144,7 +157,7 @@ function ebr_teaser_preprocess_field(&$variables, $hook): void {
     $variables['field_name'] == 'field_link' &&
     $entity instanceof ParagraphTeaserableInterface
   ) {
-    foreach($variables['items'] as $key => $item) {
+    foreach ($variables['items'] as $key => $item) {
       if (!isset($variables['items'][$key]['content']['#options']['attributes'])) {
         $variables['items'][$key]['content']['#options']['attributes'] = ['class' => []];
       }
@@ -161,14 +174,7 @@ function ebr_teaser_preprocess_field(&$variables, $hook): void {
     }
   }
 
-
-  $variables['attributes']->addClass("field--entity--" . $variables['entity_type']);
-  $variables['attributes']->addClass("field--bundle--" . $entity->bundle());
-  $variables['attributes']->addClass("field--name--" . $variables['field_name']);
-  $variables['attributes']->addClass("field--type--" . $variables['field_type']);
   $viewMode = $variables['element']['#view_mode'];
-  $variables['attributes']->addClass("field--view-mode--{$viewMode}");
-
   if ($entity instanceof TeaserableInterface && $entity->isTeaserableViewmode($viewMode)) {
     // Teaserable entities are additionally labelled with their normalized field name from the interface,
     // which might be different than the actual field name from which the value is retrieved.

@@ -1,6 +1,11 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Main module file.
+ */
+
+declare(strict_types = 1);
 
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
 use Drupal\ebr_accommodation_casablanca\Entity\AccommodationCasablanca;
@@ -9,15 +14,6 @@ use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\link\LinkItemInterface;
 use Drupal\ebr\EntityBusinessrules;
-
-/**
- * Implements hook_uninstall().
- */
-function ebr_accommodation_casablanca_uninstall(): void{
-  $config = \Drupal::configFactory()->getEditable('system.site');
-  $config->clear('casablanca');
-  $config->save(TRUE);
-}
 
 /**
  * Implements hook_entity_bundle_info_alter().
@@ -42,7 +38,7 @@ function ebr_accommodation_casablanca_entity_bundle_field_info(EntityTypeInterfa
     in_array($bundle, [AccommodationBase::BUNDLE_PACKAGE, AccommodationBase::BUNDLE_ROOM]) &&
     !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE])
   ) {
-    // Overrride base ebr_accommodation field
+    // Overrride base ebr_accommodation field.
     $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE], $bundle);
     $field->setDefaultValue(AccommodationCasablanca::DATASOURCE);
     $field->setDescription(t('If value is "<code>@remote_datasource</code>", rooms and packages with an "<code>remote_id</code>" receive a booking link.', ["@remote_datasource" => AccommodationCasablanca::DATASOURCE]));
@@ -70,6 +66,9 @@ function ebr_accommodation_casablanca_entity_bundle_field_info(EntityTypeInterfa
   return $fields;
 }
 
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
 function ebr_accommodation_casablanca_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
   \Drupal::service('ebr.service')->renderRule(
     $form,
@@ -127,11 +126,12 @@ function ebr_accommodation_casablanca_site_settings_validate(&$form, FormStateIn
     );
     return;
   }
-  if ($test = !preg_match('|^https://booking\.casablanca\.at/Info/[^/\?#]+$|', $infolink)) {
+  if (!preg_match('|^https://booking\.casablanca\.at/Info/[^/\?#]+$|', $infolink)) {
     $form_state->setErrorByName(
       'casablanca][info_link',
       t('@fieldname must be a link in the form of %url',
-        [ '@fieldname' => t('Web widgets info link'),
+        [
+          '@fieldname' => t('Web widgets info link'),
           '%url' => AccommodationCasablanca::INFOLINK_PREFIX . 'XXXXXXXXXX',
         ]
       )

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Drupal\ebr_accommodation\Entity;
 
@@ -54,14 +54,14 @@ class AccommodationBase extends Node implements ActionableInterface, TeaserableI
   public const BUNDLE_PACKAGE = 'package';
 
   /**
-   * @inheritDoc
+   * {@inheritDoc}
    */
   public static function getDefaultActions(): array {
     return array_merge(static::getReadmoreActions(), [static::ACTION_BOOK, static::ACTION_ENQUIRY]);
   }
 
   /**
-   * @inheritDoc
+   * {@inheritDoc}
    */
   public static function getDefaultActionLabel(string $actionId): TranslatableMarkup|string|NULL {
     return match($actionId) {
@@ -71,9 +71,8 @@ class AccommodationBase extends Node implements ActionableInterface, TeaserableI
     };
   }
 
-
   /**
-   * @inheritDoc
+   * {@inheritDoc}
    */
   public function getActionUrl(string $actionId): ?Url {
     if (array_key_exists($actionId, $this->actionUrls)) {
@@ -119,10 +118,11 @@ class AccommodationBase extends Node implements ActionableInterface, TeaserableI
           'data-action-link-bundle' => $this->bundle(),
           'data-action-link-type' => $actionId,
           'class' => [
-            "action-link-{$actionId}"
-          ]
-        ]
+            "action-link-{$actionId}",
+          ],
+        ],
       ],
     );
   }
+
 }

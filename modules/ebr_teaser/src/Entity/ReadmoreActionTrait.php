@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Drupal\ebr_teaser\Entity;
 
@@ -9,22 +9,25 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\ebr\Entity\ActionableInterface;
 
+/**
+ * Methods for \Drupal\ebr\Entity\ActionableInterface.
+ */
 trait ReadmoreActionTrait {
 
   /**
-   * Cached getActionUrl() results
+   * Cached getActionUrl() results.
    */
   protected array $actionUrls = [];
 
   /**
-   * @inheritDoc
+   * {@inheritDoc}
    */
   public static function getDefaultActions(): array {
     return [ReadmoreActionableInterface::ACTION_READMORE];
   }
 
   /**
-   * @inheritDoc
+   * {@inheritDoc}
    */
   public static function getDefaultActionLabel($actionId): TranslatableMarkup|string|NULL {
     return match ($actionId) {
@@ -33,6 +36,9 @@ trait ReadmoreActionTrait {
     };
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function getActionFieldnames(): array {
     $result = [];
     foreach ($this->getDefaultActions() as $actionId) {
@@ -43,9 +49,8 @@ trait ReadmoreActionTrait {
     return $result;
   }
 
-
   /**
-   * @inheritDoc
+   * {@inheritDoc}
    */
   public function getActionLabel(string $actionId): TranslatableMarkup|string|NULL {
     if ($this->getActionUrl($actionId)) {
@@ -54,9 +59,8 @@ trait ReadmoreActionTrait {
     return NULL;
   }
 
-
   /**
-   * @inheritDoc
+   * {@inheritDoc}
    */
   public function getActionUrl(string $actionId): ?Url {
     if (array_key_exists($actionId, $this->actionUrls)) {
@@ -65,26 +69,29 @@ trait ReadmoreActionTrait {
     if ($actionId != ReadmoreActionableInterface::ACTION_READMORE) {
       return $this->actionUrls[$actionId] = NULL;
     }
-    /** @var Url $url */
+    /** @var \Drupal\Core\Url $url */
     $url = $this->toUrl('canonical');
     if (!$url instanceof Url || !$this->access()) {
       return $this->actionUrls[$actionId] = NULL;
     }
-      $url->setOption('attributes', [
-        'data-action-link-entity' => $this->getEntityTypeId(),
-        'data-action-link-bundle' => $this->bundle(),
-        'data-action-link-type' => $actionId,
-        'class' => [
-          "action-link-{$actionId}"
-        ]
-      ]);
+    $url->setOption('attributes', [
+      'data-action-link-entity' => $this->getEntityTypeId(),
+      'data-action-link-bundle' => $this->bundle(),
+      'data-action-link-type' => $actionId,
+      'class' => [
+        "action-link-{$actionId}",
+      ],
+    ]);
     return $this->actionUrls[$actionId] = $url;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function getRenderedAction(string $actionId, string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
     $fieldName = $this->getActionFieldnames()[$actionId] ?? NULL;
     if (empty($fieldName)) {
-      null;
+      NULL;
     }
     $displayOptions = $this->entityTypeManager()
       ->getStorage('entity_view_display')
@@ -100,4 +107,5 @@ trait ReadmoreActionTrait {
     $build['#link_action_type'] = $actionId;
     return $build;
   }
+
 }

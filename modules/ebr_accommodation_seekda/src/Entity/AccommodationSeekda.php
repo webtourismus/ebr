@@ -1,15 +1,14 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Drupal\ebr_accommodation_seekda\Entity;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\ebr\Entity\WidgetableInterface;
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
 
 /**
- * Summary of Room
+ * Summary of Room.
  */
 class AccommodationSeekda extends AccommodationBase /* implements WidgetableInterface */ {
 
@@ -29,7 +28,7 @@ class AccommodationSeekda extends AccommodationBase /* implements WidgetableInte
   public const WIDGET_CALENDAR = 'calendar';
 
   /**
-   * @inheritDoc
+   * {@inheritDoc}
    */
   public static function getDefaultWidgets(): array {
     return [
@@ -37,16 +36,23 @@ class AccommodationSeekda extends AccommodationBase /* implements WidgetableInte
     ];
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public static function getDefaultWidgetLabel($widgetType): TranslatableMarkup {
     return match ($widgetType) {
       self::WIDGET_CALENDAR => new TranslatableMarkup('Prices & Availability'),
     };
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public function getWidgetVariables($widgetType): array {
     return [
       'property_code' => \Drupal::service('seekda.service')->getPropertyCode(),
       'token' => \Drupal::service('seekda.service')->getAccessToken(),
     ];
   }
+
 }

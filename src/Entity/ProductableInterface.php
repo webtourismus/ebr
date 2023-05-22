@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Drupal\ebr\Entity;
 
@@ -20,15 +20,11 @@ interface ProductableInterface extends TeaserableInterface {
 
   /**
    * Returns all potentially available product specific fields.
-   *
-   * @return string[]
    */
   public static function getPotentialProductFields(): array;
 
   /**
    * Returns potentially available product fields in a specific display mode.
-   *
-   * @return string[]
    */
   public function getProductFieldsByViewmode(string $viewMode): array;
 
@@ -37,5 +33,9 @@ interface ProductableInterface extends TeaserableInterface {
    */
   public static function getProductFieldLabel(string $fieldName): TranslatableMarkup|string|NULL;
 
+  /**
+   * Returns a product field as render array.
+   */
   public function getRenderedProductField(string $fieldName, string $viewMode): ?array;
+
 }

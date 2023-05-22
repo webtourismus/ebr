@@ -2,4 +2,3 @@ id: seekda
 label: Seekda import
 description: Imports rooms and packages from Seekda CM.
 source_type: JSON API
-

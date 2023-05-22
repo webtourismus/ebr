@@ -1,6 +1,11 @@
 <?php
 
-declare(strict_types=1);
+/**
+ * @file
+ * Main module file.
+ */
+
+declare(strict_types = 1);
 
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
 use Drupal\ebr_accommodation_easybooking\Entity\AccommodationEasybooking;
@@ -11,15 +16,6 @@ use Drupal\link\LinkItemInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\ebr\EntityBusinessrules;
 use Drupal\ebr\Entity\WidgetableInterface;
-
-/**
- * Implements hook_uninstall().
- */
-function ebr_accommodation_easybooking_uninstall(): void{
-  $config = \Drupal::configFactory()->getEditable('system.site');
-  $config->clear('easybooking');
-  $config->save(TRUE);
-}
 
 /**
  * Implements hook_entity_bundle_info_alter().
@@ -44,7 +40,7 @@ function ebr_accommodation_easybooking_entity_bundle_field_info(EntityTypeInterf
     in_array($bundle, [AccommodationBase::BUNDLE_PACKAGE, AccommodationBase::BUNDLE_ROOM]) &&
     !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE])
   ) {
-    // Overrride base ebr_accommodation field
+    // Overrride base ebr_accommodation field.
     $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE], $bundle);
     $field->setDefaultValue(AccommodationEasybooking::DATASOURCE);
     $field->setDescription(t('If value is "<code>@remote_datasource</code>", rooms and packages with an "<code>remote_id</code>" receive a booking link.', ["@remote_datasource" => AccommodationEasybooking::DATASOURCE]));
@@ -53,7 +49,7 @@ function ebr_accommodation_easybooking_entity_bundle_field_info(EntityTypeInterf
     $config = \Drupal::configFactory()->get('system.site');
     $infolink = $config->get('easybooking.info_link');
     if ($infolink) {
-      // Overrride base ebr_accommodation field
+      // Overrride base ebr_accommodation field.
       $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_ID], $bundle);
       $field->setDescription(t('@pms @type ID, see <a href="@url" target="_blank">@short_url</a>',
         [
@@ -74,7 +70,7 @@ function ebr_accommodation_easybooking_entity_bundle_field_info(EntityTypeInterf
     $bundle == AccommodationBase::BUNDLE_ROOM &&
     !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE])
   ) {
-    // Add additional computed fields
+    // Add additional computed fields.
     foreach (AccommodationEasybooking::getDefaultWidgets() as $widgetId) {
       $fields[WidgetableInterface::WIDGET_FIELD_PREFIX . $widgetId] = BaseFieldDefinition::create('widget_string')
         ->setName(WidgetableInterface::WIDGET_FIELD_PREFIX . $widgetId)
@@ -91,6 +87,9 @@ function ebr_accommodation_easybooking_entity_bundle_field_info(EntityTypeInterf
   return $fields;
 }
 
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
 function ebr_accommodation_easybooking_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
   \Drupal::service('ebr.service')->renderRule(
     $form,
@@ -152,11 +151,12 @@ function ebr_accommodation_easybooking_site_settings_validate(&$form, FormStateI
     );
     return;
   }
-  if ($test = !preg_match('|^https://www\.easy-booking\.at/preview/\?.*&cid=\d{1,5}.*&serialNo=\d{4}-\d{4}-\d{4}-\d{4}-\d{4}-\d{4}-\d{4}.*$|', $infolink)) {
+  if (!preg_match('|^https://www\.easy-booking\.at/preview/\?.*&cid=\d{1,5}.*&serialNo=\d{4}-\d{4}-\d{4}-\d{4}-\d{4}-\d{4}-\d{4}.*$|', $infolink)) {
     $form_state->setErrorByName(
       'easybooking][info_link',
       t('@fieldname must be a link in the form of %url',
-        ['@fieldname' => t('Web widgets info link'),
+        [
+          '@fieldname' => t('Web widgets info link'),
           '%url' => AccommodationEasybooking::INFOLINK_PREFIX . '?...&cid=1234&serialNo=1111-2222-3333-4444-5555-6666-7777...',
         ]
       )
@@ -164,16 +164,19 @@ function ebr_accommodation_easybooking_site_settings_validate(&$form, FormStateI
   }
 }
 
+/**
+ * Implements hook_theme().
+ */
 function ebr_accommodation_easybooking_theme($existing, $type, $theme, $path) {
   $suggestions = [];
   $datasource = AccommodationEasybooking::DATASOURCE;
-  foreach(AccommodationEasybooking::getDefaultWidgets() as $widgetId) {
+  foreach (AccommodationEasybooking::getDefaultWidgets() as $widgetId) {
     $suggestions["{$datasource}_{$widgetId}"] = [
       'variables' => [
         'label' => NULL,
         'widget_type' => $widgetId,
         'entity' => NULL,
-      ]
+      ],
     ];
   }
   return $suggestions;

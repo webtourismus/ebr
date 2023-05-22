@@ -1,21 +1,38 @@
 <?php
+
+declare(strict_types = 1);
+
+/**
+ * @file
+ * Main module file.
+ */
+
 use Drupal\Core\Entity\EntityFormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ebr_stable_media\Plugin\Derivative\StableMediaEditLinkDeriver;
 
+/**
+ * Implements hook_page_attachments_alter().
+ */
 function ebr_stable_media_page_attachments_alter(&$page) {
   if (_gin_toolbar_gin_is_active()) {
     $page['#attached']['library'][] = 'ebr_stable_media/toolbar';
   }
 }
 
-
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
 function ebr_stable_media_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
   \Drupal::service('ebr.service')->renderRule(
     $form,
     'stable_media_link',
     t('Media permalinks'),
-    t('Media entities where field "<code>internal_id</code>" starts with "<code>' . StableMediaEditLinkDeriver::STABLE_MEDIA_PREFIX . '</code>" generate a link in the editor menu.'),
+    t(
+      'Media entities where field "<code>internal_id</code>" starts with "<code>@prefix</code>" generate a link in the editor menu.',
+      ['@prefix' => StableMediaEditLinkDeriver::STABLE_MEDIA_PREFIX]
+    ),
+
   );
   \Drupal::service('ebr.service')->renderRule(
     $form,
@@ -47,11 +64,13 @@ function ebr_stable_media_form_alter(&$form, FormStateInterface $form_state, $fo
     '#theme' => 'status_messages',
     '#message_list' => [
       'info' => [
+        // phpcs:disable
         t("Use the URL <input size=\"23\" readonly value=\"@url\" class=\"text-center border-none bg-transparent p-0 text-[unset]\"> to create permalinks to this document. Permalinks never change, even after uploading a new file.",
           ['@url' => "/media/{$entity->id()}/download?inline"],
-        )
+        ),
+        // phpcs:enable
       ],
-    ]
+    ],
   ];
 
   array_unshift($form, $message);
