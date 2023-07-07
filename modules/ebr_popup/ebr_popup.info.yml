@@ -1,0 +1,9 @@
+name: 'EBR Popup: Content blocks as overlay messages'
+type: module
+description: 'Provides an UI to create popup windows for important frontend messages.'
+package: Entity business rules
+core_version_requirement: ^10.1
+dependencies:
+  - ebr:ebr
+  - designsystem:designsystem
+  - gin_toolbar:gin_toolbar

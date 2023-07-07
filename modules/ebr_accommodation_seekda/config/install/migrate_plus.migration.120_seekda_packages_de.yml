@@ -1,5 +1,5 @@
-id: 100_seekda_rooms_de
-label: '100 - Seekda rooms (german)'
+id: 120_seekda_packages_de
+label: '120 - Seekda packages (german)'
 migration_group: seekda
 langcode: de
 status: true
@@ -10,43 +10,52 @@ source:
   data_fetcher_plugin: http
   data_parser_plugin: json
   urls:
-    callback: ebr_accommodation_seekda_migration_100_seekda_rooms_de
-  item_selector: /result/rooms
+    callback: ebr_accommodation_seekda_migration_120_seekda_packages_de
+  item_selector: /result/packages
   track_changes: true
   fields:
     -
-      name: room_code
+      name: package_code
       selector: code
     -
-      name: room_title
+      name: package_title
       selector: title
     -
-      name: room_description
+      name: teaser
+      selector: teaser
+    -
+      name: description
       selector: description
     -
-      name: std_occupancy
-      selector: std_occupancy
-    -
-      name: max_occupancy
-      selector: max_occupancy
+      name: meal_plan
+      selector: meal_plan_code
     -
       name: images
       selector: imagesInfo
     -
+      name: min_los
+      selector: min_los_per_week_day
+    -
+      name: rate_type
+      selector: type
+    -
+      name: categories
+      selector: category_codes
+    -
       name: rates
-      selector: rates
+      selector: rooms
   constants:
     remote_datasource: seekda
     images_upload_directory: 'public://seekda/'
   ids:
-    room_code:
+    package_code:
       type: string
 
 process:
   type:
     plugin: default_value
-    default_value: room
-  title: room_title
+    default_value: package
+  title: package_title
   langcode:
     plugin: default_value
     default_value: de
@@ -62,12 +71,16 @@ process:
   promote:
     plugin: default_value
     default_value: 0
-  body/value: room_description
+  field_subtitle/value: teaser
+  field_subtitle/format:
+    plugin: default_value
+    default_value: basic_html
+  body/value: description
   body/format:
     plugin: default_value
     default_value: basic_html
   remote_datasource: constants/remote_datasource
-  remote_id: room_code
+  remote_id: package_code
   field_images:
     -
       plugin: sub_process
@@ -170,22 +183,45 @@ process:
             remote_id: image_source_url
             remote_datasource: remote_datasource
             field_media_image/target_id: image_file_id
+  field_mealplan:
+    plugin: static_map
+    source: meal_plan
+    map:
+      '1': AI
+      '10': FB
+      '11': BF
+      '12': HB
+      '100': EHB
+    bypass: true
+  field_minlos:
+    -
+      plugin: skip_on_empty
+      method: process
+      source: min_los
+    -
+      plugin: single_value
+    -
+      plugin: callback
+      callable: min
   field_price:
     plugin: seekda_minprice
     source: rates
-    round_cents_to_full: 0
-    price_per_person: false
-  field_occupancy_std: std_occupancy
-  field_occupancy_max: max_occupancy
-
+    round_cents_to_full: 0.04
+    price_per_person: true
 destination:
   plugin: 'entity:node'
   overwrite_properties:
     - remote_datasource
     - remote_id
+    - status
     - title
+    - field_subtitle
     - body
     - field_images
     - field_price
-    - field_occupancy_std
-    - field_occupancy_max
+    - field_minlos
+    - field_mealplan
+
+migration_dependencies:
+  required:
+    - 100_seekda_rooms_de

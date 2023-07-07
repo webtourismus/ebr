@@ -2,7 +2,7 @@ name: 'EBR Stable Media: Permalinks for media entities'
 type: module
 description: 'Provides an UI to create stable download links for PDF documents and similar media.'
 package: Entity business rules
-core_version_requirement: ^10
+core_version_requirement: ^10.1
 dependencies:
   - ebr:ebr
   - media_entity_download:media_entity_download

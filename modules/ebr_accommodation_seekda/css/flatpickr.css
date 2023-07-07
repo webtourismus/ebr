@@ -1,0 +1,50 @@
+.seekda-availabilities {
+  --flatpickr-default-widget-width: 308px;
+  --flatpickr-daycontainer-padding: 2px;
+}
+.seekda-availabilities .flatpickr-calendar.inline {
+  top: 0;
+  box-shadow: none;
+  background-color: transparent;
+}
+.seekda-availabilities .flatpickr-calendar, .seekda-availabilities .flatpickr-days {
+  width: calc(var(--flatpickr-default-widget-width) + 2 * var(--flatpickr-daycontainer-padding));
+}
+.seekda-availabilities .flatpickr-innerContainer {
+  padding-bottom: calc(2 * var(--flatpickr-daycontainer-padding));
+}
+.seekda-availabilities .dayContainer {
+  width: calc(var(--flatpickr-default-widget-width) + 2 * var(--flatpickr-daycontainer-padding));
+  min-width: calc(var(--flatpickr-default-widget-width) + 2 * var(--flatpickr-daycontainer-padding));
+  max-width: calc(var(--flatpickr-default-widget-width) + 2 * var(--flatpickr-daycontainer-padding));
+  padding: 0 var(--flatpickr-daycontainer-padding);
+}
+.seekda-availabilities .flatpickr-day {
+  border-radius: 0;
+  border: 0 none;
+  height: 45px;
+  line-height: 42px;
+  margin-top: 4px;
+  cursor: default;
+  pointer-events: none;
+}
+.seekda-availabilities .seekda-is-available, .seekda-is-available:hover {
+  background-color: var(--bg-seekda-is-available, #b7cc7b);
+}
+.seekda-availabilities .seekda-is-not-available, .seekda-is-not-available:hover {
+  background-color: var(--bg-seekda-is-available, #f9afaa);
+}
+.seekda-availabilities .seekda-is-available + .seekda-is-not-available {
+  /* this is a checkout only day */
+  background: linear-gradient(to right, #b7cc7b, #f9afaa);
+}
+:where(.seekda-availabilities) .seekda-availability-dayprice {
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-block;
+  font-size: 10px;
+  white-space: nowrap;
+  line-height: 1;
+}

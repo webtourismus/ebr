@@ -2,11 +2,12 @@ name: 'EBR Accommodation: Seekda CM'
 type: module
 description: 'Provides contextual call-to-action links for Seekda entites.'
 package: Entity business rules
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^10.1
 dependencies:
   - drupal:migrate
   - migrate_tools:migrate_tools
   - migrate_plus:migrate_plus
+  - twig_tweak:twig_tweak
   - ebr:ebr
   - ebr:ebr_accommodation
-  - twig_tweak:twig_tweak
+  - designsystem:designsystem

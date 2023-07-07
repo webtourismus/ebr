@@ -10,6 +10,6 @@
     }
   ],
   "require": {
-    "drupal/core": "^10"
+    "drupal/core": "^10.1"
   }
 }

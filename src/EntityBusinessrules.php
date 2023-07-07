@@ -21,7 +21,7 @@ class EntityBusinessrules {
    * @internal This is intentionally protected to potentially allow other
    * modules to decorate this serivce and the corresponding getter.
    */
-  protected const ENTITY_TYPES = ['node', 'media', 'taxonomy_term'];
+  protected const ENTITY_TYPES = ['node', 'media', 'taxonomy_term', 'block_content'];
 
   /**
    * The internal_id field name.

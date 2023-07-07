@@ -1,0 +1,32 @@
+<?php
+
+declare(strict_types = 1);
+
+use Drupal\ebr_popup\Plugin\Derivative\PopupEditLinkDeriver;
+use Drupal\Core\Entity\EntityTypeInterface;
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function ebr_popup_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
+  \Drupal::service('ebr.service')->renderRule(
+    $form,
+    'popup_edit_link',
+    t('Popup windows'),
+    t(
+      'Block content entities where field "<code>internal_id</code>" starts with "<code>@prefix</code>" generate a link in the editor menu.',
+      ['@prefix' => PopupEditLinkDeriver::POPUP_PREFIX]
+    ),
+
+  );
+}
+
+/**
+ * Implements hook_entity_base_field_info_alter().
+ */
+function ebr_popup_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
+  if ($entity_type->id() !== 'block_content' || empty($fields['status'])) {
+    return;
+  }
+  $fields['status']->setDisplayConfigurable('form', TRUE);
+}

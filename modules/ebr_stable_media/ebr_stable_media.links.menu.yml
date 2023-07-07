@@ -1,3 +1,4 @@
 ebr.stable_media.link_deriver:
-    deriver: '\Drupal\ebr_stable_media\Plugin\Derivative\StableMediaEditLinkDeriver'
-    class: '\Drupal\Core\Menu\MenuLinkDefault'
+  deriver: '\Drupal\ebr_stable_media\Plugin\Derivative\StableMediaEditLinkDeriver'
+  class: '\Drupal\Core\Menu\MenuLinkDefault'
+  menu_name: editor

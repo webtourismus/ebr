@@ -1,0 +1,4 @@
+ebr.popup.link_deriver:
+  deriver: '\Drupal\ebr_popup\Plugin\Derivative\PopupEditLinkDeriver'
+  class: '\Drupal\Core\Menu\MenuLinkDefault'
+  menu_name: editor

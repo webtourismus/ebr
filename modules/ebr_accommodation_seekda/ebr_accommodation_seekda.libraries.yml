@@ -1,0 +1,6 @@
+availabilities:
+  css:
+    theme:
+      'css/flatpickr.css': {}
+  dependencies:
+    - designsystem/flatpickr

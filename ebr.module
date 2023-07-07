@@ -15,6 +15,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\ebr\EntityBusinessrules;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Implements hook_entity_base_field_info().
@@ -99,6 +100,7 @@ function ebr_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   }
 
   if (strpos($form_id, "{$entity->getEntityTypeId()}_{$entity->bundle()}_form") !== FALSE ||
+    strpos($form_id, "{$entity->getEntityTypeId()}_{$entity->bundle()}_add_form") !== FALSE ||
     strpos($form_id, "{$entity->getEntityTypeId()}_{$entity->bundle()}_edit_form") !== FALSE
   ) {
     $hasMetaData = FALSE;
@@ -124,9 +126,15 @@ function ebr_form_alter(&$form, FormStateInterface $form_state, $form_id) {
     }
 
     if ($hasMetaData) {
+      if ($entity->getEntityTypeId() == 'taxonomy_term' && !isset($form['advanced'])) {
+        // @TODO re-evaluate once drupal.org/i/3270626 is merged
+        // @see patch in composer.json
+        $form['advanced'] = [];
+      }
       $form['machine_data'] = [
         '#type' => 'details',
-        '#title' => t('External data'),
+        '#title' => t('Functional data'),
+        '#description' => t('These fields provide and control interactive features for this page.'),
         '#open' => FALSE,
         '#group' => array_key_exists('advanced', $form) ? 'advanced' : NULL,
         '#weight' => 9999,
@@ -140,17 +148,19 @@ function ebr_form_alter(&$form, FormStateInterface $form_state, $form_id) {
 }
 
 /**
- * Prevents UID 1 from deleting entities with "interal_id".
+ * Prevents UID 1 from deleting entities with "internal_id".
  */
 function _ebr_delete_validation(&$form, FormStateInterface $form_state) {
   $entity = $form_state->getFormObject()->getEntity();
   if ($entity->get(EntityBusinessrules::FIELD_INTERNAL_ID)->isEmpty()) {
     return;
   }
+
   $form_state->setError(
-    $form, t('@bundle "@label" can not be deleted because it has an internal ID.', [
-      '@bundle' => $entity->bundle(),
-      '@label' => (string) $entity->label(),
+    $form, t("Can not delete @type @id \"@label\" because its field \"internal ID\" is not empty.", [
+      '@type' => $entity->bundle(),
+      '@id' => $entity->id(),
+      '@label' => $entity->label(),
     ])
   );
 }
@@ -170,6 +180,25 @@ function ebr_entity_access(EntityInterface $entity, $operation, AccountInterface
   }
 
   return AccessResult::neutral();
+}
+
+function ebr_entity_predelete(EntityInterface $entity) {
+  if (!in_array($entity->getEntityTypeId(), \Drupal::service('ebr.service')->getEntityTypes())) {
+    return;
+  }
+  if ($entity->hasField(EntityBusinessrules::FIELD_INTERNAL_ID) &&
+    !$entity->get(EntityBusinessrules::FIELD_INTERNAL_ID)->isEmpty()
+  ) {
+    $message = t("Can not delete @type @id \"@label\" because its field \"internal ID\" is not empty.", [
+      '@type' => $entity->bundle(),
+      '@id' => $entity->id(),
+      '@label' => $entity->label(),
+    ]);
+    \Drupal::messenger()->addError($message);
+    // there currently is no other way to prevent UID 1 from deleting protected nodes via views bulk operation
+    (new RedirectResponse('/admin'))->send();
+    exit();
+  }
 }
 
 /**

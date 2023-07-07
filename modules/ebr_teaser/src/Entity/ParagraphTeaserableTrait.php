@@ -107,16 +107,14 @@ trait ParagraphTeaserableTrait {
    * Shared render function for all fields.
    *
    * Teaserable fields should always be rendered with the view mode of the host entity, even if the field values
-   * are sourced from the referenced entity. This also means that - in case of referenced field - they must be of the
-   * same type.
-   * Special case: if the own field is an (empty) media entity, and the referenced field is an image field,
-   * we try to render the referenced image field with an responsive image style matching the machine name of
-   * the image media entity viewmode.
+   * are sourced from the referenced entity. This also means that - in case of referenced field - they must be of
+   * interchangeable types.
    */
   protected function renderFieldWithReferenceFallback(
     string $viewMode,
     ?FieldItemListInterface $ownField,
-    ?FieldItemListInterface $referencedField): ?array {
+    ?FieldItemListInterface $referencedField
+  ): ?array {
     if (!($ownField instanceof FieldItemListInterface)) {
       return NULL;
     }
@@ -124,22 +122,37 @@ trait ParagraphTeaserableTrait {
       return NULL;
     }
     $ownFieldDefinition = $ownField->getFieldDefinition();
+
+    $displayOptions = $this->entityTypeManager()
+      ->getStorage('entity_view_display')
+      ->load("paragraph.{$this->bundle()}.{$viewMode}")
+        ?->getComponent($ownFieldDefinition->getName());
+    if (is_null($displayOptions)) {
+      return NULL;
+    }
+    $imageViewMode = NULL;
+    // Teaserable paragraphs have an image ratio field, which overrides the default display settings
+    // for the image field, and maps to an media entity view mode.
+    if ($ownFieldDefinition->getName() == 'field_images' &&
+      $displayOptions['type'] == 'entity_reference_entity_view' &&
+      $ownField->getEntity()->hasField('field_image_ratio') &&
+      !$ownField->getEntity()->get('field_image_ratio')->isEmpty()
+    ) {
+      $imageViewMode = $ownField->getEntity()->get('field_image_ratio')->target_id;
+      $displayOptions['settings']['view_mode'] = $imageViewMode;
+    }
+
+
     if (!$ownField->isEmpty()) {
       // Case 1: render own field.
-      $displayOptions = $this->entityTypeManager()
-        ->getStorage('entity_view_display')
-        ->load("paragraph.{$this->bundle()}.{$viewMode}")
-        ?->getComponent($ownFieldDefinition->getName());
-      if (is_null($displayOptions)) {
-        return NULL;
-      }
       $build = $this->viewBuilder()->viewField(
         $ownField,
         $displayOptions
       );
       $build['#is_teaserable'] = TRUE;
       // When fields are rendered in isolation, Drupal sets the '#view_mode' to '_custom'.
-      $build['#view_mode'] = $viewMode;
+      // Therefore we need to re-provide a proper value.
+      $build['#view_mode'] = $imageViewMode ?? $viewMode;
       return $build;
     }
 
@@ -148,13 +161,12 @@ trait ParagraphTeaserableTrait {
     }
 
     $referencedFieldDefinition = $referencedField->getFieldDefinition();
-    if (
-      $ownFieldDefinition->getFieldStorageDefinition()->getSetting('target_type') == 'media' &&
+    if ( $ownFieldDefinition->getFieldStorageDefinition()->getSetting('target_type') == 'media' &&
       $referencedFieldDefinition->getType() == 'image'
     ) {
-      // Special case: If own field is an media entity, and referenced field is an image field,
-      // try to render a responsive image style matching the media entity's view mode.
-      $responsiveImageStyle = \Drupal::config('responsive_image.style')->get($viewMode)?->get('id');
+      // if we need to render a foreign entitie's image field, we assume there is a 1:1 mapping
+      // between media entity view modes and responsive image styles
+      $responsiveImageStyle = \Drupal::config('responsive_image.style')->get($imageViewMode ?? $viewMode)?->get('id');
       if ($responsiveImageStyle) {
         $displayOptions = [
           'label' => 'hidden',
@@ -168,31 +180,23 @@ trait ParagraphTeaserableTrait {
           ->viewField($referencedField, $displayOptions);
         $build['#is_teaserable'] = TRUE;
         $build['#referencing_object'] = $this;
-        // When fields are rendered in isolation, Drupal sets the '#view_mode' to '_custom'.
-        $build['#view_mode'] = $viewMode;
+        $build['#view_mode'] = $imageViewMode ?? $viewMode;
         return $build;
       }
       \Drupal::logger('ebr_teaser')->error("Paragraph host field paragraph.{$this->bundle()}.{$ownFieldDefinition->getName()} has no matching responsive image style '{$viewMode}' for {$this->getReferencedEntity()->getEntityTypeId()}.{$this->getReferencedEntity()->bundle()}.{$referencedFieldDefinition->getName()}");
       return NULL;
     }
 
+    // Fallback variant: Render the field from the referenced entity.
     // This blindly assumes that the referenced field is similar enough to the own field
     // to allow rendering the referenced field with the same field formatter options as the own field.
-    $displayOptions = $this->entityTypeManager()
-      ->getStorage('entity_view_display')
-      ->load("paragraph.{$this->bundle()}.{$viewMode}")
-      ->getComponent($ownFieldDefinition->getName());
-    if (is_null($displayOptions)) {
-      return NULL;
-    }
     $build = $this->viewBuilder()->viewField(
       $referencedField,
       $displayOptions
     );
     $build['#is_teaserable'] = TRUE;
     $build['#referencing_object'] = $this;
-    // When fields are rendered in isolation, Drupal sets the '#view_mode' to '_custom'.
-    $build['#view_mode'] = $viewMode;
+    $build['#view_mode'] = $imageViewMode ?? $viewMode;
     return $build;
   }
 

@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class StableMediaEditLinkDeriver extends DeriverBase implements ContainerDeriverInterface {
 
-  public const STABLE_MEDIA_LINK_WEIGHT = 2000;
+  public const STABLE_MEDIA_LINK_WEIGHT = 2100;
 
   public const STABLE_MEDIA_PREFIX = 'download_';
 
@@ -65,6 +65,7 @@ class StableMediaEditLinkDeriver extends DeriverBase implements ContainerDeriver
         'route_parameters' => ['media' => $media->id()],
         'weight' => self::STABLE_MEDIA_LINK_WEIGHT + $weight,
         'menu_name' => 'editor',
+        'description' => '/libraries/fa6/svgs/regular/file-pdf.svg'
       ] + $base_plugin_definition;
     }
 

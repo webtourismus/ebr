@@ -6,11 +6,13 @@ namespace Drupal\ebr_accommodation_seekda\Entity;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
+use Drupal\ebr\Entity\WidgetableInterface;
+use Drupal\ebr\EntityBusinessrules;
 
 /**
  * Summary of Room.
  */
-class AccommodationSeekda extends AccommodationBase /* implements WidgetableInterface */ {
+class AccommodationSeekda extends AccommodationBase implements WidgetableInterface {
 
   /**
    * The "remote_datasource" field value for entites from Seekda CM.
@@ -48,6 +50,31 @@ class AccommodationSeekda extends AccommodationBase /* implements WidgetableInte
   /**
    * {@inheritDoc}
    */
+  public function getWidgetFieldnames(): array {
+    $result = [];
+    if ($this->get(EntityBusinessrules::FIELD_REMOTE_DATASOURCE)->value == AccommodationSeekda::DATASOURCE &&
+      !$this->get(EntityBusinessrules::FIELD_REMOTE_ID)->isEmpty()
+    ) {
+      foreach ($this->getDefaultWidgets() as $widgetId) {
+        $result[$widgetId] = WidgetableInterface::WIDGET_FIELD_PREFIX . $widgetId;
+      }
+    }
+    return $result;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getWidgetLabel(string $widgetId): ?TranslatableMarkup {
+    if (array_key_exists($widgetId, $this->getWidgetFieldnames())) {
+      return $this->getDefaultWidgetLabel($widgetId);
+    }
+    return NULL;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
   public function getWidgetVariables($widgetType): array {
     return [
       'property_code' => \Drupal::service('seekda.service')->getPropertyCode(),
@@ -55,4 +82,26 @@ class AccommodationSeekda extends AccommodationBase /* implements WidgetableInte
     ];
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  public function getRenderedWidget(string $widgetId, string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
+    $field = $this->getWidgetFieldnames()[$widgetId] ?? NULL;
+    if (empty($field)) {
+      NULL;
+    }
+    $displayOptions = $this->entityTypeManager()
+      ->getStorage('entity_view_display')
+      ->load("node.{$this->bundle()}.{$viewMode}")
+      ?->getComponent($field);
+    if (is_null($displayOptions)) {
+      NULL;
+    }
+    $build = $this->entityTypeManager()->getViewBuilder('node')->viewField(
+      $field,
+      $displayOptions
+    );
+    $build['#widget_type'] = $widgetId;
+    return $build;
+  }
 }

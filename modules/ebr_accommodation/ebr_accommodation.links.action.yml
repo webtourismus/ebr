@@ -1,0 +1,14 @@
+ebr_accommodation.room.link_add:
+  route_name: node.add
+  route_parameters:
+    node_type: room
+  title: 'Create new room'
+  appears_on:
+    - view.room.admin_list
+ebr_accommodation.package.link_add:
+  route_name: node.add
+  route_parameters:
+    node_type: package
+  title: 'Create new package'
+  appears_on:
+    - view.package.admin_list

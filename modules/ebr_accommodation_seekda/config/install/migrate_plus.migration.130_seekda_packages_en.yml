@@ -1,5 +1,5 @@
-id: 110_seekda_rooms_en
-label: '110 - Seekda rooms (english translation)'
+id: 130_seekda_packages_en
+label: '130 - Seekda packages (english translation)'
 migration_group: seekda
 langcode: de
 status: true
@@ -10,37 +10,34 @@ source:
   data_fetcher_plugin: http
   data_parser_plugin: json
   urls:
-    callback: ebr_accommodation_seekda_migration_110_seekda_rooms_en
-  item_selector: /result/rooms
+    callback: ebr_accommodation_seekda_migration_130_seekda_packages_en
+  item_selector: /result/packages
   track_changes: true
   fields:
     -
-      name: room_code
+      name: package_code
       selector: code
     -
-      name: room_title
+      name: package_title
       selector: title
     -
-      name: room_description
+      name: teaser
+      selector: teaser
+    -
+      name: description
       selector: description
-    -
-      name: std_occupancy
-      selector: std_occupancy
-    -
-      name: max_occupancy
-      selector: max_occupancy
   ids:
-    room_code:
+    package_code:
       type: string
 
 process:
   type:
     plugin: default_value
-    default_value: room
+    default_value: package
   title:
     plugin: skip_on_empty
     method: row
-    source: room_title
+    source: package_title
     message: 'Title is not translated.'
   langcode:
     plugin: default_value
@@ -50,8 +47,8 @@ process:
     default_value: de
   nid:
     plugin: migration_lookup
-    source: room_code
-    migration: 100_seekda_rooms_de
+    source: package_code
+    migration: 120_seekda_packages_de
     no_stub: true
   uid:
     plugin: default_value
@@ -65,7 +62,11 @@ process:
   promote:
     plugin: default_value
     default_value: 0
-  body/value: room_description
+  field_subtitle/value: teaser
+  field_subtitle/format:
+    plugin: default_value
+    default_value: basic_html
+  body/value: description
   body/format:
     plugin: default_value
     default_value: basic_html
@@ -75,8 +76,11 @@ destination:
   translations: true
   overwrite_properties:
     - title
+    - field_subtitle
     - body
+
 
 migration_dependencies:
   required:
     - 100_seekda_rooms_de
+    - 120_seekda_packages_de

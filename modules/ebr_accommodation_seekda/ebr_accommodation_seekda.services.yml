@@ -1,4 +1,12 @@
 services:
   seekda.service:
     class: Drupal\ebr_accommodation_seekda\Seekda
-    arguments: ['@entity_type.manager', '@config.factory']
+    arguments:
+      - '@entity_type.manager'
+      - '@config.factory'
+  seekda.migration_package_publish_status:
+    class: Drupal\ebr_accommodation_seekda\EventSubscriber\MigrationPackagePublishStatus
+    tags:
+      - { name: event_subscriber }
+    arguments:
+      - '@entity_type.manager'

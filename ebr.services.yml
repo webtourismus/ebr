@@ -2,3 +2,8 @@ services:
   ebr.service:
     class: Drupal\ebr\EntityBusinessrules
     arguments: ['@entity_type.manager', '@current_user']
+  ebr.entity_clone_event_subscriber:
+    class: Drupal\ebr\EventSubscriber\EbrEntityCloneEventSubscriber
+    arguments: ['@messenger']
+    tags:
+     - { name: event_subscriber }

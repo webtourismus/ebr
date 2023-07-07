@@ -2,4 +2,4 @@ name: 'EBR Interal notes: Admin-only notes for node entities'
 type: module
 description: 'Provides an "internal_notes" field for in the admin sidebar.'
 package: Entity business rules
-core_version_requirement: ^10
+core_version_requirement: ^10.1
