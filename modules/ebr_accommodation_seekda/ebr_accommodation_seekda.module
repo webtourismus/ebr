@@ -150,7 +150,7 @@ function ebr_accommodation_seekda_form_system_site_information_settings_alter(&$
   $form['seekda']['kube_domain'] = [
     '#type' => 'url',
     '#title' => t('KUBE Domain'),
-    '#description' => t('You can find your domain at hotels.kognitiv.com > Booking Engine > Domain Setup.'),
+    '#description' => t('You can find your domain at hotels.kognitiv.com > Booking Engine > Overview > Edit (pencil icon).'),
     '#placeholder' => 'https://booking.your-domain.com',
     '#required' => TRUE,
     '#default_value' => $kubeDomain,

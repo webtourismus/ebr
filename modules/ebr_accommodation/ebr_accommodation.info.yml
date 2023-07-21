@@ -1,6 +1,6 @@
 name: 'EBR Accommodation: Nodes and action links'
 type: module
-description: 'Provides the accommodation related node bundles "room" and "package", an enquiry webform and contextual call-to-action URLs.'
+description: 'Provides the accommodation related node bundles "room" and "package", and contextual call-to-action URLs.'
 package: Entity business rules
 core_version_requirement: ^10.1
 dependencies:

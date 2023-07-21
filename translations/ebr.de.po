@@ -1,0 +1,384 @@
+# $Id$
+#
+# Deutsch translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  modules/contrib/ebr/ebr.module: n/a
+#  modules/contrib/ebr/src/EntityBusinessrules.php: n/a
+#  modules/contrib/ebr/ebr.info.yml: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation/ebr_accommodation.info.yml: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation_casablanca/ebr_accommodation_casablanca.info.yml: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation_easybooking/ebr_accommodation_easybooking.info.yml: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.info.yml: n/a
+#  modules/contrib/ebr/modules/ebr_internal_notes/ebr_internal_notes.info.yml: n/a
+#  modules/contrib/ebr/modules/ebr_popup/ebr_popup.info.yml: n/a
+#  modules/contrib/ebr/modules/ebr_stable_media/ebr_stable_media.info.yml: n/a
+#  modules/contrib/ebr/modules/ebr_teaser/ebr_teaser.info.yml: n/a
+#  modules/contrib/ebr/ebr.permissions.yml: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation/ebr_accommodation.module: n/a
+#  modules/contrib/ebr/modules/ebr_teaser/ebr_teaser.module: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation_casablanca/ebr_accommodation_casablanca.module: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation_easybooking/ebr_accommodation_easybooking.module: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation/ebr_accommodation.links.action.yml: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation/src/Entity/AccommodationBase.php: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation_casablanca/config/schema/ebr_accommodation_casablanca.schema.yml: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation_easybooking/config/schema/ebr_accommodation_easybooking.schema.yml: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation_easybooking/src/Entity/AccommodationEasybooking.php: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation_seekda/config/schema/ebr_accommodation_seekda.schema.yml: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation_seekda/src/Entity/AccommodationSeekda.php: n/a
+#  modules/contrib/ebr/modules/ebr_internal_notes/ebr_internal_notes.module: n/a
+#  modules/contrib/ebr/modules/ebr_popup/ebr_popup.module: n/a
+#  modules/contrib/ebr/modules/ebr_stable_media/ebr_stable_media.module: n/a
+#  modules/contrib/ebr/modules/ebr_teaser/src/Entity/ReadmoreActionTrait.php: n/a
+#  modules/contrib/ebr/src/EventSubscriber/EbrEntityCloneEventSubscriber.php: n/a
+#  modules/contrib/ebr/src/Plugin/Field/FieldFormatter/WidgetStringFormatter.php: n/a
+#  modules/contrib/ebr/src/Plugin/Field/FieldType/ActionLinkItem.php: n/a
+#  modules/contrib/ebr/src/Plugin/Field/FieldType/WidgetStringItem.php: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation_seekda/config/install/migrate_plus.migration.100_seekda_rooms_de.yml: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation_seekda/config/install/migrate_plus.migration.110_seekda_rooms_en.yml: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation_seekda/config/install/migrate_plus.migration.120_seekda_packages_de.yml: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation_seekda/config/install/migrate_plus.migration.130_seekda_packages_en.yml: n/a
+#  modules/contrib/ebr/modules/ebr_accommodation_seekda/config/install/migrate_plus.migration_group.seekda.yml: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2023-07-20 15:01+0200\n"
+"PO-Revision-Date: 2023-07-20 15:01+0200\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Deutsch <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: modules/contrib/ebr/ebr.module:30;47 modules/contrib/ebr/src/EntityBusinessrules.php:113
+msgid "Internal ID"
+msgstr "Interne ID"
+
+#: modules/contrib/ebr/ebr.module:31
+msgid "An unique machine name to mark special entities used elsewhere in code or templates."
+msgstr "Ein einzigartiger Maschinenname um spezielle Daten zu markieren, die im Code oder in Templates verwendet werden."
+
+#: modules/contrib/ebr/ebr.module:45;69
+msgid "In field @label only lowercase letters, numbers, underscore and minus are allowed."
+msgstr "Im Feld @label sind nur Kleinbuchstaben, Ziffern, Unterstrich und Minus erlaubt."
+
+#: modules/contrib/ebr/ebr.module:53;71
+msgid "Remote datasource"
+msgstr "Externe Datenquelle"
+
+#: modules/contrib/ebr/ebr.module:55
+msgid "A machine name to define the remote system used for synching and/or outbound contextual links."
+msgstr "Ein Maschinenname für externe Datenquellen, verwendet zum Synchronisieren oder Verlinken von Daten."
+
+#: modules/contrib/ebr/ebr.module:77
+msgid "Remote ID"
+msgstr "Externe ID"
+
+#: modules/contrib/ebr/ebr.module:78
+msgid "An external identifier to mark content for import synching and/or outbound contextual links."
+msgstr "Ein externer Datenschlüssel um Daten zu synchronisieren und zu verlinken."
+
+#: modules/contrib/ebr/ebr.module:136
+msgid "Functional data"
+msgstr "Technische Daten"
+
+#: modules/contrib/ebr/ebr.module:137
+msgid "These fields provide and control interactive features for this page."
+msgstr "Diese Felder markieren besondere Seiten und steuern interaktive Elemente."
+
+#: modules/contrib/ebr/ebr.module:166;198
+msgid "Can not delete @type @id \"@label\" because its field \"internal ID\" is not empty."
+msgstr "Kann @type @id \"@label\" nicht löschen weil das Feld \"Interne ID\" nicht leer ist."
+
+#: modules/contrib/ebr/ebr.module:218
+msgid "All entities"
+msgstr "Alle Daten"
+
+#: modules/contrib/ebr/ebr.module:219
+msgid "Entities where field \"<code>internal_id</code>\" is not empty can not be deleted."
+msgstr "Daten bei denen Feld \"<code>internal_id</code>\" nicht leer ist können nicht gelöscht werden."
+
+#: modules/contrib/ebr/ebr.info.yml:0
+msgid "Entity business rules"
+msgstr "Entity business rules"
+
+#: modules/contrib/ebr/ebr.info.yml:0
+msgid "Adds base fields \"remote_id\", \"remote_datasource\", \"internal_id\" to nodes, terms and media to provide business rules like contextual action links for entites."
+msgstr "Fügt die Felder \"remote_id\", \"remote_datasource\", \"internal_id\" zu den Datentypen Seiten, Kategorien und Medien hinzu, um besondere Daten zu markieren und interaktive Elemente zu steuern."
+
+#: modules/contrib/ebr/ebr.permissions.yml:0
+msgid "Edit internal id field"
+msgstr "Feld Interne ID bearbeiten"
+
+#: modules/contrib/ebr/ebr.permissions.yml:0
+msgid "View internal id field"
+msgstr "Feld Interne ID anzeigen"
+
+#: modules/contrib/ebr/ebr.permissions.yml:0
+msgid "Edit remote id field"
+msgstr "Feld externe ID bearbeiten"
+
+#: modules/contrib/ebr/ebr.permissions.yml:0
+msgid "View remote id field"
+msgstr "Feld externe ID anzeigen"
+
+#: modules/contrib/ebr/ebr.permissions.yml:0
+msgid "Edit remote datasource field"
+msgstr "Feld externe Datenquelle bearbeiten"
+
+#: modules/contrib/ebr/ebr.permissions.yml:0
+msgid "View remote datasource field"
+msgstr "Feld externe Datenquelle anzeigen"
+
+#: modules/contrib/ebr/modules/ebr_accommodation/ebr_accommodation.module:46
+msgid "If value is not empty, rooms and packages with an remote_id receive a booking link."
+msgstr "Wenn Feld nicht leer ist, erhalten Zimmer und Pauschalen mit externer ID einen Buchungs-Link."
+
+#: modules/contrib/ebr/modules/ebr_accommodation/ebr_accommodation.module:52 modules/contrib/ebr/modules/ebr_teaser/ebr_teaser.module:68
+msgid "Action link @type"
+msgstr "Aktionslink @type"
+
+#: modules/contrib/ebr/modules/ebr_accommodation/ebr_accommodation.module:76;82 modules/contrib/ebr/modules/ebr_accommodation_casablanca/ebr_accommodation_casablanca.module:76 modules/contrib/ebr/modules/ebr_accommodation_easybooking/ebr_accommodation_easybooking.module:97 modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:125
+msgid "Accommodation"
+msgstr "Unterkunft"
+
+#: modules/contrib/ebr/modules/ebr_accommodation/ebr_accommodation.module:77
+msgid "Node types \"<code>room</code>\" and \"<code>package</code>\" with field \"<code>remote_datasource</code>\" filled receive an \"@action\" action button."
+msgstr "Seitentypen \"<code>room</code>\" und \"<code>package</code>\" mit ausgefülltem Feld \"<code>remote_datasource</code>\" erhalten einen \"@action\" Aktions-Button."
+
+#: modules/contrib/ebr/modules/ebr_accommodation/ebr_accommodation.module:83
+msgid "Node types \"<code>room</code>\" and \"<code>package</code>\" with fields \"<code>remote_id</code>\" and \"<code>remote_datasource</code>\" filled receive a \"@action\" action button."
+msgstr "Seitentypen \"<code>room</code>\" und \"<code>package</code>\" mit ausgefülltem Feld \"<code>remote_id</code>\" and \"<code>remote_datasource</code>\" erhalten einen \"@action\" Aktions-Button."
+
+#: modules/contrib/ebr/modules/ebr_accommodation/ebr_accommodation.info.yml:0
+msgid "EBR Accommodation: Nodes and action links"
+msgstr "EBR Accommodation: Seitentypen und Aktions-Links"
+
+#: modules/contrib/ebr/modules/ebr_accommodation/ebr_accommodation.info.yml:0
+msgid "Provides the accommodation related node bundles \"room\" and \"package\", and contextual call-to-action URLs."
+msgstr "Stellt die Unterkunfts-bezogenen Seitentypen \"room\" and \"package\" bereit, und kontext-spezifische Call-To-Action Links."
+
+#: modules/contrib/ebr/modules/ebr_accommodation/ebr_accommodation.links.action.yml:0
+msgid "Create new room"
+msgstr "Neues Zimmer erstellen"
+
+#: modules/contrib/ebr/modules/ebr_accommodation/ebr_accommodation.links.action.yml:0
+msgid "Create new package"
+msgstr "Neue Pauschale erstellen"
+
+#: modules/contrib/ebr/modules/ebr_accommodation/src/Entity/AccommodationBase.php:68
+msgctxt "accommodation"
+msgid "Book"
+msgstr "Buchen"
+
+#: modules/contrib/ebr/modules/ebr_accommodation/src/Entity/AccommodationBase.php:69
+msgid "Enquiry"
+msgstr "Anfrage"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_casablanca/ebr_accommodation_casablanca.module:44 modules/contrib/ebr/modules/ebr_accommodation_easybooking/ebr_accommodation_easybooking.module:46 modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:48
+msgid "If value is \"<code>@remote_datasource</code>\", rooms and packages with an \"<code>remote_id</code>\" receive a booking link."
+msgstr "Wenn Feld \"<code>@remote_datasource</code>\" enthält, erhalten Zimmer und Pauschalen mit \"<code>remote_id</code>\" einen Buchungs-Link."
+
+#: modules/contrib/ebr/modules/ebr_accommodation_casablanca/ebr_accommodation_casablanca.module:51 modules/contrib/ebr/modules/ebr_accommodation_easybooking/ebr_accommodation_easybooking.module:54 modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:60;81
+msgid "@pms @type ID, see <a href=\"@url\" target=\"_blank\">@short_url</a>"
+msgstr "@pms @type ID, siehe <a href=\"@url\" target=\"_blank\">@short_url</a>"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_casablanca/ebr_accommodation_casablanca.module:77
+msgid "Node types \"<code>room</code>\" and \"<code>package</code>\" where field \"<code>remote_datasource</code>\" is \"<code>@remote_datasource</code>\", will receive action links decorated with contextual query parameters for @pms."
+msgstr "Seitentypen \"<code>room</code>\" und \"<code>package</code>\" mit Feld \"<code>remote_datasource</code>\" = \"<code>@remote_datasource</code>\" erhalten Aktions-Links mit kontext-spezifischen Link-Parametern für @pms."
+
+#: modules/contrib/ebr/modules/ebr_accommodation_casablanca/ebr_accommodation_casablanca.module:93;125;134 modules/contrib/ebr/modules/ebr_accommodation_casablanca/config/schema/ebr_accommodation_casablanca.schema.yml:0 modules/contrib/ebr/modules/ebr_accommodation_easybooking/ebr_accommodation_easybooking.module:114;150;159 modules/contrib/ebr/modules/ebr_accommodation_easybooking/config/schema/ebr_accommodation_easybooking.schema.yml:0
+msgid "Web widgets info link"
+msgstr "Web-Widgets Info-Link"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_casablanca/ebr_accommodation_casablanca.module:94 modules/contrib/ebr/modules/ebr_accommodation_easybooking/ebr_accommodation_easybooking.module:115
+msgid "A site provided by @pms, showing IDs of room types and packages. These are used for action links, controlled by field \"<code>remote_id</code>\"."
+msgstr "Eine Webseite von @pms, die IDs von Zimmern und Pauschalen anzeigt. Diese werden für Aktions-Links verwendet, gesteuert vom Feld \"<code>remote_id</code>\"."
+
+#: modules/contrib/ebr/modules/ebr_accommodation_casablanca/ebr_accommodation_casablanca.module:125 modules/contrib/ebr/modules/ebr_accommodation_easybooking/ebr_accommodation_easybooking.module:150 modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:183;189
+msgid "@fieldname must not be empty."
+msgstr "@fieldname darf nicht leer sein."
+
+#: modules/contrib/ebr/modules/ebr_accommodation_casablanca/ebr_accommodation_casablanca.module:132 modules/contrib/ebr/modules/ebr_accommodation_easybooking/ebr_accommodation_easybooking.module:157 modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:203
+msgid "@fieldname must be a link in the form of %url"
+msgstr "@fieldname muss ein Link in der Form %url sein"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_casablanca/ebr_accommodation_casablanca.info.yml:0
+msgid "EBR Accommodation: Casablanca PMS"
+msgstr "EBR Accommodation: Casablanca PMS"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_casablanca/ebr_accommodation_casablanca.info.yml:0
+msgid "Provides contextual call-to-action links for Casablanca PMS entites."
+msgstr "Kontext-spezifische Call-To-Action Links für Casablanca PMS Seiten."
+
+#: modules/contrib/ebr/modules/ebr_accommodation_easybooking/ebr_accommodation_easybooking.module:98 modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:126
+msgid "Node types \"<code>room</code>\" where field \"<code>remote_datasource</code>\" is \"<code>@remote_datasource</code>\", will receive extra fields showing web widgets by @pms."
+msgstr "Seitentyp \"<code>room</code>\" mit Feld \"<code>remote_datasource</code>\" = \"<code>@remote_datasource</code>\" erhalten extra Felder mit Web-Widgets von @pms."
+
+#: modules/contrib/ebr/modules/ebr_accommodation_easybooking/ebr_accommodation_easybooking.info.yml:0
+msgid "Provides contextual call-to-action links for EasyBooking PMS entites."
+msgstr "Kontext-spezifische Call-To-Action Links für EasyBooking PMS Seiten."
+
+#: modules/contrib/ebr/modules/ebr_accommodation_easybooking/config/schema/ebr_accommodation_easybooking.schema.yml:0
+msgid "Customer ID"
+msgstr "Kunden-ID"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_easybooking/config/schema/ebr_accommodation_easybooking.schema.yml:0
+msgid "Serial number"
+msgstr "Seriennr."
+
+#: modules/contrib/ebr/modules/ebr_accommodation_easybooking/src/Entity/AccommodationEasybooking.php:96
+msgid "Prices"
+msgstr "Preise"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_easybooking/src/Entity/AccommodationEasybooking.php:97
+msgid "Availability"
+msgstr "Verfügbarkeit"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_easybooking/src/Entity/AccommodationEasybooking.php:98
+msgid "Comparison of prices"
+msgstr "Preisvergleich"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:143;183;196 modules/contrib/ebr/modules/ebr_accommodation_seekda/config/schema/ebr_accommodation_seekda.schema.yml:0
+msgid "Seekda property code"
+msgstr "Seekda Unterkunfts-Code"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:144
+msgid "You can find your property code at hotels.kognitiv.com, on the top right of the screen, in brackets next to your company name."
+msgstr "Sie finden Ihren Unterkunfts-Code unter hotels.kognitiv.com, rechts oben am Bildschirm, in Klammern neben Ihrem Firmennamen."
+
+#: modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:153
+msgid "You can find your domain at hotels.kognitiv.com > Booking Engine > Overview > Edit (pencil icon)."
+msgstr "Sie finden Ihre Domain hotels.kognitiv.com > Booking Engines > Übersicht > Bearbeiten (Bleistift-Icon)."
+
+#: modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:196
+msgid "In field @label only letters, numbers, underscore and minus are allowed."
+msgstr "Im Feld @label sind nur Buchstaben, Ziffern, Unterstrich und Minus erlaubt."
+
+#: modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:326
+msgid "The following fields are imported from <a href=\":link\" target=\"_blank\">Seekda Channel Manager</a> and must be edited there:"
+msgstr "Die folgenden Felder werden vom <a href=\":link\" target=\"_blank\">Seekda Channel Manager</a> importiert und müssen dort bearbeitet werden:"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:381
+msgid "The import @migration_id on @site_name has failed multiple times. The last successful import was on @date."
+msgstr "Der Import @migration_id auf @site_name ist mehrmals fehlgeschlagen. Der letzte erfolgreiche Import war am @date."
+
+#: modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:391
+msgid "Warning: Migration @migration_id failed"
+msgstr "Warnung: Import @migration_id fehlgeschlagen"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.info.yml:0
+msgid "Provides contextual call-to-action links for Seekda entites."
+msgstr "Kontext-spezifische Call-To-Action Links für Seekda Seiten."
+
+#: modules/contrib/ebr/modules/ebr_accommodation_seekda/src/Entity/AccommodationSeekda.php:46
+msgid "Prices & Availability"
+msgstr "Preise & Verfügbarkeit"
+
+#: modules/contrib/ebr/modules/ebr_internal_notes/ebr_internal_notes.module:23
+msgid "Internal notes"
+msgstr "Interne Notiz"
+
+#: modules/contrib/ebr/modules/ebr_internal_notes/ebr_internal_notes.info.yml:0
+msgid "EBR Interal notes: Admin-only notes for node entities"
+msgstr "EBR Interal notes: Interne Notizen nur für Admins auf allen Seitentypen"
+
+#: modules/contrib/ebr/modules/ebr_internal_notes/ebr_internal_notes.info.yml:0
+msgid "Provides an \"internal_notes\" field for in the admin sidebar."
+msgstr "Erstellt ein \"internal_notes\" Feld in der Admin Seitenleiste."
+
+#: modules/contrib/ebr/modules/ebr_popup/ebr_popup.module:15
+msgid "Popup windows"
+msgstr "Popup-Fenster"
+
+#: modules/contrib/ebr/modules/ebr_popup/ebr_popup.module:16
+msgid "Block content entities where field \"<code>internal_id</code>\" starts with \"<code>@prefix</code>\" generate a link in the editor menu."
+msgstr "Globale Blöcke wo Feld \"<code>internal_id</code>\" mit \"<code>@prefix</code>\" startet erzeugen einen Link im Editor-Menü."
+
+#: modules/contrib/ebr/modules/ebr_popup/ebr_popup.info.yml:0
+msgid "EBR Popup: Content blocks as overlay messages"
+msgstr "EBR Popup: Globale Blöcke als Popup-Fenster"
+
+#: modules/contrib/ebr/modules/ebr_popup/ebr_popup.info.yml:0
+msgid "Provides an UI to create popup windows for important frontend messages."
+msgstr "Ein User-Interface zum Erstellen von wichtigen Besucher-Infos als Popup-Fenster im Frontend."
+
+#: modules/contrib/ebr/modules/ebr_stable_media/ebr_stable_media.module:30;40
+msgid "Media permalinks"
+msgstr "Media Perma-Links"
+
+#: modules/contrib/ebr/modules/ebr_stable_media/ebr_stable_media.module:31
+msgid "Media entities where field \"<code>internal_id</code>\" starts with \"<code>@prefix</code>\" generate a link in the editor menu."
+msgstr "Medien wo Feld \"<code>internal_id</code>\" mit \"<code>@prefix</code>\" startet erzeugen einen Link im Editor-Menü."
+
+#: modules/contrib/ebr/modules/ebr_stable_media/ebr_stable_media.module:41
+msgid "A hint how to use those permalinks is shown in the media edit form."
+msgstr "Ein Hinweis zur Verwendung der Perma-Links wird in der Medien-Bearbeitungsmaske angezeigt."
+
+#: modules/contrib/ebr/modules/ebr_stable_media/ebr_stable_media.module:68
+msgid "Use the URL <input size=\"23\" readonly value=\"@url\" class=\"text-center border-none bg-transparent p-0 text-[unset]\"> to create permalinks to this document. Permalinks never change, even after uploading a new file."
+msgstr "Verwenden Sie den Perma-Link <input size=\"23\" readonly value=\"@url\" class=\"text-center border-none bg-transparent p-0 text-[unset]\"> für dieses Dokument. Perma-Links ändern sich nie, auch dann nicht, wenn man eine neue Datei hochlädt."
+
+#: modules/contrib/ebr/modules/ebr_stable_media/ebr_stable_media.info.yml:0
+msgid "EBR Stable Media: Permalinks for media entities"
+msgstr "EBR Stable Media: Perma-Links für Medien"
+
+#: modules/contrib/ebr/modules/ebr_stable_media/ebr_stable_media.info.yml:0
+msgid "Provides an UI to create stable download links for PDF documents and similar media."
+msgstr "Ein User-Interface um unveränderliche Download-Links zu erzeugen, für PDF Dokumente und ähnliche Medien."
+
+#: modules/contrib/ebr/modules/ebr_teaser/ebr_teaser.info.yml:0
+msgid "EBR Teaser: Teaserable content entities"
+msgstr "EBR Teaser: Vorschau-Templates für Inhalte"
+
+#: modules/contrib/ebr/modules/ebr_teaser/ebr_teaser.info.yml:0
+msgid "Provides templating tools to create reusable designs for teaser-like content entity templates"
+msgstr "Ein Werkzeug für wiederverwendbare Templates für Inhalte mit Vorschau-Ansicht"
+
+#: modules/contrib/ebr/src/EntityBusinessrules.php:81
+msgid "Content with special rules"
+msgstr "Inhalt mit besonderen Regeln"
+
+#: modules/contrib/ebr/src/EntityBusinessrules.php:1
+msgid "List of special content entities"
+msgstr "Liste mit besonderen Inhalten"
+
+#: modules/contrib/ebr/src/EventSubscriber/EbrEntityCloneEventSubscriber.php:50
+msgid "The source field @field_name was \"%value\". This value has been removed from the clone."
+msgstr "Der Wert Quell-Feldes @field_name war \"%value\". Dieser Wert wurde im Klon gelöscht."
+
+#: modules/contrib/ebr/src/Plugin/Field/FieldFormatter/WidgetStringFormatter.php:10
+msgid "Web widget source code"
+msgstr "Web-Widget Quellcode"
+
+#: modules/contrib/ebr/src/Plugin/Field/FieldType/ActionLinkItem.php:10
+msgid "Action link"
+msgstr "Aktionslink"
+
+#: modules/contrib/ebr/src/Plugin/Field/FieldType/ActionLinkItem.php:10
+msgid "A computed, contextual action link."
+msgstr "Ein sich automatisch anpassender Aktionslink."
+
+#: modules/contrib/ebr/src/Plugin/Field/FieldType/WidgetStringItem.php:10
+msgid "Web widget"
+msgstr "Web-Widget"
+
+#: modules/contrib/ebr/src/Plugin/Field/FieldType/WidgetStringItem.php:10
+msgid "A computed, contextual web widget."
+msgstr "Ein sich automatisch anpassendes Web-Widget"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_seekda/config/install/migrate_plus.migration_group.seekda.yml:0
+msgid "Seekda import"
+msgstr "Seekda Import"
+
+#: Custom
+msgid "Book online"
+msgstr "Online buchen"
+
+#: Custom
+msgid "Search room"
+msgstr "Zimmer suchen"

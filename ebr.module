@@ -145,6 +145,12 @@ function ebr_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   if (strpos($form_id, "{$entity->getEntityTypeId()}_{$entity->bundle()}_delete_form") !== FALSE) {
     $form['#validate'][] = '_ebr_delete_validation';
   }
+
+  if (isset($form['actions']['delete']) &&
+      ebr_entity_access($entity, 'delete',\Drupal::currentUser()) == AccessResult::forbidden()
+  ) {
+    $form['actions']['delete']['#access'] = FALSE;
+  }
 }
 
 /**
