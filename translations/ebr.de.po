@@ -382,3 +382,7 @@ msgstr "Online buchen"
 #: Custom
 msgid "Search room"
 msgstr "Zimmer suchen"
+
+#: modules/contrib/ebr/ebr.module
+msgid "The node where field \"<code>internal_id</code>\" = \"<code>@action</code>\" is used as target for that action button."
+msgstr "Die Seite mit Feld \"<code>internal_id</code>\" = \"<code>@action</code>\" wird als Ziel für diesen Aktions-Button verwendet."

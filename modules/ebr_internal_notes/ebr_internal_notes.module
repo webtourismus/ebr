@@ -10,6 +10,7 @@ declare(strict_types = 1);
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\ebr\EntityBusinessrules;
 
 /**
  * Implements hook_entity_base_field_info().
@@ -19,7 +20,7 @@ function ebr_internal_notes_entity_base_field_info(EntityTypeInterface $entity_t
     return [];
   }
   $fields = [];
-  $fields['internal_notes'] = BaseFieldDefinition::create('string_long')
+  $fields[EntityBusinessrules::FIELD_INTERAL_NOTES] = BaseFieldDefinition::create('string_long')
     ->setLabel(t('Internal notes'))
     ->setTranslatable(FALSE)
     ->setRevisionable(TRUE)
@@ -47,7 +48,7 @@ function ebr_internal_notes_form_alter(&$form, FormStateInterface $form_state, $
     return;
   }
 
-  if (array_key_exists('internal_notes', $form)) {
-    $form['internal_notes']['#group'] = 'meta';
+  if (array_key_exists(EntityBusinessrules::FIELD_INTERAL_NOTES, $form)) {
+    $form[EntityBusinessrules::FIELD_INTERAL_NOTES]['#group'] = 'meta';
   }
 }

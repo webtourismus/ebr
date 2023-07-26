@@ -39,6 +39,13 @@ class EntityBusinessrules {
   public const FIELD_REMOTE_DATASOURCE = 'remote_datasource';
 
   /**
+   * The interal_notes field name.
+   *
+   * @see ebr_interal_nodes.module
+   */
+  public const FIELD_INTERAL_NOTES = 'internal_notes';
+
+  /**
    * The current user.
    */
   protected AccountInterface $currentUser;

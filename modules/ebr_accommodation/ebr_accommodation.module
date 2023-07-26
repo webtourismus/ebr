@@ -82,4 +82,16 @@ function ebr_accommodation_form_system_site_information_settings_alter(&$form, $
     t('Accommodation'),
     t('Node types "<code>room</code>" and "<code>package</code>" with fields "<code>remote_id</code>" and "<code>remote_datasource</code>" filled receive a "@action" action button.', ['@action' => AccommodationBase::getDefaultActionLabel(AccommodationBase::ACTION_BOOK)]),
   );
+  \Drupal::service('ebr.service')->renderRule(
+    $form,
+    'accommodation',
+    t('Accommodation'),
+    t('The node where field "<code>internal_id</code>" = "<code>@action</code>" is used as target for that action button.', ['@action' => AccommodationBase::ACTION_ENQUIRY]),
+  );
+  \Drupal::service('ebr.service')->renderRule(
+    $form,
+    'accommodation',
+    t('Accommodation'),
+    t('The node where field "<code>internal_id</code>" = "<code>@action</code>" is used as target for that action button.', ['@action' => AccommodationBase::ACTION_BOOK]),
+  );
 }
