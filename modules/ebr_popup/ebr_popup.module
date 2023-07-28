@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 use Drupal\ebr_popup\Plugin\Derivative\PopupEditLinkDeriver;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\block_content\BlockContentForm;
 
 /**
  * Implements hook_form_FORM_ID_alter().
@@ -29,4 +31,22 @@ function ebr_popup_entity_base_field_info_alter(&$fields, EntityTypeInterface $e
     return;
   }
   $fields['status']->setDisplayConfigurable('form', TRUE);
+  $fields['uuid']->setDisplayConfigurable('form', TRUE);
+}
+
+function ebr_popup_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (!($form_state->getFormObject() instanceof BlockContentForm)) {
+    return;
+  }
+  if (!array_key_exists('uuid', $form)) {
+    return;
+  }
+  if (!in_array('administrator', \Drupal::currentUser()->getRoles())) {
+    $form['uuid']['#access'] = FALSE;
+  }
+  $form['uuid']['#group'] = 'machine_data';
+  $form['uuid']['#access'] = TRUE;
+  $form['uuid']['widget'][0]['value']['#disabled'] = FALSE;
+  $form['uuid']['widget'][0]['value']['#attributes']['readonly'] = 'readonly';
+  $form['uuid']['widget'][0]['value']['#description'] = t('Do <b><u>not</u></b> edit. Change <b><u>only</u></b> to sync between dev and prod environment. Use the browser\'s Web developer tool to remove <tt>readonly</tt> attribute in HTML form source if you really need to change this field.');
 }

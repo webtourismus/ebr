@@ -22,6 +22,8 @@ These fields are used by various business rules:
   * Any module using this field should also implement hook_form_system_site_information_settings_alter().
   * See ebr_stable_mediahook_form_system_site_information_settings_alter() for an example.
 * 3rd party modules might use remote_datasource and remote_id in conjunction with migrate module for external data synching.
+* Twig function `ebr`  
+  To get for EBR entities by `internal_id` in Twig templates, e.g. `{{ ebr('node', 'enquiry')|entity_link }}`
 
 Two interfaces are declaring common features based on those fields:
 * Actionable Interface  
@@ -45,3 +47,13 @@ Provides node bundles "room" and "package", base fields and contextual call-to-a
 EBR Stable media (sub module)
 ----------------------------
 Provides permalinks and admin UI helpers for frequently updated, downloadable media content entites like price lists or daily offers.
+
+EBR Internal notes (sub module)
+----------------------------
+Adds base field "internal_notes" for notes visible only in administrative interface.
+
+EBR Popup windows (sub module)
+----------------------------
+Custom content blocks with an `internal_id` starting with `popup_` are added to the editor toolbar menu.  
+Publish and unpublish checkbox enabled for custom content blocks.  
+Added UUID field widget for block_content for administrators.

@@ -65,7 +65,7 @@ function ebr_stable_media_form_alter(&$form, FormStateInterface $form_state, $fo
     '#message_list' => [
       'info' => [
         // phpcs:disable
-        t("Use the URL <input size=\"23\" readonly value=\"@url\" class=\"text-center border-none bg-transparent p-0 text-[unset]\"> to create permalinks to this document. Permalinks never change, even after uploading a new file.",
+        t("Use the URL <span class=\"select-all inline-block border border-current border-solid px-1 nowrap \">@url</span> to create permalinks to this document. Permalinks never change, even after uploading a new file.",
           ['@url' => "/media/{$entity->id()}/download?inline"],
         ),
         // phpcs:enable

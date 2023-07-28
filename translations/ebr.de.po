@@ -320,8 +320,8 @@ msgid "A hint how to use those permalinks is shown in the media edit form."
 msgstr "Ein Hinweis zur Verwendung der Perma-Links wird in der Medien-Bearbeitungsmaske angezeigt."
 
 #: modules/contrib/ebr/modules/ebr_stable_media/ebr_stable_media.module:68
-msgid "Use the URL <input size=\"23\" readonly value=\"@url\" class=\"text-center border-none bg-transparent p-0 text-[unset]\"> to create permalinks to this document. Permalinks never change, even after uploading a new file."
-msgstr "Verwenden Sie den Perma-Link <input size=\"23\" readonly value=\"@url\" class=\"text-center border-none bg-transparent p-0 text-[unset]\"> für dieses Dokument. Perma-Links ändern sich nie, auch dann nicht, wenn man eine neue Datei hochlädt."
+msgid "Use the URL <span class=\"select-all inline-block border border-current border-solid px-1 nowrap \">@url</span> to create permalinks to this document. Permalinks never change, even after uploading a new file."
+msgstr "Verwenden Sie den Perma-Link <span class=\"select-all inline-block border border-current border-solid px-1 nowrap \">@url</span> für dieses Dokument. Perma-Links ändern sich nie, auch dann nicht, wenn man eine neue Datei hochlädt."
 
 #: modules/contrib/ebr/modules/ebr_stable_media/ebr_stable_media.info.yml:0
 msgid "EBR Stable Media: Permalinks for media entities"

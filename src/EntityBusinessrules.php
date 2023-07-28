@@ -4,8 +4,9 @@ declare(strict_types = 1);
 
 namespace Drupal\ebr;
 
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
@@ -46,22 +47,12 @@ class EntityBusinessrules {
   public const FIELD_INTERAL_NOTES = 'internal_notes';
 
   /**
-   * The current user.
-   */
-  protected AccountInterface $currentUser;
-
-  /**
-   * The entity type manager.
-   */
-  protected EntityTypeManagerInterface $entityTypeManager;
-
-  /**
    * The constructor.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, AccountInterface $current_user) {
-    $this->entityTypeManager = $entity_type_manager;
-    $this->currentUser = $current_user;
-  }
+  public function __construct(
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected EntityRepositoryInterface $entityRepository,
+  ) { }
 
   /**
    * Returns entity types having fields for business rules.
@@ -175,4 +166,29 @@ class EntityBusinessrules {
     $systemSiteInformationSettingsForm['entity_businessrules']['rules'][$ruleId]['item_list']['#items'][] = $ruleDescription;
   }
 
+  /**
+   * Returns the entity for the given interal_id.
+   *
+   * @param string $entityTypeId
+   *   The entity type.
+   * @param string $internalId
+   *   The internal_id.
+   * @param string $language
+   *   The language code for the entity. Defaults to current content language.
+   * @return EntityInterface|null
+   */
+  public function getEntity(string $entityTypeId, string $internalId, string $langCode = NULL): ?EntityInterface {
+    if (!in_array($entityTypeId, $this->getEntityTypes()) || empty($entityTypeId) || empty($internalId)) {
+      return NULL;
+    }
+    $entities = $this->entityTypeManager->getStorage($entityTypeId)->loadByProperties([
+      'internal_id' => $internalId,
+    ]);
+    ksort($entities, SORT_NUMERIC);
+    $entity = reset($entities);
+    if (!($entity instanceof EntityInterface)) {
+      return NULL;
+    }
+    return $this->entityRepository->getTranslationFromContext($entity, $langCode);
+  }
 }

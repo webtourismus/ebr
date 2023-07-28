@@ -1,9 +1,14 @@
 services:
   ebr.service:
     class: Drupal\ebr\EntityBusinessrules
-    arguments: ['@entity_type.manager', '@current_user']
+    arguments: ['@entity_type.manager', '@entity.repository']
   ebr.entity_clone_event_subscriber:
     class: Drupal\ebr\EventSubscriber\EbrEntityCloneEventSubscriber
     arguments: ['@messenger']
     tags:
      - { name: event_subscriber }
+  ebr.twig_extension:
+    class: Drupal\ebr\Twig\EbrTwigExtension
+    arguments: ['@ebr.service']
+    tags:
+      - { name: twig.extension }
