@@ -3,3 +3,5 @@ type: module
 description: 'Provides an "internal_notes" field for in the admin sidebar.'
 package: Entity business rules
 core_version_requirement: ^10.1
+dependencies:
+  - ebr:ebr
