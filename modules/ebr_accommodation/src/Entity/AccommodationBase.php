@@ -72,14 +72,35 @@ class AccommodationBase extends Node implements ActionableInterface, TeaserableI
   }
 
   /**
+   * @inheritDoc
+   */
+  public function getActionFieldnames(): array {
+    $actions = $this->getDefaultActions();
+    $result = [];
+    foreach($actions as $action) {
+      if (!empty($this->getActionUrl($action))) {
+        $result[$action] = ActionableInterface::ACTION_FIELD_PREFIX . $action;
+      }
+    }
+    return $result;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getActionLabel(string $actionId): TranslatableMarkup|string|NULL {
+    if (!empty($this->getActionUrl($actionId))) {
+      return $this->getDefaultActionLabel($actionId);
+    }
+    return NULL;
+  }
+
+  /**
    * {@inheritDoc}
    */
   public function getActionUrl(string $actionId): ?Url {
     if (array_key_exists($actionId, $this->actionUrls)) {
       return $this->actionUrls[$actionId];
-    }
-    if (!in_array($actionId, $this->getDefaultActions())) {
-      return $this->actionUrls[$actionId] = NULL;
     }
     if (in_array($actionId, $this->getReadmoreActions())) {
       return $this->getReadmoreActionUrl($actionId);
@@ -104,7 +125,7 @@ class AccommodationBase extends Node implements ActionableInterface, TeaserableI
     if (!($node instanceof NodeInterface)) {
       return $this->actionUrls[$actionId] = NULL;
     }
-    return $this->actionUrls[$actionId] = Url::fromRoute(
+    $this->actionUrls[$actionId] = Url::fromRoute(
       'entity.node.canonical',
       [
         'node' => $node->id(),
@@ -123,6 +144,7 @@ class AccommodationBase extends Node implements ActionableInterface, TeaserableI
         ],
       ],
     );
+    return $this->actionUrls[$actionId];
   }
 
 }

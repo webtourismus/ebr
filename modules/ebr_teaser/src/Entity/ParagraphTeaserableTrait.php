@@ -297,57 +297,106 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
-   * Shim for \Drupal\ebr\Entity\ActionableInterface::getActionFieldnames().
-   *
-   * Paragraphs do not implement ActionableInterface, but their referenced
-   * entities might do so. Therefore we provide passthrough functions for
-   * some actionable methods for usage in Twig templates.
+   * {@inheritDoc}
+   */
+  public static function getDefaultActions(): array {
+    return [ReadmoreActionableInterface::ACTION_READMORE];
+  }
+
+    /**
+   * {@inheritDoc}
+   */
+  public static function getDefaultActionLabel($actionId): TranslatableMarkup|string|NULL {
+    return match ($actionId) {
+      ReadmoreActionableInterface::ACTION_READMORE => new TranslatableMarkup('Details'),
+      default => NULL,
+    };
+  }
+
+  /**
+   * @inheritDoc
    */
   public function getActionFieldnames(): array {
     $result = [];
     if ($this->getReferencedEntity() instanceof ActionableInterface) {
       $result = $this->getReferencedEntity()->getActionFieldnames();
-      // Do not use the read more action, because paragraphs have their own "field_link".
-      if (array_key_exists(ReadmoreActionableInterface::ACTION_READMORE, $result)) {
-        unset($result[ReadmoreActionableInterface::ACTION_READMORE]);
-      }
+    }
+    // Do not use the referenced read more action, because paragraphs have their own "field_link",
+    // which might have extra query params.
+    if (array_key_exists(ReadmoreActionableInterface::ACTION_READMORE, $result)) {
+      unset($result[ReadmoreActionableInterface::ACTION_READMORE]);
+    }
+    if (!$this->getReferencingField()->isEmpty()) {
+      $result[ReadmoreActionableInterface::ACTION_READMORE] = $this->getReferencingField()->getName();
     }
     return $result;
   }
 
   /**
-   * Shim for \Drupal\ebr\Entity\ActionableInterface::getActionLabel().
-   *
-   * Paragraphs do not implement ActionableInterface, but their referenced
-   * entities might do so. Therefore we provide passthrough functions for
-   * some actionable methods for usage in Twig templates.
+   * @inheritDoc
    */
   public function getActionLabel(string $actionId): TranslatableMarkup|string|NULL {
     if ($actionId != ReadmoreActionableInterface::ACTION_READMORE && $this->getReferencedEntity() instanceof ActionableInterface) {
       return $this->getReferencedEntity()->getActionLabel($actionId);
     }
-    return NULL;
-  }
-
-  /**
-   * Shim for \Drupal\ebr\Entity\ActionableInterface::getActionUrl().
-   *
-   * Paragraphs do not implement ActionableInterface, but their referenced
-   * entities might do so. Therefore we provide passthrough functions for
-   * some actionable methods for usage in Twig templates.
-   */
-  public function getActionUrl(string $actionId): ?Url {
-    if ($actionId != ReadmoreActionableInterface::ACTION_READMORE && $this->getReferencedEntity() instanceof ActionableInterface) {
-      return $this->getReferencedEntity()->getActionUrl($actionId);
+    if ($actionId == ReadmoreActionableInterface::ACTION_READMORE && !$this->getReferencingField()->isEmpty()) {
+      return $this->getReferencingField()->first()->getTitle() ?? new TranslatableMarkup('Details');
     }
     return NULL;
   }
 
   /**
-   * Returns an call-to-action as render array.
+   * @inheritDoc
+   */
+  public function getActionUrl(string $actionId): ?Url {
+    if ($actionId != ReadmoreActionableInterface::ACTION_READMORE && $this->getReferencedEntity() instanceof ActionableInterface) {
+      return $this->getReferencedEntity()->getActionUrl($actionId);
+    }
+    if ($actionId == ReadmoreActionableInterface::ACTION_READMORE && !$this->getReferencingField()->isEmpty()) {
+      $url = $this->getReferencingField()->first()->getUrl();
+      $url->setOption('attributes', [
+        'data-action-link-entity' => $this->getReferencedEntity()?->getEntityTypeId() ?? $this->getEntityTypeId(),
+        'data-action-link-bundle' => $this->getReferencedEntity()?->getEntityTypeId() ?? $this->bundle(),
+        'data-action-link-type' => $actionId,
+        'class' => [
+          "action-link-{$actionId}",
+        ],
+      ]);
+      return $url;
+    }
+    return NULL;
+  }
+
+  /**
+   * @inheritDoc
+   *
+   * Rule: Suppressing the primary action "readmore" == suppressing "field_link" will also suppress other action links.
    */
   public function getRenderedAction(string $actionId, string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
-    if ($actionId != ReadmoreActionableInterface::ACTION_READMORE && $this->getReferencedEntity() instanceof ActionableInterface) {
+    $fieldName = $this->getActionFieldnames()[$actionId] ?? NULL;
+    if (empty($fieldName) || $this->isFieldSuppressed($this->getReferencingField()->getName())) {
+      return NULL;
+    }
+    if ($actionId == ReadmoreActionableInterface::ACTION_READMORE && !$this->getReferencingField()->isEmpty()) {
+      $displayOptions = $this->entityTypeManager()
+        ->getStorage('entity_view_display')
+        ->load("paragraph.{$this->bundle()}.{$viewMode}")
+        ?->getComponent($fieldName);
+      if (is_null($displayOptions)) {
+        return NULL;
+      }
+      $build = $this->viewBuilder()->viewField(
+        $this->get($fieldName),
+        $displayOptions
+      );
+      $build[0]['options']['attributes']['class'][] = "action-link-{$actionId}";
+      $build[0]['options']['attributes']['data-action-link-entity'] = $this->getReferencedEntity()?->getEntityTypeId() ?? $this->getEntityTypeId();
+      $build[0]['options']['attributes']['data-action-link-bundle'] = $this->getReferencedEntity()?->getEntityTypeId() ?? $this->bundle();
+      $build[0]['options']['attributes']['data-action-link-type'] = $actionId;
+      $build['#link_action_type'] = $actionId;
+      return $build;
+    }
+    if ($this->getReferencedEntity() instanceof ActionableInterface) {
       return $this->getReferencedEntity()->getRenderedAction($actionId, $viewMode);
     }
     return NULL;

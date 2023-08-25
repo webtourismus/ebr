@@ -91,7 +91,7 @@ trait ReadmoreActionTrait {
   public function getRenderedAction(string $actionId, string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
     $fieldName = $this->getActionFieldnames()[$actionId] ?? NULL;
     if (empty($fieldName)) {
-      NULL;
+      return NULL;
     }
     $displayOptions = $this->entityTypeManager()
       ->getStorage('entity_view_display')

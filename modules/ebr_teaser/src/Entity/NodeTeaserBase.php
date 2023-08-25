@@ -13,5 +13,4 @@ use Drupal\node\Entity\Node;
 class NodeTeaserBase extends Node implements TeaserableInterface, ActionableInterface {
   use NodeTeaserableTrait;
   use ReadmoreActionTrait;
-
 }

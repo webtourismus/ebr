@@ -7,6 +7,7 @@ namespace Drupal\ebr_accommodation\PathProcessor;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\PathProcessor\OutboundPathProcessorInterface;
 use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\Core\Url;
 use Drupal\ebr\Entity\ActionableInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -59,6 +60,9 @@ class OutboundPathProcessor implements OutboundPathProcessorInterface {
     $actionUrl = NULL;
     foreach ($contextNode->getActionFieldnames() as $actionId => $actionField) {
       $actionUrl = $contextNode->getActionUrl($actionId);
+      if (!($actionUrl instanceof Url)) {
+        return $path;
+      }
       if (ltrim($path, '/') == $actionUrl->getInternalPath()) {
         if ($bubbleable_metadata) {
           $bubbleable_metadata->addCacheableDependency($contextNode);
