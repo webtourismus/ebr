@@ -386,3 +386,27 @@ msgstr "Zimmer suchen"
 #: modules/contrib/ebr/ebr.module
 msgid "The node where field \"<code>internal_id</code>\" = \"<code>@action</code>\" is used as target for that action button."
 msgstr "Die Seite mit Feld \"<code>internal_id</code>\" = \"<code>@action</code>\" wird als Ziel für diesen Aktions-Button verwendet."
+
+#: Custom
+msgid "Gift card"
+msgstr "Gutschein"
+
+#: Custom
+msgid "Giftcard"
+msgstr "Gutschein"
+
+#: Custom
+msgid "Gift cards"
+msgstr "Gutscheine"
+
+#: Custom
+msgid "Giftcards"
+msgstr "Gutscheine"
+
+#: Custom
+msgid "Menu"
+msgstr "Menü"
+
+#: Custom
+msgid "Enquire"
+msgstr "Anfragen"
