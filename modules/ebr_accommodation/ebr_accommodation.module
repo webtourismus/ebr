@@ -8,6 +8,8 @@
 declare(strict_types = 1);
 
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
+use Drupal\ebr_accommodation\Entity\Room;
+use Drupal\ebr_accommodation\Entity\Package;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -19,10 +21,10 @@ use Drupal\ebr\Entity\ActionableInterface;
  */
 function ebr_accommodation_entity_bundle_info_alter(array &$bundles): void {
   if (isset($bundles['node'][AccommodationBase::BUNDLE_ROOM])) {
-    $bundles['node'][AccommodationBase::BUNDLE_ROOM]['class'] = AccommodationBase::class;
+    $bundles['node'][AccommodationBase::BUNDLE_ROOM]['class'] = Room::class;
   }
   if (isset($bundles['node'][AccommodationBase::BUNDLE_PACKAGE])) {
-    $bundles['node'][AccommodationBase::BUNDLE_PACKAGE]['class'] = AccommodationBase::class;
+    $bundles['node'][AccommodationBase::BUNDLE_PACKAGE]['class'] = Package::class;
   }
 }
 

@@ -33,7 +33,7 @@ trait ParagraphTeaserableTrait {
    * {@inheritDoc}
    */
   public function isTeaserableViewmode(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): bool {
-    // A paragraph teaserable'ness is defined on bunble level, not on view mode level.
+    // A paragraph teaserable'ness is defined on bundle level, not on view mode level.
     return TRUE;
   }
 

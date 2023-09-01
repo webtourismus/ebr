@@ -22,6 +22,7 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\ebr\Entity\ActionableInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\ebr_teaser\Entity\ReadmoreActionableInterface;
+use Drupal\ebr\Entity\ProductableInterface;
 
 /**
  * Implements hook_entity_bundle_info_alter().
@@ -141,6 +142,14 @@ function ebr_teaser_entity_view_alter(array &$build, EntityInterface $entity, En
     }
     if ($entity->getTeaserTextField() instanceof FieldItemListInterface) {
       $build[$entity->getTeaserTextField()->getName()] = $entity->getRenderedTeaserText($viewMode);
+    }
+    if ($entity instanceof ProductableInterface && !empty($entity->getProductFieldNames())) {
+      foreach ($entity->getProductFieldNames() as $fieldName) {
+        $renderArray = $entity->getRenderedProductField($fieldName, $viewMode);
+        if (!empty($renderArray)) {
+          $build[$fieldName] = $renderArray;
+        }
+      }
     }
   }
 }

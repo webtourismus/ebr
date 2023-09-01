@@ -7,6 +7,7 @@ namespace Drupal\ebr_accommodation\Entity;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\ebr\Entity\ActionableInterface;
+use Drupal\ebr\Entity\ProductableInterface;
 use Drupal\ebr\EntityBusinessrules;
 use Drupal\ebr_teaser\Entity\ReadmoreActionTrait;
 use Drupal\ebr_teaser\Entity\NodeTeaserableTrait;
@@ -17,7 +18,7 @@ use Drupal\node\NodeInterface;
 /**
  * Business rules for accomodation node bundles "room" and "package".
  */
-class AccommodationBase extends Node implements ActionableInterface, TeaserableInterface {
+abstract class AccommodationBase extends Node implements ActionableInterface, TeaserableInterface, ProductableInterface {
   use NodeTeaserableTrait;
   use ReadmoreActionTrait {
     getDefaultActions as protected getReadmoreActions;

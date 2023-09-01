@@ -12,7 +12,7 @@ use Drupal\ebr\EntityBusinessrules;
 /**
  * Summary of Room.
  */
-class AccommodationSeekda extends AccommodationBase implements WidgetableInterface {
+abstract class AccommodationSeekda extends AccommodationBase implements WidgetableInterface {
 
   /**
    * The "remote_datasource" field value for entites from Seekda CM.

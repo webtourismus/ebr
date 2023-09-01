@@ -9,6 +9,8 @@ declare(strict_types = 1);
 
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
 use Drupal\ebr_accommodation_seekda\Entity\AccommodationSeekda;
+use Drupal\ebr_accommodation_seekda\Entity\RoomSeekda;
+use Drupal\ebr_accommodation_seekda\Entity\PackageSeekda;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\Core\Form\FormStateInterface;
@@ -24,10 +26,10 @@ use Drupal\Core\Field\BaseFieldDefinition;
  */
 function ebr_accommodation_seekda_entity_bundle_info_alter(array &$bundles): void {
   if (isset($bundles['node'][AccommodationBase::BUNDLE_ROOM])) {
-    $bundles['node'][AccommodationBase::BUNDLE_ROOM]['class'] = AccommodationSeekda::class;
+    $bundles['node'][AccommodationBase::BUNDLE_ROOM]['class'] = RoomSeekda::class;
   }
   if (isset($bundles['node'][AccommodationBase::BUNDLE_PACKAGE])) {
-    $bundles['node'][AccommodationBase::BUNDLE_PACKAGE]['class'] = AccommodationSeekda::class;
+    $bundles['node'][AccommodationBase::BUNDLE_PACKAGE]['class'] = PackageSeekda::class;
   }
 }
 

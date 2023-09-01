@@ -10,9 +10,9 @@ use Drupal\ebr\EntityBusinessrules;
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
 
 /**
- * Summary of Room.
- */
-class AccommodationEasybooking extends AccommodationBase implements WidgetableInterface {
+* Business rules for accomodation node bundles "room" and "package" with Easybooking PMS.
+  */
+abstract class AccommodationEasybooking extends AccommodationBase implements WidgetableInterface {
 
   /**
    * The "remote_datasource" field value for entites from EasyBooking PMS.

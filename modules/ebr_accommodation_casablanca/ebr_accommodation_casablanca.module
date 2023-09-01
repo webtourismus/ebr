@@ -9,6 +9,8 @@ declare(strict_types = 1);
 
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
 use Drupal\ebr_accommodation_casablanca\Entity\AccommodationCasablanca;
+use Drupal\ebr_accommodation_casablanca\Entity\RoomCasablanca;
+use Drupal\ebr_accommodation_casablanca\Entity\PackageCasablanca;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\Core\Form\FormStateInterface;
@@ -20,10 +22,10 @@ use Drupal\ebr\EntityBusinessrules;
  */
 function ebr_accommodation_casablanca_entity_bundle_info_alter(array &$bundles): void {
   if (isset($bundles['node'][AccommodationBase::BUNDLE_ROOM])) {
-    $bundles['node'][AccommodationBase::BUNDLE_ROOM]['class'] = AccommodationCasablanca::class;
+    $bundles['node'][AccommodationBase::BUNDLE_ROOM]['class'] = RoomCasablanca::class;
   }
   if (isset($bundles['node'][AccommodationBase::BUNDLE_PACKAGE])) {
-    $bundles['node'][AccommodationBase::BUNDLE_PACKAGE]['class'] = AccommodationCasablanca::class;
+    $bundles['node'][AccommodationBase::BUNDLE_PACKAGE]['class'] = PackageCasablanca::class;
   }
 }
 

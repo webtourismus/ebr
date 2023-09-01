@@ -9,9 +9,9 @@ use Drupal\ebr_accommodation\Entity\AccommodationBase;
 use Drupal\Core\Url;
 
 /**
- * Summary of Room.
+ * Business rules for accomodation node bundles "room" and "package" with Casablanca PMS.
  */
-class AccommodationCasablanca extends AccommodationBase {
+abstract class AccommodationCasablanca extends AccommodationBase {
 
   /**
    * The "remote_datasource" field value for entites from Casablanca PMS.

@@ -9,6 +9,8 @@ declare(strict_types = 1);
 
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
 use Drupal\ebr_accommodation_easybooking\Entity\AccommodationEasybooking;
+use Drupal\ebr_accommodation_easybooking\Entity\RoomEasybooking;
+use Drupal\ebr_accommodation_easybooking\Entity\PackageEasybooking;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\Core\Form\FormStateInterface;
@@ -22,10 +24,10 @@ use Drupal\ebr\Entity\WidgetableInterface;
  */
 function ebr_accommodation_easybooking_entity_bundle_info_alter(array &$bundles): void {
   if (isset($bundles['node'][AccommodationBase::BUNDLE_ROOM])) {
-    $bundles['node'][AccommodationBase::BUNDLE_ROOM]['class'] = AccommodationEasybooking::class;
+    $bundles['node'][AccommodationBase::BUNDLE_ROOM]['class'] = RoomEasybooking::class;
   }
   if (isset($bundles['node'][AccommodationBase::BUNDLE_PACKAGE])) {
-    $bundles['node'][AccommodationBase::BUNDLE_PACKAGE]['class'] = AccommodationEasybooking::class;
+    $bundles['node'][AccommodationBase::BUNDLE_PACKAGE]['class'] = PackageEasybooking::class;
   }
 }
 

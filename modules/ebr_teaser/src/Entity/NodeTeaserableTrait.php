@@ -69,7 +69,7 @@ trait NodeTeaserableTrait {
   /**
    * {@inheritDoc}
    */
-  protected function renderField(string $viewMode, ?FieldItemListInterface $field) {
+  public function renderField(string $viewMode, ?FieldItemListInterface $field) {
     if (!$field instanceof FieldItemListInterface) {
       return NULL;
     }
