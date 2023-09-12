@@ -383,6 +383,10 @@ msgstr "Online buchen"
 msgid "Search room"
 msgstr "Zimmer suchen"
 
+#: Custom
+msgid "Find room"
+msgstr "Zimmer find"
+
 #: modules/contrib/ebr/ebr.module
 msgid "The node where field \"<code>internal_id</code>\" = \"<code>@action</code>\" is used as target for that action button."
 msgstr "Die Seite mit Feld \"<code>internal_id</code>\" = \"<code>@action</code>\" wird als Ziel für diesen Aktions-Button verwendet."
@@ -410,3 +414,61 @@ msgstr "Menü"
 #: Custom
 msgid "Enquire"
 msgstr "Anfragen"
+
+#: Custom
+msgid "Arrival"
+msgstr "Anreise"
+
+#: Custom
+msgid "Departure"
+msgstr "Abreise"
+
+#: Custom
+msgid "person"
+msgstr "Person"
+
+#: Custom
+msgid "persons"
+msgstr "Personen"
+
+#: Custom
+msgid "adults"
+msgstr "Erwachsene"
+
+#: Custom
+msgid "per person"
+msgstr "pro Person"
+
+#: Custom
+msgid "per night"
+msgstr "pro Nacht"
+
+#: Custom
+msgid "night"
+msgstr "Nacht"
+
+#: Custom
+msgid "nights"
+msgstr "Nächte"
+
+#: Custom
+msgid "per day"
+msgstr "pro Tag"
+
+#: Custom
+msgid "day"
+msgstr "Tag"
+
+#: Custom
+msgid "days"
+msgstr "Tage"
+
+#: Custom
+msgctxt "number"
+msgid "from"
+msgstr "ab"
+
+#: Custom
+msgctxt "person"
+msgid "from"
+msgstr "von"

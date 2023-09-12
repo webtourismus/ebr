@@ -66,14 +66,15 @@ document.addEventListener('alpine:init', () => {
       const response = await fetch(currentEndpoint);
       const json = await response.json();
       let rates = undefined;
+      let priceDivisor = 1;
       if (bundle == 'room') {
         rates = json.overview.entities.filter(rate => (rate.isPackage == false && rate.room_code == remoteId));
       }
       else if (bundle == 'package') {
         rates = json.overview.entities.filter(rate => (rate.isPackage == true && rate.rate_code == remoteId));
+        let priceDivisor = rate?.std_occupancy || 1;
       }
       rates.forEach((rate, i) => {
-        let priceDivisor = rate?.std_occupancy || 1;
         rate.prices.forEach((price, j) => {
           let currentDay = new Date();
           currentDay.setDate(currentDay.getDate() + j);
