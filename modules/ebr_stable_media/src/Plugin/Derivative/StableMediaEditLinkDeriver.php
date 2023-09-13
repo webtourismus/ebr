@@ -65,7 +65,11 @@ class StableMediaEditLinkDeriver extends DeriverBase implements ContainerDeriver
         'route_parameters' => ['media' => $media->id()],
         'weight' => self::STABLE_MEDIA_LINK_WEIGHT + $weight,
         'menu_name' => 'editor',
-        'description' => '/libraries/fa6/svgs/regular/file-pdf.svg'
+        'options' => [
+          'attributes' => [
+            'class' => ['before:![mask-image:url(/libraries/fa6/svgs/regular/file-pdf.svg)]'],
+          ],
+        ]
       ] + $base_plugin_definition;
     }
 

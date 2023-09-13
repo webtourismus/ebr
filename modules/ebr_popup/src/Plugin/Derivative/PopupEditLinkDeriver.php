@@ -65,7 +65,11 @@ class PopupEditLinkDeriver extends DeriverBase implements ContainerDeriverInterf
         'route_parameters' => ['block_content' => $block->id()],
         'weight' => self::POPUP_LINK_WEIGHT + $weight,
         'menu_name' => 'editor',
-        'description' => '/libraries/fa6/svgs/regular/bell.svg'
+        'options' => [
+          'attributes' => [
+            'class' => ['before:![mask-image:url(/libraries/fa6/svgs/regular/bell.svg)]'],
+          ],
+        ]
       ] + $base_plugin_definition;
     }
 
