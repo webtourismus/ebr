@@ -8,6 +8,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
 use Drupal\ebr\Entity\WidgetableInterface;
 use Drupal\ebr\EntityBusinessrules;
+use Drupal\Core\Url;
 
 /**
  * Summary of Room.
@@ -103,5 +104,28 @@ abstract class AccommodationSeekda extends AccommodationBase implements Widgetab
     );
     $build['#widget_type'] = $widgetId;
     return $build;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getActionUrl(string $actionId): ?Url {
+    $url = parent::getActionUrl($actionId);
+    if (is_null($url) ||
+      $this->get(EntityBusinessrules::FIELD_REMOTE_ID)->isEmpty() ||
+      $this->get(EntityBusinessrules::FIELD_REMOTE_DATASOURCE)->value != static::DATASOURCE
+    ) {
+      return $url;
+    }
+
+    $queryParams = $url->getOption('query');
+    if ($this->bundle() == static::BUNDLE_PACKAGE) {
+      $queryParams['skd-package-view'] = $this->get(EntityBusinessrules::FIELD_REMOTE_ID)->value;
+    }
+    if ($this->bundle() == static::BUNDLE_ROOM) {
+      $queryParams['skd-room-view'] = $this->get(EntityBusinessrules::FIELD_REMOTE_ID)->value;
+    }
+    $url->setOption('query', $queryParams);
+    return $url;
   }
 }
