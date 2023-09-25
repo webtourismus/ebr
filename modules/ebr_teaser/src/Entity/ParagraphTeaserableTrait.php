@@ -204,9 +204,6 @@ trait ParagraphTeaserableTrait {
    * {@inheritDoc}
    */
   public function getTeaserTitleField(): ?FieldItemListInterface {
-    if ($this->isFieldSuppressed('field_title')) {
-      return NULL;
-    }
     if ($this->get('field_title')->isEmpty() && $this->getReferencedEntity() instanceof TeaserableInterface) {
       return $this->getReferencedEntity()->getTeaserTitleField();
     }
@@ -217,9 +214,6 @@ trait ParagraphTeaserableTrait {
    * {@inheritDoc}
    */
   public function getTeaserSubtitleField(): ?FieldItemListInterface {
-    if ($this->isFieldSuppressed('field_subtitle')) {
-      return NULL;
-    }
     if ($this->get('field_subtitle')->isEmpty() && $this->getReferencedEntity() instanceof TeaserableInterface) {
       return $this->getReferencedEntity()->getTeaserSubtitleField();
     }
@@ -230,9 +224,6 @@ trait ParagraphTeaserableTrait {
    * {@inheritDoc}
    */
   public function getTeaserImagesField(): ?FieldItemListInterface {
-    if ($this->isFieldSuppressed('field_images')) {
-      return NULL;
-    }
     if ($this->get('field_images')->isEmpty() && $this->getReferencedEntity() instanceof TeaserableInterface) {
       return $this->getReferencedEntity()->getTeaserImagesField();
     }
@@ -243,9 +234,6 @@ trait ParagraphTeaserableTrait {
    * {@inheritDoc}
    */
   public function getTeaserTextField(): ?FieldItemListInterface {
-    if ($this->isFieldSuppressed('field_text')) {
-      return NULL;
-    }
     if ($this->get('field_text')->isEmpty() && $this->getReferencedEntity() instanceof TeaserableInterface) {
       return $this->getReferencedEntity()->getTeaserTextField();
     }
