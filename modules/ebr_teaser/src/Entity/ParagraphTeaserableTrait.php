@@ -377,10 +377,10 @@ trait ParagraphTeaserableTrait {
         $this->get($fieldName),
         $displayOptions
       );
-      $build[0]['options']['attributes']['class'][] = "action-link-{$actionId}";
-      $build[0]['options']['attributes']['data-action-link-entity'] = $this->getReferencedEntity()?->getEntityTypeId() ?? $this->getEntityTypeId();
-      $build[0]['options']['attributes']['data-action-link-bundle'] = $this->getReferencedEntity()?->getEntityTypeId() ?? $this->bundle();
-      $build[0]['options']['attributes']['data-action-link-type'] = $actionId;
+      $build[0]['#options']['attributes']['class'][] = "action-link-{$actionId}";
+      $build[0]['#options']['attributes']['data-action-link-entity'] = $this->getReferencedEntity()?->getEntityTypeId() ?? $this->getEntityTypeId();
+      $build[0]['#options']['attributes']['data-action-link-bundle'] = $this->getReferencedEntity()?->bundle() ?? $this->bundle();
+      $build[0]['#options']['attributes']['data-action-link-type'] = $actionId;
       $build['#link_action_type'] = $actionId;
       return $build;
     }
