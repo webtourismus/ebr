@@ -304,7 +304,7 @@ function ebr_accommodation_seekda_form_node_form_alter(array &$form, FormStateIn
     return;
   }
   $migration = match($node->bundle()) {
-    'room' => \Drupal::entityTypeManager()->getStorage('migration')->load('100_seekda_room_de'),
+    'room' => \Drupal::entityTypeManager()->getStorage('migration')->load('100_seekda_rooms_de'),
     'package' => \Drupal::entityTypeManager()->getStorage('migration')->load('120_seekda_packages_de'),
     'default' => NULL,
   };
@@ -323,7 +323,7 @@ function ebr_accommodation_seekda_form_node_form_alter(array &$form, FormStateIn
   }
   $formIntro['seekda'] = [
     '#type' => 'inline_template',
-    '#template' => '<p>{{ message }}<br>{{ fields|join(", ") }}</p>',
+    '#template' => '<div class="messages messages--status"><p>{{ message }}<br>{{ fields|join(", ") }}</p></div>',
     '#context' => [
       'message' => t(
         'The following fields are imported from <a href=":link" target="_blank">Seekda Channel Manager</a> and must be edited there:',
