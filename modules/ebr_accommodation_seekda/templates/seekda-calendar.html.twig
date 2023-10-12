@@ -1,86 +1,87 @@
+{% set attributes = attributes ?? create_attribute() %}
+{% set attributes = attributes.addClass('seekda-availabilities') %}
+
 {% block before %}{% endblock %}
 
 {% block calendar %}
-{% set attributes = attribtes ?? create_attribute() %}
-{{ attach_library('ebr_accommodation_seekda/availabilities') }}
-<div {{ attributes.addClass('seekda-availabilities') }} x-data="{
-    init() {
-      $store.seekda.calculateAvailabilities();
-      let flatpickrInstance = flatpickr(this.$refs.flatpickr, {
-        inline: true,
-        locale: drupalSettings.path.currentLanguage,
-        showMonths: ($store.breakpoint == 'xs' ? 1 : 2),
-        onDayCreate: (selectedDates, dateStr, instance, dayElem) => {
-          let currentDay = new Date(dayElem.dateObj.toISOString());
-          /* normalize all times to 12:00 to avoid problems with timezones or summertime */
-          currentDay.setHours(12,0,0,0);
-          if (currentDay < $store.seekda.startDate || currentDay > $store.seekda.endDate) {
-            return;
+  {{ attach_library('ebr_accommodation_seekda/availabilities') }}
+  <div {{ attributes }}
+    x-data="{
+      startDate: undefined,
+      endDate: undefined,
+      firstAvailableDate: undefined,
+      availabilities: {},
+      {# By default prices are rounded to nearest integer due limited space. -#}
+      {% block price_formatter -%}
+      getFormattedPrice: function(price) {
+        return Math.round(price) + '&euro;';
+      },
+      {% endblock -%}
+      runFlatpickr() {
+        let flatpickrInstance = window.flatpickr(this.$refs.flatpickr, {
+          inline: true,
+          locale: document.documentElement.getAttribute('lang'),
+          showMonths: ($store.breakpoint == 'xs' ? 1 : 2),
+          onDayCreate: (selectedDates, dateStr, instance, dayElem) => {
+            let currentDay = new Date(dayElem.dateObj.toISOString());
+            /* normalize all times to 12:00 to avoid problems with timezones or summertime */
+            currentDay.setHours(12,0,0,0);
+            if (currentDay < $data.startDate || currentDay > $data.endDate) {
+              return;
+            }
+            let currentIsoDay = currentDay.toISOString().substring(0,10);
+            if ($data.availabilities[currentIsoDay] && $data.availabilities[currentIsoDay].price && $data.availabilities[currentIsoDay].available) {
+              dayElem.classList.add('seekda-is-available');
+              dayElem.innerHTML += `<span class='seekda-availability-dayprice'>` + $data.getFormattedPrice($data.availabilities[currentIsoDay].price) + `</span>`;
+            }
+            else {
+              dayElem.classList.add('seekda-is-not-available');
+            }
+          },
+        });
+        flatpickrInstance.jumpToDate(new Date($data.firstAvailableDate), true);
+        this.$watch('$store.breakpoint', (breakpoint) => {
+          let m = (breakpoint == 'xs' ? 1 : 2);
+          if (flatpickrInstance.config['showMonths'] != m) {
+            flatpickrInstance.set('showMonths', m);
+            if (m==1) {
+              flatpickrInstance.calendarContainer.style.removeProperty('width');
+              flatpickrInstance.calendarContainer.querySelector('.flatpickr-days').style.removeProperty('width');
+            }
           }
-          let currentIsoDay = currentDay.toISOString().substring(0,10);
-          if ($store.seekda.availabilities[currentIsoDay] && $store.seekda.availabilities[currentIsoDay].price && $store.seekda.availabilities[currentIsoDay].available) {
-            dayElem.classList.add('seekda-is-available');
-            dayElem.innerHTML += `<span class='seekda-availability-dayprice'>` + Math.round($store.seekda.availabilities[currentIsoDay].price) + '&euro;</span>';
-          }
-          else {
-            dayElem.classList.add('seekda-is-not-available');
-          }
-        },
-      });
-      this.$watch('$store.seekda.firstAvailableDate', (date) => flatpickrInstance.jumpToDate(new Date(date), true));
-      this.$watch('$store.breakpoint', (breakpoint) => {
-        let m = (breakpoint == 'xs' ? 1 : 2);
-        if (flatpickrInstance.config['showMonths'] != m) {
-          flatpickrInstance.set('showMonths', m);
-          if (m==1) {
-            flatpickrInstance.calendarContainer.style.removeProperty('width');
-            flatpickrInstance.calendarContainer.querySelector('.flatpickr-days').style.removeProperty('width');
-          }
-        }
-      });
-    }
-  }">
-  <input type="hidden" class="hidden" x-ref="flatpickr" name="dummy_flatpickr_anchor" />
-</div>
-{% endblock %}
-
-{% block script %}
-<script>
-document.addEventListener('alpine:init', () => {
-  Alpine.store('seekda', {
-    availabilities: {},
-    startDate: undefined,
-    endDate: undefined,
-    firstAvailableDate: undefined,
-    async calculateAvailabilities() {
-      let firstDay = new Date();
-      /* normalize all times to 12:00 to avoid problems with timezones or summertime */
-      firstDay.setHours(12,0,0,0);
-      this.startDate = firstDay;
-      const bundle = '{{ entity.bundle() }}';
-      const remoteId = '{{ entity.get("remote_id").value }}';
-      const endpoint = '{{ endpoint|raw }}';
-      const langcode = drupalSettings.path.currentLanguage;
-      const isoStartDate = this.startDate.toISOString().substring(0,10);
-      const currentEndpoint = `${endpoint}&skd-language-code=${langcode}&skd-start-date=${isoStartDate}`;
-      const response = await fetch(currentEndpoint);
-      const json = await response.json();
-      let rates = undefined;
-      let priceDivisor = 1;
-      if (bundle == 'room') {
-        rates = json.overview.entities.filter(rate => (rate.isPackage == false && rate.room_code == remoteId));
-      }
-      else if (bundle == 'package') {
-        rates = json.overview.entities.filter(rate => (rate.isPackage == true && rate.rate_code == remoteId));
-        let priceDivisor = rate?.std_occupancy || 1;
-      }
+        });
+      },
+    }"
+    x-init="(async () => {
+      startDate = new Date();
+      {# normalize all times to 12:00 to avoid problems with timezones or summertime -#}
+      startDate.setHours(12,0,0,0);
+      let endpoint = `{{ endpoint|raw }}&skd-language-code=${document.documentElement.getAttribute('lang')}&skd-start-date=${startDate.toISOString().substring(0,10)}`;
+      let json = await( await fetch(endpoint) ).json();
+      let remoteId = '{{- entity.get("remote_id").value -}}';
+      {% if entity.bundle() == 'package' -%}
+        let rates = json.overview.entities.filter(rate => (rate.isPackage == true && rate.rate_code == remoteId));
+      {% elseif entity.bundle() == 'room' -%}
+        let rates = json.overview.entities.filter(rate => (rate.isPackage == false && rate.room_code == remoteId));
+      {% endif -%}
+      {# By default prices in packages are per person and prices in rooms are per day. -#}
+      {% block price_divisor -%}
+        const getPriceDivisor = function(rate) {
+          {%- if entity.bundle() == 'package' -%}
+            return rate?.std_occupancy ?? 1;
+          {%- else -%}
+            return 1;
+          {%- endif -%}
+        };
+      {% endblock -%}
       rates.forEach((rate, i) => {
+        let priceDivisor = getPriceDivisor(rate);
         rate.prices.forEach((price, j) => {
           let currentDay = new Date();
           currentDay.setDate(currentDay.getDate() + j);
           currentDay.setHours(12,0,0,0);
           currentDay = currentDay.toISOString().substring(0,10);
-          this.availabilities[currentDay] = this.availabilities[currentDay] ?? {
+          availabilities[currentDay] = availabilities[currentDay] ?? {
             date: currentDay,
             price: 0,
             available: 0,
@@ -88,23 +89,22 @@ document.addEventListener('alpine:init', () => {
           if (!price || !rate.availabilities[j]) {
             return;
           };
-          if (!this.firstAvailableDate || currentDay < this.firstAvailableDate) {
-            this.firstAvailableDate = currentDay;
+          if (!firstAvailableDate || currentDay < firstAvailableDate) {
+            firstAvailableDate = currentDay;
           }
-          if (this.availabilities[currentDay].price == 0 || this.availabilities[currentDay].price > price) {
-            this.availabilities[currentDay].price = price / priceDivisor;
-            this.availabilities[currentDay].available = rate.availabilities[j];
+          if (availabilities[currentDay].price == 0 || availabilities[currentDay].price > price) {
+            availabilities[currentDay].price = price / priceDivisor;
+            availabilities[currentDay].available = rate.availabilities[j];
           }
         });
       });
-      let lastDay = new Date();
-      lastDay.setHours(12,0,0,0);
-      lastDay.setDate(lastDay.getDate() + Object.keys(this.availabilities).length);
-      this.endDate = lastDay;
-    }
-  });
-});
-</script>
+      endDate = new Date();
+      endDate.setHours(12,0,0,0);
+      endDate.setDate(endDate.getDate() + Object.keys(availabilities).length);
+      runFlatpickr();
+    })()">
+    <input type="hidden" class="hidden" x-ref="flatpickr" name="dummy_flatpickr_anchor" />
+  </div>
 {% endblock %}
 
 {% block after %}{% endblock %}
