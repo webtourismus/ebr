@@ -67,7 +67,7 @@ abstract class AccommodationBase extends Node implements ActionableInterface, Te
   public static function getDefaultActionLabel(string $actionId): TranslatableMarkup|string|NULL {
     return match($actionId) {
       static::ACTION_BOOK => new TranslatableMarkup('Book', [], ['context' => 'accommodation']),
-      static::ACTION_ENQUIRY => new TranslatableMarkup('Enquiry'),
+      static::ACTION_ENQUIRY => new TranslatableMarkup('Enquiry', [], ['context' => 'anfragen']),
       default => self::getReadmoreActionLabel($actionId),
     };
   }

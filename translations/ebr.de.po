@@ -472,3 +472,9 @@ msgstr "ab"
 msgctxt "person"
 msgid "from"
 msgstr "von"
+
+#: Custom
+msgctxt "anfragen"
+msgid "Enquiry"
+msgstr "Anfragen"
+

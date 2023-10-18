@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\ebr\Plugin\Field\FieldType;
 
+use Drupal\ebr\Entity\ActionableInterface;
 use Drupal\link\LinkItemInterface;
 use Drupal\link\Plugin\Field\FieldType\LinkItem;
 
@@ -72,7 +73,7 @@ class ActionLinkItem extends LinkItem {
     if (!$this->isCalculated) {
       /** @var \Drupal\ebr\Entity\ActionableInterface $entity */
       $entity = $this->getEntity();
-      if (!$entity->isNew()) {
+      if (!$entity->isNew() && $entity instanceof ActionableInterface) {
         $actionId = $this->getSetting('action_type');
         $value = [
           'uri' => NULL,
