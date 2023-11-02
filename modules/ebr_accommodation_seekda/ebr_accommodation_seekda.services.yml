@@ -10,6 +10,7 @@ services:
       - { name: event_subscriber }
     arguments:
       - '@entity_type.manager'
+      - '@keyvalue'
   seekda.request_subscriber:
     class: Drupal\ebr_accommodation_seekda\EventSubscriber\RedirectBookNodeToKube
     arguments: ['@redirect.checker', '@config.factory', '@ebr.service', '@path.validator']
