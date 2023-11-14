@@ -2,8 +2,9 @@ cron_interval: 86400
 cron_allowed_environments:
   - prod
   - live
-cron_max_runtime: 3600
+cron_max_runtime: 1800
 cron_warningmail_after: 100800
 cron_warningmail_to: 'entwicklung@webtourismus.at'
 cron_warningmail_repeat: 86400
+migrate_post_import_unpublish_package: 174600
 jsonapi_months: 14

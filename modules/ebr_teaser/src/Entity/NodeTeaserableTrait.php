@@ -97,6 +97,8 @@ trait NodeTeaserableTrait {
     $build['#teasered_entity_type'] = $this->getEntityTypeId();
     $build['#teasered_entity_bundle'] = $this->bundle();
     $build['#teasered_field_storage'] = $field->getName();
+    // @see \Drupal\designsystem\DesignHelper::getRealViewmode()
+    $build['#view_mode'] = $viewMode;
     return $build;
   }
 

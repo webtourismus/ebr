@@ -385,7 +385,11 @@ msgstr "Zimmer suchen"
 
 #: Custom
 msgid "Find room"
-msgstr "Zimmer find"
+msgstr "Zimmer finden"
+
+#: Custom
+msgid "Check availability"
+msgstr "Verfügbarkeit prüfen"
 
 #: modules/contrib/ebr/ebr.module
 msgid "The node where field \"<code>internal_id</code>\" = \"<code>@action</code>\" is used as target for that action button."
@@ -434,6 +438,14 @@ msgstr "Personen"
 #: Custom
 msgid "adults"
 msgstr "Erwachsene"
+
+#: Custom
+msgid "children"
+msgstr "Kinder"
+
+#: Custom
+msgid "age of children"
+msgstr "Alter der Kinder"
 
 #: Custom
 msgid "per person"

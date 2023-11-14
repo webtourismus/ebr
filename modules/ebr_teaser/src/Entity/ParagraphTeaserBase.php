@@ -19,9 +19,9 @@ class ParagraphTeaserBase extends Paragraph implements ParagraphTeaserableInterf
   /**
    * {@inheritDoc}
    */
-  public function getProductFieldNames(): array {
+  public function getProductFieldnames(?string $viewMode = NULL): array {
     if ($this->getReferencedEntity() instanceof ProductableInterface) {
-      return $this->getReferencedEntity()->getProductFieldNames();
+      return $this->getReferencedEntity()->getProductFieldnames($viewMode);
     }
     // By convention a Paragraph itself should not be a product.
     return [];

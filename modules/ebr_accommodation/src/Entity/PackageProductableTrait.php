@@ -16,7 +16,10 @@ trait PackageProductableTrait {
   /**
    * {@inheritDoc}
    */
-  public function getProductFieldNames(): array {
-    return ['field_price', 'field_minlos', 'field_mealplan'];
+  public function getProductFieldnames(?string $viewMode = NULL): array {
+    return $this->getFilteredAndSortedProductFields(
+      ['field_price', 'field_minlos', 'field_mealplan'],
+      $viewMode
+    );
   }
 }

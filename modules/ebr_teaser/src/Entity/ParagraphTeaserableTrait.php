@@ -150,8 +150,7 @@ trait ParagraphTeaserableTrait {
         $displayOptions
       );
       $build['#is_teaserable'] = TRUE;
-      // When fields are rendered in isolation, Drupal sets the '#view_mode' to '_custom'.
-      // Therefore we need to re-provide a proper value.
+      // @see \Drupal\designsystem\DesignHelper::getRealViewmode()
       $build['#view_mode'] = $imageViewMode ?? $viewMode;
       return $build;
     }
@@ -180,6 +179,7 @@ trait ParagraphTeaserableTrait {
           ->viewField($referencedField, $displayOptions);
         $build['#is_teaserable'] = TRUE;
         $build['#referencing_object'] = $this;
+        // @see \Drupal\designsystem\DesignHelper::getRealViewmode()
         $build['#view_mode'] = $imageViewMode ?? $viewMode;
         return $build;
       }
@@ -196,6 +196,7 @@ trait ParagraphTeaserableTrait {
     );
     $build['#is_teaserable'] = TRUE;
     $build['#referencing_object'] = $this;
+    // @see \Drupal\designsystem\DesignHelper::getRealViewmode()
     $build['#view_mode'] = $imageViewMode ?? $viewMode;
     return $build;
   }
@@ -304,18 +305,48 @@ trait ParagraphTeaserableTrait {
   /**
    * @inheritDoc
    */
-  public function getActionFieldnames(): array {
+  public function getActionFieldnames(?string $viewMode = NULL): array {
     $result = [];
+    if ($this->isFieldSuppressed($this->getReferencingField()->getName())) {
+      // Suppressing the link field should suppress all action links (also from a referenced entity).
+      return [];
+    }
+
+    $actionEntity = $this;
     if ($this->getReferencedEntity() instanceof ActionableInterface) {
-      $result = $this->getReferencedEntity()->getActionFieldnames();
+      $result = $this->getReferencedEntity()->getActionFieldnames($viewMode);
+      $actionEntity = $this->getReferencedEntity();
     }
-    // Do not use the referenced read more action, because paragraphs have their own "field_link",
-    // which might have extra query params.
-    if (array_key_exists(ReadmoreActionableInterface::ACTION_READMORE, $result)) {
-      unset($result[ReadmoreActionableInterface::ACTION_READMORE]);
+    // Filter and sort by view mode
+    if (!empty($viewMode)) {
+      // If this paragraph references a productable node, we must use the node's display mode settings for action links,
+      // because paragraphs themselves can't be productable and therefore can't configure those action links.
+      $viewModeObject = $this->entityTypeManager()
+        ->getStorage('entity_view_display')
+        ->load("{$actionEntity->getEntityTypeId()}.{$actionEntity->bundle()}.{$viewMode}");
+      // We might have special display modes on paragraphs that might not be available on the referenced
+      // node. To cover those cases, use the paragraph's own display mode settings as fallback.
+      if (empty($viewModeObject)) {
+        $viewModeObject = $this->entityTypeManager()
+          ->getStorage('entity_view_display')
+          ->load("{$this->getEntityTypeId()}.{$this->bundle()}.{$viewMode}");
+      }
+      $enabledComponents = $viewModeObject?->getComponents();
+      if (empty($enabledComponents)) {
+        return [];
+      }
+      $result = array_intersect($result, array_keys($enabledComponents));
+      uasort($result, function($a, $b) use ($enabledComponents) {
+        return $enabledComponents[$a]['weight'] < $enabledComponents[$b]['weight'] ? -1 : 1;
+      });
     }
-    if (!$this->getReferencingField()->isEmpty()) {
+    if (!empty($this->getActionUrl(ReadmoreActionableInterface::ACTION_READMORE))) {
+      // Do not use the referenced read more action, because paragraphs have their own "field_link",
+      // which might have extra query params.
       $result[ReadmoreActionableInterface::ACTION_READMORE] = $this->getReferencingField()->getName();
+    }
+    else {
+      unset($result[ReadmoreActionableInterface::ACTION_READMORE]);
     }
     return $result;
   }
@@ -361,7 +392,7 @@ trait ParagraphTeaserableTrait {
    * Rule: Suppressing the primary action "readmore" == suppressing "field_link" will also suppress other action links.
    */
   public function getRenderedAction(string $actionId, string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
-    $fieldName = $this->getActionFieldnames()[$actionId] ?? NULL;
+    $fieldName = $this->getActionFieldnames($viewMode)[$actionId] ?? NULL;
     if (empty($fieldName) || $this->isFieldSuppressed($this->getReferencingField()->getName())) {
       return NULL;
     }
@@ -382,6 +413,8 @@ trait ParagraphTeaserableTrait {
       $build[0]['#options']['attributes']['data-action-link-bundle'] = $this->getReferencedEntity()?->bundle() ?? $this->bundle();
       $build[0]['#options']['attributes']['data-action-link-type'] = $actionId;
       $build['#link_action_type'] = $actionId;
+      // @see \Drupal\designsystem\DesignHelper::getRealViewmode()
+      $build['#view_mode'] = $viewMode;
       return $build;
     }
     if ($this->getReferencedEntity() instanceof ActionableInterface) {

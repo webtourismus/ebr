@@ -15,11 +15,6 @@ use Drupal\ebr\Entity\ActionableInterface;
 trait ReadmoreActionTrait {
 
   /**
-   * Cached getActionUrl() results.
-   */
-  protected array $actionUrls = [];
-
-  /**
    * {@inheritDoc}
    */
   public static function getDefaultActions(): array {
@@ -39,12 +34,25 @@ trait ReadmoreActionTrait {
   /**
    * {@inheritDoc}
    */
-  public function getActionFieldnames(): array {
+  public function getActionFieldnames(?string $viewMode = NULL): array {
     $result = [];
     foreach ($this->getDefaultActions() as $actionId) {
       if ($this->getActionUrl($actionId)) {
         $result[$actionId] = ActionableInterface::ACTION_FIELD_PREFIX . $actionId;
       }
+    }
+    if (!empty($viewMode)) {
+      $enabledComponents = $this->entityTypeManager()
+        ->getStorage('entity_view_display')
+        ->load("{$this->getEntityTypeId()}.{$this->bundle()}.{$viewMode}")
+        ?->getComponents();
+      if (empty($enabledComponents)) {
+        return [];
+      }
+      $result = array_intersect($result, array_keys($enabledComponents));
+      uasort($result, function($a, $b) use ($enabledComponents) {
+        return $enabledComponents[$a]['weight'] < $enabledComponents[$b]['weight'] ? -1 : 1;
+      });
     }
     return $result;
   }
@@ -63,16 +71,13 @@ trait ReadmoreActionTrait {
    * {@inheritDoc}
    */
   public function getActionUrl(string $actionId): ?Url {
-    if (array_key_exists($actionId, $this->actionUrls)) {
-      return $this->actionUrls[$actionId];
-    }
     if ($actionId != ReadmoreActionableInterface::ACTION_READMORE) {
-      return $this->actionUrls[$actionId] = NULL;
+      return NULL;
     }
     /** @var \Drupal\Core\Url $url */
     $url = $this->toUrl('canonical');
     if (!$url instanceof Url || !$this->access()) {
-      return $this->actionUrls[$actionId] = NULL;
+      return NULL;
     }
     $url->setOption('attributes', [
       'data-action-link-entity' => $this->getEntityTypeId(),
@@ -82,14 +87,14 @@ trait ReadmoreActionTrait {
         "action-link-{$actionId}",
       ],
     ]);
-    return $this->actionUrls[$actionId] = $url;
+    return $url;
   }
 
   /**
    * {@inheritDoc}
    */
   public function getRenderedAction(string $actionId, string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
-    $fieldName = $this->getActionFieldnames()[$actionId] ?? NULL;
+    $fieldName = $this->getActionFieldnames($viewMode)[$actionId] ?? NULL;
     if (empty($fieldName)) {
       return NULL;
     }
@@ -105,6 +110,8 @@ trait ReadmoreActionTrait {
       $displayOptions
     );
     $build['#link_action_type'] = $actionId;
+    // @see \Drupal\designsystem\DesignHelper::getRealViewmode()
+    $build['#view_mode'] = $viewMode;
     return $build;
   }
 

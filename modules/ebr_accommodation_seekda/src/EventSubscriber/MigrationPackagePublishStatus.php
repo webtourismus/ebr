@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\ebr_accommodation_seekda\EventSubscriber;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManager;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\ebr\EntityBusinessrules;
@@ -18,27 +19,13 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class MigrationPackagePublishStatus implements EventSubscriberInterface {
 
   /**
-   * The grace period in seconds for outdated packages between "package changed timestamp" and "last cron timestamp".
-   */
-  private const UNPUBLISH_GRACE_PERIOD = 300;
-
-  /**
-   * The EntityType Manager.
-   */
-  protected EntityTypeManager $entityTypeManager;
-
-  /**
-   * The KeyValue
-   */
-  protected KeyValueFactoryInterface $keyValue;
-
-  /**
    * The constructor.
    */
-  public function __construct(EntityTypeManager $entityTypeManager, KeyValueFactoryInterface $keyValue) {
-    $this->entityTypeManager = $entityTypeManager;
-    $this->keyValue = $keyValue;
-  }
+  public function __construct(
+    protected EntityTypeManager $entityTypeManager,
+    protected KeyValueFactoryInterface $keyValue,
+    protected ConfigFactoryInterface $config,
+  ) { }
 
   /**
    * {@inheritdoc}
@@ -70,16 +57,19 @@ class MigrationPackagePublishStatus implements EventSubscriberInterface {
       EntityBusinessrules::FIELD_REMOTE_DATASOURCE => AccommodationSeekda::DATASOURCE,
       'default_langcode' => 1,
     ]);
+    $unpublishGracePeriod = $this->config->get('ebr_accommodation_seekda')->get('migrate_post_import_unpublish_package');
 
     foreach ($allSeekdaPackages as $package) {
       $remoteId = $package->get(EntityBusinessrules::FIELD_REMOTE_ID)->value;
-      if (!$remoteId) {
+      if (empty($remoteId)) {
         continue;
       }
       $packageUpdateTime = $package->get('changed')->value;
-      if ($packageUpdateTime + self::UNPUBLISH_GRACE_PERIOD > $lastImportTime ) {
+      if ($packageUpdateTime + $unpublishGracePeriod > $lastImportTime ) {
         continue;
       }
+      // The package was not updated for "migrate_post_import_unpublish_package" seconds,
+      // therefore we assume it is no longer available for booking.
       $package->set('status', 0);
       $package->save();
     }

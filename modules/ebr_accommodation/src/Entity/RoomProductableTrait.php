@@ -16,7 +16,10 @@ trait RoomProductableTrait {
   /**
    * {@inheritDoc}
    */
-  public function getProductFieldNames(): array {
-    return ['field_price', 'field_occupancy_std', 'field_occupancy_max', 'field_roomsize'];
+  public function getProductFieldnames(?string $viewMode = NULL): array {
+    return $this->getFilteredAndSortedProductFields(
+      ['field_price', 'field_occupancy_std', 'field_occupancy_max', 'field_roomsize'],
+      $viewMode
+    );
   }
 }

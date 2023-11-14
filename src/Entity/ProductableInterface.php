@@ -23,8 +23,10 @@ interface ProductableInterface extends TeaserableInterface {
 
   /**
    * Returns all potentially available product specific fields.
+   *
+   * Optionally sort and filter fields as specified in the given view mode.
    */
-  public function getProductFieldNames(): array;
+  public function getProductFieldnames(?string $viewMode = NULL): array;
 
   /**
    * Returns the human readable label of a call-to-action.

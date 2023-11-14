@@ -73,44 +73,17 @@ abstract class AccommodationBase extends Node implements ActionableInterface, Te
   }
 
   /**
-   * @inheritDoc
-   */
-  public function getActionFieldnames(): array {
-    $actions = $this->getDefaultActions();
-    $result = [];
-    foreach($actions as $action) {
-      if (!empty($this->getActionUrl($action))) {
-        $result[$action] = ActionableInterface::ACTION_FIELD_PREFIX . $action;
-      }
-    }
-    return $result;
-  }
-
-  /**
-   * @inheritDoc
-   */
-  public function getActionLabel(string $actionId): TranslatableMarkup|string|NULL {
-    if (!empty($this->getActionUrl($actionId))) {
-      return $this->getDefaultActionLabel($actionId);
-    }
-    return NULL;
-  }
-
-  /**
    * {@inheritDoc}
    */
   public function getActionUrl(string $actionId): ?Url {
-    if (array_key_exists($actionId, $this->actionUrls)) {
-      return $this->actionUrls[$actionId];
-    }
     if (in_array($actionId, $this->getReadmoreActions())) {
       return $this->getReadmoreActionUrl($actionId);
     }
     if ($this->get(EntityBusinessrules::FIELD_REMOTE_DATASOURCE)->isEmpty()) {
-      return $this->actionUrls[$actionId] = NULL;
+      return NULL;
     }
     if ($actionId == static::ACTION_BOOK && $this->get(EntityBusinessrules::FIELD_REMOTE_ID)->isEmpty()) {
-      return $this->actionUrls[$actionId] = NULL;
+      return NULL;
     }
     $query = $this->entityTypeManager()->getStorage('node')->getQuery();
     $query->accessCheck(TRUE);
@@ -120,13 +93,13 @@ abstract class AccommodationBase extends Node implements ActionableInterface, Te
     $nodeIds = $query->execute();
     $nodeId = reset($nodeIds);
     if (empty($nodeId)) {
-      return $this->actionUrls[$actionId] = NULL;
+      return NULL;
     }
     $node = Node::load($nodeId);
     if (!($node instanceof NodeInterface)) {
-      return $this->actionUrls[$actionId] = NULL;
+      return NULL;
     }
-    $this->actionUrls[$actionId] = Url::fromRoute(
+    $url = Url::fromRoute(
       'entity.node.canonical',
       [
         'node' => $node->id(),
@@ -145,7 +118,7 @@ abstract class AccommodationBase extends Node implements ActionableInterface, Te
         ],
       ],
     );
-    return $this->actionUrls[$actionId];
+    return $url;
   }
 
 }

@@ -42,8 +42,10 @@ interface ActionableInterface extends ContentEntityInterface {
    * The array keys are the available action IDs, the array values are their
    * corresponding field (or render array) names injected into the entities
    * "content" render array for use in Twig.
+   *
+   * Optionally sort and filter fields as specified in the given view mode.
    */
-  public function getActionFieldnames(): array;
+  public function getActionFieldnames(?string $viewMode = NULL): array;
 
   /**
    * Returns the human readable label of a call-to-action.

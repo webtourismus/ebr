@@ -36,7 +36,7 @@ trait ProductableTrait {
    * {@inheritDoc}
    */
   public function getProductField(string $fieldName): ?FieldItemListInterface {
-    if (!in_array($fieldName, $this->getProductEntity()?->getProductFieldNames())) {
+    if (!in_array($fieldName, $this->getProductEntity()?->getProductFieldnames())) {
       return NULL;
     }
     return $this->getProductEntity()?->get($fieldName);
@@ -46,9 +46,30 @@ trait ProductableTrait {
    * {@inheritDoc}
    */
   public function getRenderedProductField(string $fieldName, string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
-    if (!in_array($fieldName, $this->getProductEntity()?->getProductFieldNames())) {
+    if (!in_array($fieldName, $this->getProductEntity()?->getProductFieldnames())) {
       return NULL;
     }
-    return $this->getProductEntity()?->renderField($viewMode, $this->getProductField($fieldName));
+    $build = $this->getProductEntity()?->renderField($viewMode, $this->getProductField($fieldName));
+    // @see \Drupal\designsystem\DesignHelper::getRealViewmode()
+    $build['#view_mode'] = $viewMode;
+    return $build;
+  }
+
+  protected function getFilteredAndSortedProductFields(array $fields, ?string $viewMode = NULL): array {
+    if (empty($viewMode)) {
+      return $fields;
+    }
+    $enabledComponents = $this->entityTypeManager()
+      ->getStorage('entity_view_display')
+      ->load("{$this->getProductEntity()?->getEntityTypeId()}.{$this->getProductEntity()?->bundle()}.{$viewMode}")
+      ?->getComponents();
+    if (empty($enabledComponents)) {
+      return [];
+    }
+    $fields = array_intersect($fields, array_keys($enabledComponents));
+    uasort($fields, function($a, $b) use ($enabledComponents) {
+      return $enabledComponents[$a]['weight'] < $enabledComponents[$b]['weight'] ? -1 : 1;
+    });
+    return $fields;
   }
 }

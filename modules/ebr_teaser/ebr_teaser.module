@@ -143,9 +143,17 @@ function ebr_teaser_entity_view_alter(array &$build, EntityInterface $entity, En
     if ($entity->getTeaserTextField() instanceof FieldItemListInterface) {
       $build[$entity->getTeaserTextField()->getName()] = $entity->getRenderedTeaserText($viewMode);
     }
-    if ($entity instanceof ProductableInterface && !empty($entity->getProductFieldNames())) {
-      foreach ($entity->getProductFieldNames() as $fieldName) {
+    if ($entity instanceof ProductableInterface) {
+      foreach ($entity->getProductFieldnames($viewMode) as $fieldName) {
         $renderArray = $entity->getRenderedProductField($fieldName, $viewMode);
+        if (!empty($renderArray)) {
+          $build[$fieldName] = $renderArray;
+        }
+      }
+    }
+    if ($entity instanceof ActionableInterface) {
+      foreach ($entity->getActionFieldnames($viewMode) as $actionId => $fieldName) {
+        $renderArray = $entity->getRenderedAction($actionId, $viewMode);
         if (!empty($renderArray)) {
           $build[$fieldName] = $renderArray;
         }
