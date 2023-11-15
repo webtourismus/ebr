@@ -57,7 +57,7 @@ class MigrationPackagePublishStatus implements EventSubscriberInterface {
       EntityBusinessrules::FIELD_REMOTE_DATASOURCE => AccommodationSeekda::DATASOURCE,
       'default_langcode' => 1,
     ]);
-    $unpublishGracePeriod = $this->config->get('ebr_accommodation_seekda')->get('migrate_post_import_unpublish_package');
+    $unpublishGracePeriod = $this->config->get('ebr_accommodation_seekda.settings')->get('migrate_post_import_unpublish_package');
 
     foreach ($allSeekdaPackages as $package) {
       $remoteId = $package->get(EntityBusinessrules::FIELD_REMOTE_ID)->value;
