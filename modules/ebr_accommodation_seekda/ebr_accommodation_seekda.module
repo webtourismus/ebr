@@ -368,12 +368,12 @@ function ebr_accommodation_seekda_cron() {
     $result = MigrationInterface::RESULT_SKIPPED;
     if ($migration->getStatus() == MigrationInterface::STATUS_IDLE) {
       \Drupal::state()->set("ebr_accommodation_seekda.last_cron_start.{$migrationId}", $requestTime);
-      $executable = new \Drupal\migrate_tools\MigrateExecutable($migration, new \Drupal\migrate\MigrateMessage());
       // All packages are set unpublished after an import to disable (but not delete) unavailable packages.
       // To re-enable active packages, all imported rows must get a new changed timestamp.
       if (strpos($migration->id(), '_seekda_packages_') == 3) {
         $migration->getIdMap()->prepareUpdate();
       }
+      $executable = new \Drupal\migrate_tools\MigrateExecutable($migration, new \Drupal\migrate\MigrateMessage());
       $result = $executable->import();
     }
     if ($result == MigrationInterface::RESULT_COMPLETED) {
