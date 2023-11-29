@@ -71,6 +71,11 @@ process:
   promote:
     plugin: default_value
     default_value: 0
+  changed:
+    plugin: callback
+    callable: time
+    unpack_source: true
+    source: {  }
   field_subtitle/value: teaser
   field_subtitle/format:
     plugin: default_value
@@ -215,6 +220,7 @@ destination:
     - remote_id
     - status
     - title
+    - changed
     - field_subtitle
     - body
     - field_images
