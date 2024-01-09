@@ -34,9 +34,17 @@ function ebr_teaser_entity_bundle_info_alter(array &$bundles): void {
   if (isset($bundles['paragraph']['icon'])) {
     $bundles['paragraph']['icon']['class'] = ParagraphTeaserBase::class;
   }
+
+  $fieldManager = \Drupal::service('entity_field.manager');
+  /** @var NodeType $bundle */
   foreach (NodeType::loadMultiple() as $bundle) {
-    if (isset($bundles['node'][$bundle->id()])) {
-      $bundles['node']['page']['class'] = NodeTeaserBase::class;
+    $fieldDefinitions = $fieldManager->getFieldDefinitions('node', $bundle->id());
+    if (isset($bundles['node'][$bundle->id()]) &&
+      isset($fieldDefinitions['body']) &&
+      isset($fieldDefinitions['field_images']) &&
+      isset($fieldDefinitions['field_subtitle'])
+    ) {
+      $bundles['node'][$bundle->id()]['class'] = NodeTeaserBase::class;
     }
   }
 }
