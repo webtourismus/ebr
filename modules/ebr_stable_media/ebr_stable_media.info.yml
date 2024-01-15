@@ -5,5 +5,5 @@ package: Entity business rules
 core_version_requirement: ^10.1
 dependencies:
   - ebr:ebr
-  - media_entity_download:media_entity_download
   - gin_toolbar:gin_toolbar
+  - media_entity_download:media_entity_download

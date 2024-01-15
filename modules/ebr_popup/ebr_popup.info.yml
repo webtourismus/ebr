@@ -4,6 +4,7 @@ description: 'Provides an UI to create popup windows for important frontend mess
 package: Entity business rules
 core_version_requirement: ^10.1
 dependencies:
+  - core:block_content
   - ebr:ebr
   - designsystem:designsystem
   - gin_toolbar:gin_toolbar

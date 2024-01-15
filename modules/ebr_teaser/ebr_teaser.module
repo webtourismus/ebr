@@ -39,10 +39,13 @@ function ebr_teaser_entity_bundle_info_alter(array &$bundles): void {
   /** @var NodeType $bundle */
   foreach (NodeType::loadMultiple() as $bundle) {
     $fieldDefinitions = $fieldManager->getFieldDefinitions('node', $bundle->id());
+    // set the default NodeTeaser bundle class if it has the typical teaser fields
     if (isset($bundles['node'][$bundle->id()]) &&
       isset($fieldDefinitions['body']) &&
       isset($fieldDefinitions['field_images']) &&
-      isset($fieldDefinitions['field_subtitle'])
+      isset($fieldDefinitions['field_subtitle']) &&
+      // but do not overwrite if a bundle class was already set somewhere else
+      !isset($bundles['node'][$bundle->id()]['class'])
     ) {
       $bundles['node'][$bundle->id()]['class'] = NodeTeaserBase::class;
     }

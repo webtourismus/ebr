@@ -5,5 +5,5 @@ package: Entity business rules
 core_version_requirement: ^10.1
 dependencies:
   - ebr:ebr
-  - ebr_teaser:ebr_teaser
+  - ebr:ebr_teaser
   - webform:webform
