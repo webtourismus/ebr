@@ -80,10 +80,14 @@ class ActionLinkItem extends LinkItem {
         ];
         if ($actionId && $actionUrl = $entity->getActionUrl($actionId)) {
           $value = [
-            'uri' => $actionUrl->toUriString(),
+            'uri' => $actionUrl->toString(),
             'title' => $entity->getActionLabel($actionId),
-            'options' => $actionUrl->getOptions(),
           ];
+        }
+        // Only include the HTML attribute options array. Other options (like e.g. the referenced
+        // entity instance) do not work with the field serializer for views export.
+        if (array_key_exists('attributes', $actionUrl->getOptions() ?? [])) {
+          $value['options']['attributes'] = $actionUrl->getOptions()['attributes'];
         }
         $this->setValue($value);
       }
