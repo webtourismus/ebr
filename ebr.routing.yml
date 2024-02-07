@@ -1,0 +1,9 @@
+ebr.redirect_link_template:
+  path: '/ebr/{entity_type}/{internal_id}/{link_template}'
+  defaults:
+    _title: 'Dummy'
+    _title_callback: '\Drupal\ebr\Controller\EbrController::getRedirectTitle'
+    _controller: '\Drupal\ebr\Controller\EbrController::doRedirection'
+    link_template: 'canonical'
+  requirements:
+    _access: 'TRUE'
