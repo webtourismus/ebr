@@ -181,26 +181,6 @@ function ebr_teaser_preprocess_field(&$variables, $hook): void {
   if (!(($variables['attributes'] ?? []) instanceof Attribute)) {
     $variables['attributes'] = new Attribute($variables['attributes'] ?? []);
   }
-  if (
-    $variables['field_name'] == 'field_link' &&
-    $entity instanceof ParagraphTeaserableInterface
-  ) {
-    foreach ($variables['items'] as $key => $item) {
-      if (!isset($variables['items'][$key]['content']['#options']['attributes'])) {
-        $variables['items'][$key]['content']['#options']['attributes'] = ['class' => []];
-      }
-      elseif (!isset($variables['items'][$key]['content']['#options']['attributes']['class'])) {
-        $variables['items'][$key]['content']['#options']['attributes']['class'] = [];
-      }
-      elseif (is_string($variables['items'][$key]['content']['#options']['attributes']['class'])) {
-        $variables['items'][$key]['content']['#options']['attributes']['class'] = [$variables['items'][$key]['content']['#options']['attributes']['class']];
-      }
-      $variables['items'][$key]['content']['#options']['attributes']['data-action-link-entity'] = $entity->getEntityTypeId();
-      $variables['items'][$key]['content']['#options']['attributes']['data-action-link-bundle'] = $entity->bundle();
-      $variables['items'][$key]['content']['#options']['attributes']['data-action-link-type'] = ReadmoreActionableInterface::ACTION_READMORE;
-      $variables['items'][$key]['content']['#options']['attributes']['class'][] = 'action-link-more';
-    }
-  }
 
   $viewMode = $variables['element']['#view_mode'];
   if ($entity instanceof TeaserableInterface && $entity->isTeaserableViewmode($viewMode)) {

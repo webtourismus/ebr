@@ -373,14 +373,17 @@ trait ParagraphTeaserableTrait {
     }
     if ($actionId == ReadmoreActionableInterface::ACTION_READMORE && !$this->getReferencingField()->isEmpty()) {
       $url = $this->getReferencingField()->first()->getUrl();
-      $url->setOption('attributes', [
-        'data-action-link-entity' => $this->getReferencedEntity()?->getEntityTypeId() ?? $this->getEntityTypeId(),
-        'data-action-link-bundle' => $this->getReferencedEntity()?->getEntityTypeId() ?? $this->bundle(),
-        'data-action-link-type' => $actionId,
-        'class' => [
-          "action-link-{$actionId}",
+      $url->setOption('attributes', array_merge_recursive(
+        [
+          'data-action-link-entity' => $this->getReferencedEntity()?->getEntityTypeId() ?? $this->getEntityTypeId(),
+          'data-action-link-bundle' => $this->getReferencedEntity()?->getEntityTypeId() ?? $this->bundle(),
+          'data-action-link-type' => $actionId,
+          'class' => [
+            "action-link-{$actionId}",
+          ],
         ],
-      ]);
+        $url->getOption('attributes') ?? [],
+      ));
       return $url;
     }
     return NULL;
@@ -408,10 +411,16 @@ trait ParagraphTeaserableTrait {
         $this->get($fieldName),
         $displayOptions
       );
-      $build[0]['#options']['attributes']['class'][] = "action-link-{$actionId}";
-      $build[0]['#options']['attributes']['data-action-link-entity'] = $this->getReferencedEntity()?->getEntityTypeId() ?? $this->getEntityTypeId();
-      $build[0]['#options']['attributes']['data-action-link-bundle'] = $this->getReferencedEntity()?->bundle() ?? $this->bundle();
-      $build[0]['#options']['attributes']['data-action-link-type'] = $actionId;
+      $build[0]['#options']['attributes'] = array_merge_recursive(
+        $build[0]['#options']['attributes'] ?? [],
+        $this->get($fieldName)?->first()?->getUrl()?->getOption('attributes') ?? [],
+        [
+          'class' => ["action-link-{$actionId}"],
+          'data-action-link-entity' => $this->getReferencedEntity()?->getEntityTypeId() ?? $this->getEntityTypeId(),
+          'data-action-link-bundle' => $this->getReferencedEntity()?->bundle() ?? $this->bundle(),
+          'data-action-link-type' => $actionId,
+        ]
+      );
       $build['#link_action_type'] = $actionId;
       // @see \Drupal\designsystem\DesignHelper::getRealViewmode()
       $build['#view_mode'] = $viewMode;

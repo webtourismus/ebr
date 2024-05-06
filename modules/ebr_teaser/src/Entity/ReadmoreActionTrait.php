@@ -24,7 +24,7 @@ trait ReadmoreActionTrait {
   /**
    * {@inheritDoc}
    */
-  public static function getDefaultActionLabel($actionId): TranslatableMarkup|string|NULL {
+  public static function getDefaultActionLabel(string $actionId): TranslatableMarkup|string|NULL {
     return match ($actionId) {
       ReadmoreActionableInterface::ACTION_READMORE => new TranslatableMarkup('Details'),
       default => NULL,
@@ -79,14 +79,17 @@ trait ReadmoreActionTrait {
     if (!$url instanceof Url || !$this->access()) {
       return NULL;
     }
-    $url->setOption('attributes', [
-      'data-action-link-entity' => $this->getEntityTypeId(),
-      'data-action-link-bundle' => $this->bundle(),
-      'data-action-link-type' => $actionId,
-      'class' => [
-        "action-link-{$actionId}",
+    $url->setOption('attributes', array_merge_recursive(
+      [
+        'data-action-link-entity' => $this->getEntityTypeId(),
+        'data-action-link-bundle' => $this->bundle(),
+        'data-action-link-type' => $actionId,
+        'class' => [
+          "action-link-{$actionId}",
+        ],
       ],
-    ]);
+      $url->getOption('attributes') ?? []
+    ));
     return $url;
   }
 
@@ -107,7 +110,7 @@ trait ReadmoreActionTrait {
     }
     $build = $this->entityTypeManager()->getViewBuilder($this->getEntityTypeId())->viewField(
       $this->get($fieldName),
-      $displayOptions
+      $displayOptions,
     );
     $build['#link_action_type'] = $actionId;
     // @see \Drupal\designsystem\DesignHelper::getRealViewmode()

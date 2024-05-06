@@ -80,7 +80,7 @@ class ActionLinkItem extends LinkItem {
         ];
         if ($actionId && $actionUrl = $entity->getActionUrl($actionId)) {
           $value = [
-            'uri' => $actionUrl->toString(),
+            'uri' => $actionUrl->toUriString(),
             'title' => $entity->getActionLabel($actionId),
           ];
         }
