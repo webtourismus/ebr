@@ -101,7 +101,11 @@
       endDate = new Date();
       endDate.setHours(12,0,0,0);
       endDate.setDate(endDate.getDate() + Object.keys(availabilities).length);
-      runFlatpickr();
+      if (window.flatpickr) {
+        runFlatpickr();
+      } else {
+        document.addEventListener('flatpickr:loaded', () => {$data.runFlatpickr()}, {once: true});
+      }
     })()">
     <input type="hidden" class="hidden" x-ref="flatpickr" name="dummy_flatpickr_anchor" />
   </div>
