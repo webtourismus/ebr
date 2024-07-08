@@ -1,0 +1,8 @@
+name: 'EBR Accommodation: External URI'
+type: module
+description: 'Provides contextual call-to-action links for room and package nodes by redirecting to an external URI.'
+package: Entity business rules
+core_version_requirement: ^10.1
+dependencies:
+  - ebr:ebr
+  - ebr:ebr_accommodation

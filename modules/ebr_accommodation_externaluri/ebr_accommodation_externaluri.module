@@ -1,0 +1,160 @@
+<?php
+
+/**
+ * @file
+ * Main module file.
+ */
+
+declare(strict_types = 1);
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\ebr_accommodation\Entity\AccommodationBase;
+use Drupal\ebr_accommodation_externaluri\Entity\AccommodationExternalUri;
+use Drupal\ebr_accommodation_externaluri\Entity\PackageExternalUri;
+use Drupal\ebr_accommodation_externaluri\Entity\RoomExternalUri;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\Entity\BaseFieldOverride;
+use Drupal\ebr\EntityBusinessrules;
+use Drupal\link\LinkItemInterface;
+
+/**
+ * Implements hook_entity_bundle_info_alter().
+ */
+function ebr_accommodation_externaluri_entity_bundle_info_alter(array &$bundles): void {
+  if (isset($bundles['node'][AccommodationBase::BUNDLE_ROOM])) {
+    $bundles['node'][AccommodationBase::BUNDLE_ROOM]['class'] = RoomExternalUri::class;
+  }
+  if (isset($bundles['node'][AccommodationBase::BUNDLE_PACKAGE])) {
+    $bundles['node'][AccommodationBase::BUNDLE_PACKAGE]['class'] = PackageExternalUri::class;
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_field_info().
+ */
+function ebr_accommodation_externaluri_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+  $fields = [];
+
+  // Whether the hook implementation was called for our group type.
+  if ($entity_type->id() == 'node' &&
+    in_array($bundle, [AccommodationBase::BUNDLE_PACKAGE, AccommodationBase::BUNDLE_ROOM]) &&
+    !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE])
+  ) {
+    // Overrride base ebr_accommodation field.
+    $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE], $bundle);
+    $field->setDefaultValue(AccommodationExternalUri::DATASOURCE);
+    $field->setDescription(t('If value is "<code>@remote_datasource</code>" and "<code>External URI</code>" is configured in site settings, rooms and packages with a "<code>remote_id</code>" receive an externally redirected action link.', ["@remote_datasource" => AccommodationExternalUri::DATASOURCE]));
+    $fields[EntityBusinessrules::FIELD_REMOTE_DATASOURCE] = $field;
+  }
+
+  return $fields;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function ebr_accommodation_externaluri_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
+  $config = \Drupal::configFactory()->getEditable('system.site');
+  $bookLink = $config->get('ebr_external_uri.book');
+  $enquiryLink = $config->get('ebr_external_uri.enquiry');
+
+  if ($bookLink) {
+    \Drupal::service('ebr.service')->renderRule(
+      $form,
+      'accommodation',
+      t('Accommodation'),
+      t('The node where field "<code>internal_id</code>" = "<code>@action</code>" will be redirected to <code>%uri</code>.', [
+          '%uri' => $bookLink,
+          '@action' => AccommodationBase::ACTION_BOOK,
+        ]),
+    );
+  }
+
+  if ($enquiryLink) {
+    \Drupal::service('ebr.service')->renderRule(
+      $form,
+      'accommodation',
+      t('Accommodation'),
+      t('The node where field "<code>internal_id</code>" = "<code>@action</code>" will be redirected to <code>%uri</code>.', [
+          '%uri' => $enquiryLink,
+          '@action' => AccommodationBase::ACTION_ENQUIRY,
+        ]),
+    );
+  }
+
+  $form['ebr_external_uri'] = [
+    '#type' => 'details',
+    '#title' => AccommodationExternalUri::NAME,
+    '#open' => ($bookLink || $enquiryLink) ? FALSE : TRUE,
+    '#tree' => TRUE,
+  ];
+  $form['ebr_external_uri']['book'] = [
+    '#type' => 'url',
+    '#title' => t('Booking URI'),
+    '#description' => t('An external URI to which the interal "<code>@action</code>" node will be redirected to. You can use Twig variables (Entity) "<code>{{ node }}</code>", (string) "<code>{{ action }}</code>" and (LanguageManager) "<code>{{ language }}</code>".', [
+      '@action' => AccommodationBase::ACTION_BOOK,
+    ]),
+    '#placeholder' => 'https://www.external-booking-tool.com?category={{ node.remote_id.value }}&lang={{ language.id() }}',
+    '#required' => FALSE,
+    '#default_value' => $bookLink,
+    '#link_type' => LinkItemInterface::LINK_EXTERNAL,
+  ];
+  $form['ebr_external_uri']['enquiry'] = [
+    '#type' => 'url',
+    '#title' => t('Enquiry URI'),
+    '#description' => t('An external URI to which the interal "<code>@action</code>" node will be redirected to. You can use Twig variables (Entity) "<code>{{ node }}</code>", (string) "<code>{{ action }}</code>" and (LanguageManager) "<code>{{ language }}</code>".', [
+      '@action' => AccommodationBase::ACTION_ENQUIRY,
+    ]),
+    '#placeholder' => 'https://www.external-enquiry-tool.com?category={{ node.remote_id.value }}&lang={{ language.id() }}',
+    '#required' => FALSE,
+    '#default_value' => $enquiryLink,
+    '#link_type' => LinkItemInterface::LINK_EXTERNAL,
+  ];
+  $form['#validate'][] = 'ebr_accommodation_externaluri_site_settings_validate';
+  $form['#submit'][] = 'ebr_accommodation_externaluri_site_settings_submit';
+}
+
+/**
+ * Submit form callback for system site settings form.
+ */
+function ebr_accommodation_externaluri_site_settings_submit(&$form, FormStateInterface $form_state): void {
+  \Drupal::service('config.factory')
+    ->getEditable('system.site')
+    ->set('ebr_external_uri.book', $form_state->getValue(['ebr_external_uri', 'book']))
+    ->set('ebr_external_uri.enquiry', $form_state->getValue(['ebr_external_uri', 'enquiry']))
+    ->save();
+}
+
+/**
+ * Validate form callback for system site settings form.
+ */
+function ebr_accommodation_externaluri_site_settings_validate(&$form, FormStateInterface $form_state): void {
+  $bookLink = $form_state->getValue(['ebr_external_uri', 'book']);
+  $enquiryLink = $form_state->getValue(['ebr_external_uri', 'enquiry']);
+
+  if (empty($bookLink) && empty($enquiryLink)) {
+    $form_state->setErrorByName(
+      '',
+      t('At least one of the external URIs (book or enquiry) must not be empty.')
+    );
+  }
+
+  // Suppress error messages due {{Twig}} variables in URI.
+  $formErrors = $form_state->getErrors();
+  $looksLikeErrorFromTwigVariableInUri = FALSE;
+  if ($bookLink && isset($formErrors['ebr_external_uri][book']) && strpos($bookLink, '{{') && strpos($bookLink, '}}')) {
+    $looksLikeErrorFromTwigVariableInUri = TRUE;
+    unset($formErrors['ebr_external_uri][book']);
+  }
+  if ($enquiryLink && isset($formErrors['ebr_external_uri][enquiry']) && strpos($enquiryLink, '{{') && strpos($enquiryLink, '}}')) {
+    $looksLikeErrorFromTwigVariableInUri = TRUE;
+    unset($formErrors['ebr_external_uri][enquiry']);
+  }
+  if ($looksLikeErrorFromTwigVariableInUri) {
+    $form_state->clearErrors();
+    foreach ($formErrors as $name => $msg) {
+      $form_state->setErrorByName($name, $msg);
+    }
+  }
+}
+

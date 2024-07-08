@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions.
+ */
+
+declare(strict_types = 1);
+
+/**
+ * Implements hook_uninstall().
+ */
+function ebr_accommodation_externaluri_uninstall(): void {
+  $config = \Drupal::configFactory()->getEditable('system.site');
+  $config->clear('ebr_external_uri');
+  $config->save(TRUE);
+}

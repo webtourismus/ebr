@@ -152,7 +152,7 @@ msgstr "Seitentypen \"<code>room</code>\" und \"<code>package</code>\" mit ausge
 
 #: modules/contrib/ebr/modules/ebr_accommodation/ebr_accommodation.module:83
 msgid "Node types \"<code>room</code>\" and \"<code>package</code>\" with fields \"<code>remote_id</code>\" and \"<code>remote_datasource</code>\" filled receive a \"@action\" action button."
-msgstr "Seitentypen \"<code>room</code>\" und \"<code>package</code>\" mit ausgefülltem Feld \"<code>remote_id</code>\" and \"<code>remote_datasource</code>\" erhalten einen \"@action\" Aktions-Button."
+msgstr "Seitentypen \"<code>room</code>\" und \"<code>package</code>\" mit ausgefülltem Feld \"<code>remote_id</code>\" und \"<code>remote_datasource</code>\" erhalten einen \"@action\" Aktions-Button."
 
 #: modules/contrib/ebr/modules/ebr_accommodation/ebr_accommodation.info.yml:0
 msgid "EBR Accommodation: Nodes and action links"
@@ -160,7 +160,7 @@ msgstr "EBR Accommodation: Seitentypen und Aktions-Links"
 
 #: modules/contrib/ebr/modules/ebr_accommodation/ebr_accommodation.info.yml:0
 msgid "Provides the accommodation related node bundles \"room\" and \"package\", and contextual call-to-action URLs."
-msgstr "Stellt die Unterkunfts-bezogenen Seitentypen \"room\" and \"package\" bereit, und kontext-spezifische Call-To-Action Links."
+msgstr "Stellt die Unterkunfts-bezogenen Seitentypen \"room\" und \"package\" bereit, und kontext-spezifische Call-To-Action Links."
 
 #: modules/contrib/ebr/modules/ebr_accommodation/ebr_accommodation.links.action.yml:0
 msgid "Create new room"
@@ -490,3 +490,22 @@ msgctxt "anfragen"
 msgid "Enquiry"
 msgstr "Anfragen"
 
+#: modules/contrib/ebr/modules/ebr_accommodation_externaluri/ebr_accommodation_externaluri.module
+msgid "The node where field \"<code>internal_id</code>\" = \"<code>@action</code>\" will be redirected to <code>%uri</code>."
+msgstr "Die Seite mit Feld \"<code>internal_id</code>\" = \"<code>@action</code>\" wird weitergeleitet zu <code>%uri</code>."
+
+#: modules/contrib/ebr/modules/ebr_accommodation_externaluri/ebr_accommodation_externaluri.module
+msgid "External URI"
+msgstr "Externe URI"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_externaluri/ebr_accommodation_externaluri.module
+msgid "Booking URI"
+msgstr "Buchung URI"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_externaluri/ebr_accommodation_externaluri.module
+msgid "Enquiry URI"
+msgstr "Anfrage URI"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_externaluri/ebr_accommodation_externaluri.module
+msgid "An external URI to which the interal \"<code>@action</code>\" node will be redirected to. You can use Twig variables (Entity) \"<code>{{ node }}</code>\", (string) \"<code>{{ action }}</code>\" and (LanguageManager) \"<code>{{ language }}</code>\"."
+msgstr "Eine externe URI zu welcher die interne \"<code>@action</code>\" Seite weitergeleitet wird. Sie können die Twig Variablen (Entity) \"<code>{{ node }}</code>\", (string) \"<code>{{ action }}</code>\" und (LanguageManager) \"<code>{{ language }}</code>\" verwenden."

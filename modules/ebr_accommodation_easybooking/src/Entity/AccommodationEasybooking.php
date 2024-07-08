@@ -40,7 +40,7 @@ abstract class AccommodationEasybooking extends AccommodationBase implements Wid
   public const WIDGET_PRICECOMPARISON = 'pricecomparison';
 
   /**
-   * The URL prefix for Casablanca Web Widgets Info Page.
+   * The URL prefix for EasyBooking Web Widgets Info Page.
    *
    * The final url has customer ID and serial nr. as query params appended, like
    * 'https://www.easy-booking.at/preview/?...&cid=1234&serialNo=1111-2222-3333-4444-5555-6666-7777...'.
