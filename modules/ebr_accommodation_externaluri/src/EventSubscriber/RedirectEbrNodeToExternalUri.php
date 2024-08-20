@@ -2,6 +2,7 @@
 
 namespace Drupal\ebr_accommodation_externaluri\EventSubscriber;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
@@ -108,7 +109,12 @@ class RedirectEbrNodeToExternalUri implements EventSubscriberInterface {
       ],
     ];
     try {
-      $redirectUrl = trim($this->renderer->renderPlain($build));
+      $redirectUrl = DeprecationHelper::backwardsCompatibleCall(
+        currentVersion: \Drupal::VERSION,
+        deprecatedVersion: '10.3',
+        currentCallable: fn() => trim($this->renderer->renderInIsolation($build)),
+        deprecatedCallable: fn() => trim($this->renderer->renderPlain($build)),
+      );
     }
     catch (\Exception $exception) {
       /* fail silently, just pass the url as is */

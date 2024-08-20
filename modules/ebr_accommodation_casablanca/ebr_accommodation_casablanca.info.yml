@@ -2,7 +2,7 @@ name: 'EBR Accommodation: Casablanca PMS'
 type: module
 description: 'Provides contextual call-to-action links for Casablanca PMS entites.'
 package: Entity business rules
-core_version_requirement: ^10.1
+core_version_requirement: ^10.3 || ^11
 dependencies:
   - ebr:ebr
   - ebr:ebr_accommodation

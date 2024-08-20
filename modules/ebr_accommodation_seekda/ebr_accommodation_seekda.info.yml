@@ -2,7 +2,7 @@ name: 'EBR Accommodation: Seekda CM'
 type: module
 description: 'Imports Seekda CM data and provides contextual call-to-action links for accommodation entites.'
 package: Entity business rules
-core_version_requirement: ^10.1
+core_version_requirement: ^10.3 || ^11
 dependencies:
   - drupal:migrate
   - migrate_tools:migrate_tools
