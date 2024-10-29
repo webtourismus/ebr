@@ -18,10 +18,29 @@ use Drupal\ebr\EntityBusinessrules;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
- * Implements hook_entity_base_field_info().
+ * Adds the base fields "remote_id", "remote_datasource" and "internal_id" to entity types.
+ *
+ * This hook is only fired during the installation of a module. Changing the code or its parameters
+ * later will not trigger database schema updates required for field storage!
+ *
+ * Do not use this hook with the same entity type in different modules!
+ * This would cause problems when uninstalling one of these modules.
  */
 function ebr_entity_base_field_info(EntityTypeInterface $entity_type): array {
-  if (!in_array($entity_type->id(), \Drupal::service('ebr.service')->getEntityTypes())) {
+  return _install_ebr_base_fields_by_entity_type($entity_type, \Drupal::service('ebr.service')->getEntityTypes());
+}
+
+/**
+ * @see ebr_entity_base_field_info()
+ *
+ * This helper function is outsourced from the "real" hook, so that other modules
+ * can re-use the EBR logic during their own installation routine.
+ *
+ * The other module must call this function only with their entity_type IDs,
+ * so pre-existing config from this module or third party modules is not overwritten.
+ */
+function _install_ebr_base_fields_by_entity_type(EntityTypeInterface $entity_type, array $entityTypes): array {
+  if (!in_array($entity_type->id(), $entityTypes)) {
     return [];
   }
 

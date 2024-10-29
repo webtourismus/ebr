@@ -163,13 +163,13 @@ trait ParagraphTeaserableTrait {
     if ( $ownFieldDefinition->getFieldStorageDefinition()->getSetting('target_type') == 'media' &&
       $referencedFieldDefinition->getType() == 'image'
     ) {
-      // if we need to render a foreign entity's plain image field, we assume there is a 1:1 mapping
+      // If we need to render a foreign entity's plain image field, we assume there is a 1:1 mapping
       // between media entity view modes and responsive image styles
-      $responsiveImageStyle = \Drupal::config('responsive_image.style.' . ($imageViewMode ?? $viewMode))?->get('id');
+      $responsiveImageStyle = \Drupal::config('responsive_image.styles.' . ($imageViewMode ?? $viewMode))?->get('id');
       if ($responsiveImageStyle) {
         $displayOptions = [
-          'label' => 'hidden',
           'type' => 'responsive_image',
+          'label' => 'hidden',
           'settings' => [
             'responsive_image_style' => $responsiveImageStyle,
           ],
