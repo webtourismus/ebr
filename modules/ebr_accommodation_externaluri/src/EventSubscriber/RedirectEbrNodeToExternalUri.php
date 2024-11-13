@@ -94,8 +94,6 @@ class RedirectEbrNodeToExternalUri implements EventSubscriberInterface {
       return;
     }
 
-    $redirectUrl .= (strpos($redirectUrl, '?') === FALSE ? '?' : '&') . $request->getQueryString();
-
     $sourceNode = $this->entityTypeManager->getStorage('node')->load(
       $request->query->get('package') ?? $request->query->get('room')
     );

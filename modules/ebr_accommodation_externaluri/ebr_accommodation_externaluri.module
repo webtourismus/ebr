@@ -98,6 +98,12 @@ function ebr_accommodation_externaluri_form_system_site_information_settings_alt
     '#required' => FALSE,
     '#default_value' => $bookLink,
     '#link_type' => LinkItemInterface::LINK_EXTERNAL,
+    /**
+     * URL max length is 2048, but this URL string actually is a Twig template and might contain Twig logic
+     * and Twig variables. So we allow up to 4000 chars and hope that, after the Twig logic is executed,
+     * the resulting plain URL string will be shorter than 2048 characters.
+     */
+    '#maxlength' => 4000,
   ];
   $form['ebr_external_uri']['enquiry'] = [
     '#type' => 'url',
@@ -109,6 +115,12 @@ function ebr_accommodation_externaluri_form_system_site_information_settings_alt
     '#required' => FALSE,
     '#default_value' => $enquiryLink,
     '#link_type' => LinkItemInterface::LINK_EXTERNAL,
+    /**
+     * URL max length is 2048, but this URL string actually is a Twig template and might contain Twig logic
+     * and Twig variables. So we allow up to 4000 chars and hope that, after the Twig logic is executed,
+     * the resulting plain URL string will be shorter than 2048 characters.
+     */
+    '#maxlength' => 4000,
   ];
   $form['#validate'][] = 'ebr_accommodation_externaluri_site_settings_validate';
   $form['#submit'][] = 'ebr_accommodation_externaluri_site_settings_submit';

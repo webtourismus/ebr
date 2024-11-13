@@ -21,7 +21,7 @@ class EbrController extends ControllerBase {
    * This is a convenient helper to create links to entites by the user-editable internal_id field
    * instead of the entity ID (which can not be edited by the user and might be different accross environments).
    */
-  public function doRedirection(string $entity_type, string $internal_id, string $link_template = 'canonical', Request $request) {
+  public function doRedirection(Request $request, string $entity_type, string $internal_id, string $link_template = 'canonical') {
     $entities = $this->entityTypeManager()->getStorage($entity_type)->loadByProperties([
       'internal_id' => $internal_id,
     ]);
