@@ -7,8 +7,8 @@
     if (typeof jQuery != "undefined") {
       if (jQuery.fn.ebPriceOmeter) {
         jQuery("#ebPriceOmeter").ebPriceOmeter({
-          customerId: "{{- drupal_config('system.site', 'easybooking.customer_id') -}}",
-          serialNo: "{{- drupal_config('system.site', 'easybooking.serial_nr') -}}",
+          customerId: "{{- drupal_config('ebr_accommodation_easybooking.settings', 'customer_id') -}}",
+          serialNo: "{{- drupal_config('ebr_accommodation_easybooking.settings', 'serial_nr') -}}",
           localeId: "{{- entity.getWidgetLangId(langcode) -}}",
           showHeading: "off",
           bookingPage: "popup",

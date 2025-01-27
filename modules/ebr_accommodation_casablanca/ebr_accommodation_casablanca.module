@@ -46,8 +46,8 @@ function ebr_accommodation_casablanca_entity_bundle_field_info(EntityTypeInterfa
     $field->setDescription(t('If value is "<code>@remote_datasource</code>", rooms and packages with an "<code>remote_id</code>" receive a booking link.', ["@remote_datasource" => AccommodationCasablanca::DATASOURCE]));
     $fields[EntityBusinessrules::FIELD_REMOTE_DATASOURCE] = $field;
 
-    $config = \Drupal::configFactory()->getEditable('system.site');
-    $infolink = $config->get('casablanca.info_link');
+    $config = \Drupal::configFactory()->getEditable('ebr_accommodation_casablanca.settings');
+    $infolink = $config->get('info_link');
     if ($infolink) {
       $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_ID], $bundle);
       $field->setDescription(t('@pms @type ID, see <a href="@url" target="_blank">@short_url</a>',
@@ -82,8 +82,8 @@ function ebr_accommodation_casablanca_form_system_site_information_settings_alte
       "@pms" => AccommodationCasablanca::NAME,
     ]),
   );
-  $config = \Drupal::configFactory()->getEditable('system.site');
-  $infolink = $config->get('casablanca.info_link');
+  $config = \Drupal::configFactory()->getEditable('ebr_accommodation_casablanca.settings');
+  $infolink = $config->get('info_link');
   $form['casablanca'] = [
     '#type' => 'details',
     '#title' => AccommodationCasablanca::NAME,
@@ -99,21 +99,10 @@ function ebr_accommodation_casablanca_form_system_site_information_settings_alte
     ),
     '#placeholder' => AccommodationCasablanca::INFOLINK_PREFIX . 'XXXXXXXXXX',
     '#required' => TRUE,
-    '#default_value' => $infolink,
+    '#config_target' => 'ebr_accommodation_casablanca.settings:info_link',
     '#link_type' => LinkItemInterface::LINK_EXTERNAL,
   ];
   $form['#validate'][] = 'ebr_accommodation_casablanca_site_settings_validate';
-  $form['#submit'][] = 'ebr_accommodation_casablanca_site_settings_submit';
-}
-
-/**
- * Submit form callback for system site settings form.
- */
-function ebr_accommodation_casablanca_site_settings_submit(&$form, FormStateInterface $form_state): void {
-  \Drupal::service('config.factory')
-    ->getEditable('system.site')
-    ->set('casablanca.info_link', $form_state->getValue(['casablanca', 'info_link']))
-    ->save();
 }
 
 /**

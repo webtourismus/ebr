@@ -25,10 +25,19 @@ function ebr_accommodation_easybooking_install(): void {
 }
 
 /**
- * Implements hook_uninstall().
+ * Move all configuration to ebr_accommodation_easybooking.settings
  */
-function ebr_accommodation_easybooking_uninstall(): void {
-  $config = \Drupal::configFactory()->getEditable('system.site');
-  $config->clear('easybooking');
-  $config->save(TRUE);
+function ebr_accommodation_easybooking_update_10001(array &$sandbox): ?string {
+  $oldConfig = \Drupal::configFactory()->getEditable('system.site');
+  if (!empty($oldConfig->get('easybooking.info_link'))) {
+    $newConfig = \Drupal::configFactory()->getEditable('ebr_accommodation_easybooking.settings');
+    $newConfig->set('info_link', $oldConfig->get('easybooking.info_link'));
+    $newConfig->set('customer_id', $oldConfig->get('easybooking.customer_id'));
+    $newConfig->set('serial_nr', $oldConfig->get('easybooking.serial_nr'));
+    $newConfig->save();
+  }
+  $oldConfig->clear('easybooking');
+  $oldConfig->save();
+  return NULL;
 }
+

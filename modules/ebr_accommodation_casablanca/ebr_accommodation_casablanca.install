@@ -1,0 +1,19 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Move all configuration to ebr_accommodation_casablanca.settings
+ */
+function ebr_accommodation_casablanca_update_10001(array &$sandbox): ?string {
+  $oldConfig = \Drupal::configFactory()->getEditable('system.site');
+  if (!empty($oldConfig->get('casablanca.info_link'))) {
+    $newConfig = \Drupal::configFactory()->getEditable('ebr_accommodation_casablanca.settings');
+    $newConfig->set('info_link', $oldConfig->get('casablanca.info_link'));
+    $newConfig->save();
+  }
+  $oldConfig->clear('casablanca');
+  $oldConfig->save();
+  return NULL;
+}
+

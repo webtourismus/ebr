@@ -29,9 +29,6 @@ function ebr_accommodation_seekda_install() {
  * Implements hook_uninstall().
  */
 function ebr_accommodation_seekda_uninstall(): void {
-  $config = \Drupal::configFactory()->getEditable('system.site');
-  $config->clear('seekda');
-  $config->save(TRUE);
   $migrations = \Drupal::entityTypeManager()->getStorage('migration')->loadByProperties(['migration_group' => 'seekda']);
   foreach ($migrations as $migration) {
     $migration->delete();
@@ -41,3 +38,24 @@ function ebr_accommodation_seekda_uninstall(): void {
     $migrationGroup->delete();
   }
 }
+
+/**
+ * Move all configuration to ebr_accommodation_seekda.settings
+ */
+function ebr_accommodation_seekda_update_10001(array &$sandbox): ?string {
+  $oldConfig = \Drupal::configFactory()->getEditable('system.site');
+  if (!empty($oldConfig->get('seekda.property_code'))) {
+    $newConfig = \Drupal::configFactory()->getEditable('ebr_accommodation_seekda.settings');
+    $newConfig->set('property_code', $oldConfig->get('seekda.property_code'));
+    $newConfig->save();
+  }
+  if (!empty($oldConfig->get('seekda.kube_domain'))) {
+    $newConfig = \Drupal::configFactory()->getEditable('ebr_accommodation_seekda.settings');
+    $newConfig->set('kube_domain', $oldConfig->get('seekda.kube_domain'));
+    $newConfig->save();
+  }
+  $oldConfig->clear('seekda');
+  $oldConfig->save();
+  return NULL;
+}
+

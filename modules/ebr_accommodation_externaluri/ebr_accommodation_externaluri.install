@@ -8,10 +8,22 @@
 declare(strict_types = 1);
 
 /**
- * Implements hook_uninstall().
+ * Move all configuration to ebr_accommodation_externaluri.settings
  */
-function ebr_accommodation_externaluri_uninstall(): void {
-  $config = \Drupal::configFactory()->getEditable('system.site');
-  $config->clear('ebr_external_uri');
-  $config->save(TRUE);
+function ebr_accommodation_externaluri_update_10001(array &$sandbox): ?string {
+  $oldConfig = \Drupal::configFactory()->getEditable('system.site');
+  if (!empty($oldConfig->get('ebr_external_uri.book'))) {
+    $newConfig = \Drupal::configFactory()->getEditable('ebr_accommodation_externaluri.settings');
+    $newConfig->set('book', $oldConfig->get('ebr_external_uri.book'));
+    $newConfig->save();
+  }
+  if (!empty($oldConfig->get('ebr_external_uri.enquiry'))) {
+    $newConfig = \Drupal::configFactory()->getEditable('ebr_accommodation_externaluri.settings');
+    $newConfig->set('enquiry', $oldConfig->get('ebr_external_uri.enquiry'));
+    $newConfig->save();
+  }
+  $oldConfig->clear('ebr_external_uri');
+  $oldConfig->save();
+  return NULL;
 }
+

@@ -1,0 +1,9 @@
+ebr_accommodation_externaluri.settings:
+  type: config_object
+  mapping:
+    book:
+      type: uri
+      label: 'Redirect book node to external URI'
+    enquiry:
+      type: uri
+      label: 'Redirect enquiry node to external URI'

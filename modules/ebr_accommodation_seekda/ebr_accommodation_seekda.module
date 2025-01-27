@@ -51,7 +51,7 @@ function ebr_accommodation_seekda_entity_bundle_field_info(EntityTypeInterface $
     $fields[EntityBusinessrules::FIELD_REMOTE_DATASOURCE] = $field;
   }
 
-  $propertyCode = \Drupal::configFactory()->get('system.site')->get('seekda.property_code');
+  $propertyCode = \Drupal::configFactory()->get('ebr_accommodation_seekda.settings')->get('property_code');
 
   if ($entity_type->id() == 'node' &&
     $bundle == AccommodationBase::BUNDLE_ROOM &&
@@ -131,9 +131,9 @@ function ebr_accommodation_seekda_form_system_site_information_settings_alter(&$
         "@pms" => AccommodationSeekda::NAME,
       ]),
   );
-  $config = \Drupal::configFactory()->getEditable('system.site');
-  $propertyCode = $config->get('seekda.property_code');
-  $kubeDomain = $config->get('seekda.kube_domain');
+  $config = \Drupal::configFactory()->getEditable('ebr_accommodation_seekda.settings');
+  $propertyCode = $config->get('property_code');
+  $kubeDomain = $config->get('kube_domain');
   $form['seekda'] = [
     '#type' => 'details',
     '#title' => AccommodationSeekda::NAME,
@@ -147,7 +147,7 @@ function ebr_accommodation_seekda_form_system_site_information_settings_alter(&$
     '#placeholder' => 'S012345',
     '#pattern' => '[a-zA-Z0-9_\-]+',
     '#required' => TRUE,
-    '#default_value' => $propertyCode,
+    '#config_target' => 'ebr_accommodation_seekda.settings:property_code',
   ];
   $form['seekda']['kube_domain'] = [
     '#type' => 'url',
@@ -155,22 +155,10 @@ function ebr_accommodation_seekda_form_system_site_information_settings_alter(&$
     '#description' => t('You can find your domain at hotels.kognitiv.com > Booking Engine > Overview > Edit (pencil icon).'),
     '#placeholder' => 'https://booking.your-domain.com',
     '#required' => TRUE,
-    '#default_value' => $kubeDomain,
+    '#config_target' => 'ebr_accommodation_seekda.settings:kube_domain',
     '#link_type' => LinkItemInterface::LINK_EXTERNAL,
   ];
   $form['#validate'][] = 'ebr_accommodation_seekda_site_settings_validate';
-  $form['#submit'][] = 'ebr_accommodation_seekda_site_settings_submit';
-}
-
-/**
- * Submit form callback for system site settings form.
- */
-function ebr_accommodation_seekda_site_settings_submit(&$form, FormStateInterface $form_state): void {
-  \Drupal::service('config.factory')
-    ->getEditable('system.site')
-    ->set('seekda.property_code', $form_state->getValue(['seekda', 'property_code']))
-    ->set('seekda.kube_domain', $form_state->getValue(['seekda', 'kube_domain']))
-    ->save();
 }
 
 /**
@@ -218,8 +206,8 @@ function ebr_accommodation_seekda_site_settings_validate(&$form, FormStateInterf
 function ebr_accommodation_seekda_theme($existing, $type, $theme, $path) {
   $suggestions = [];
   $datasource = AccommodationSeekda::DATASOURCE;
-  $siteConfig = \Drupal::configFactory()->getEditable('system.site');
-  $propertyCode = $siteConfig->get('seekda.property_code');
+  $siteConfig = \Drupal::configFactory()->getEditable('ebr_accommodation_seekda.settings');
+  $propertyCode = $siteConfig->get('property_code');
   $apiToken = \Drupal::service('seekda.service')->getAccessToken();
   $seekdaConfig = \Drupal::configFactory()->getEditable('ebr_accommodation_seekda.settings');
   $days = $seekdaConfig->get('jsonapi_months') * 30;
@@ -285,10 +273,9 @@ function ebr_accommodation_seekda_migration_130_seekda_packages_en(): array {
  * @internal
  */
 function _ebr_accommodation_seekda_migration_seekda(string $langcode, bool $packages = FALSE): array {
-  $siteConfig = \Drupal::configFactory()->getEditable('system.site');
-  $propertyCode = $siteConfig->get('seekda.property_code');
-  $apiToken = \Drupal::service('seekda.service')->getAccessToken();
   $seekdaConfig = \Drupal::configFactory()->getEditable('ebr_accommodation_seekda.settings');
+  $propertyCode = $seekdaConfig->get('property_code');
+  $apiToken = \Drupal::service('seekda.service')->getAccessToken();
   $months = $seekdaConfig->get('jsonapi_months');
   $packages = var_export($packages, true);
   $url = "https://switch.seekda.com/switch/latest/json/ratesAverage.json?skd-property-code={$propertyCode}&token={$apiToken}&skd-language-code={$langcode}&skd-packages={$packages}&skd-months={$months}";
@@ -383,7 +370,8 @@ function ebr_accommodation_seekda_cron() {
     // error handling starts here
     $lastCronMail = \Drupal::state()->get("ebr_accommodation_seekda.last_cron_mail.{$migrationId}", 0);
     if ($requestTime >= $lastSuccessfulImport + $config->get('cron_warningmail_after') &&
-      $requestTime >= $lastCronMail + $config->get('cron_warningmail_repeat')
+      $requestTime >= $lastCronMail + $config->get('cron_warningmail_repeat') &&
+      !empty($config->get('cron_warningmail_to'))
     ) {
       $mailMessage = t(
         'The import @migration_id on @site_name has failed multiple times. The last successful import was on @date.',

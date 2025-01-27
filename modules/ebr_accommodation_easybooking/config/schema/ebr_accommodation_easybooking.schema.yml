@@ -1,16 +1,21 @@
-system.site:
+ebr_accommodation_easybooking.settings:
   type: config_object
+  label: 'EasyBooking settings'
   mapping:
-    casablanca:
-      type: mapping
-      label: 'EasyBooking'
-      mapping:
-        info_link:
-          type: uri
-          label: 'Web widgets info link'
-        customer_id:
-          type: string
-          label: 'Customer ID'
-        serial_nr:
-          type: string
-          label: 'Serial number'
+    info_link:
+      type: uri
+      label: 'Web widgets info link'
+    customer_id:
+      type: integer
+      label: 'Customer ID'
+      constraints:
+        Range:
+          min: 1
+          max: 999999
+    serial_nr:
+      type: string
+      label: 'Serial number'
+      constraints:
+        Regex:
+          pattern: '/\d{4}-\d{4}-\d{4}/'
+          message: 'Widget serial nr. must be the first 3 quadruples of the Info Link serialNo, pattern 1111-2222-3333'

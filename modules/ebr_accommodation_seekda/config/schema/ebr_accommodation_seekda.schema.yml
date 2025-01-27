@@ -1,13 +1,61 @@
-system.site:
+ebr_accommodation_seekda.settings:
   type: config_object
   mapping:
-    seekda:
-      type: mapping
-      label: 'Seekda'
-      mapping:
-        kube_domain:
-          type: uri
-          label: 'KUBE Domain'
-        property_code:
-          type: string
-          label: 'Seekda property code'
+    kube_domain:
+      type: uri
+      label: 'KUBE Domain'
+    property_code:
+      type: string
+      label: 'Seekda property code'
+    cron_interval:
+      type: integer
+      label: 'Cron interval'
+      constraints:
+        Range:
+          min: 60
+          max: 604800
+    cron_allowed_environments:
+      label: 'Environments allowed to run the cron job'
+      type: sequence
+      sequence:
+        type: machine_name
+        label: 'Envionment name, e.g. dev or prod'
+    cron_max_runtime:
+      type: integer
+      label: 'Max runtime of cronjob (will force cronjob status back to idle)'
+      constraints:
+        Range:
+          min: 10
+          max: 86400
+    cron_warningmail_after:
+      type: integer
+      label: 'Send warning mail when cron fails for X seconds'
+      constraints:
+        Range:
+          min: 120
+          max: 999999999
+    cron_warningmail_to:
+      type: email
+      label: 'Warning mail recipient (leave empty to disable warning mails)'
+      nullable: true
+    cron_warningmail_repeat:
+      type: integer
+      label: 'Repeat cron fail warning mails every X seconds'
+      constraints:
+        Range:
+          min: 120
+          max: 999999999
+    migrate_post_import_unpublish_package:
+      type: integer
+      label: 'Unpublish packages when it is not including in the response for X seconds'
+      constraints:
+        Range:
+          min: 120
+          max: 604800
+    jsonapi_months:
+      type: integer
+      label: 'Query the Seekda API for X months ahead'
+      constraints:
+        Range:
+          min: 1
+          max: 36

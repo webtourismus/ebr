@@ -48,8 +48,8 @@ function ebr_accommodation_easybooking_entity_bundle_field_info(EntityTypeInterf
     $field->setDescription(t('If value is "<code>@remote_datasource</code>", rooms and packages with an "<code>remote_id</code>" receive a booking link.', ["@remote_datasource" => AccommodationEasybooking::DATASOURCE]));
     $fields[EntityBusinessrules::FIELD_REMOTE_DATASOURCE] = $field;
 
-    $config = \Drupal::configFactory()->get('system.site');
-    $infolink = $config->get('easybooking.info_link');
+    $config = \Drupal::configFactory()->get('ebr_accommodation_easybooking.settings');
+    $infolink = $config->get('info_link');
     if ($infolink) {
       // Overrride base ebr_accommodation field.
       $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_ID], $bundle);
@@ -103,8 +103,8 @@ function ebr_accommodation_easybooking_form_system_site_information_settings_alt
         "@pms" => AccommodationEasybooking::NAME,
       ]),
   );
-  $config = \Drupal::configFactory()->getEditable('system.site');
-  $infolink = $config->get('easybooking.info_link');
+  $config = \Drupal::configFactory()->getEditable('ebr_accommodation_easybooking.settings');
+  $infolink = $config->get('info_link');
   $form['easybooking'] = [
     '#type' => 'details',
     '#title' => AccommodationEasybooking::NAME,
@@ -120,7 +120,7 @@ function ebr_accommodation_easybooking_form_system_site_information_settings_alt
     ),
     '#placeholder' => AccommodationEasybooking::INFOLINK_PREFIX . '?...&cid=1234&serialNo=1111-2222-3333-4444-5555-6666-7777...',
     '#required' => TRUE,
-    '#default_value' => $infolink,
+    '#config_target' => 'ebr_accommodation_easybooking.settings:info_link',
     '#link_type' => LinkItemInterface::LINK_EXTERNAL,
   ];
   $form['#validate'][] = 'ebr_accommodation_easybooking_site_settings_validate';
@@ -132,12 +132,13 @@ function ebr_accommodation_easybooking_form_system_site_information_settings_alt
  */
 function ebr_accommodation_easybooking_site_settings_submit(&$form, FormStateInterface $form_state): void {
   $infolink = $form_state->getValue(['easybooking', 'info_link']);
-  preg_match('|^https://www\.easy-booking\.at/preview/\?.*&cid=(\d{1,5}).*&serialNo=(\d{4}-\d{4}-\d{4})-\d{4}-\d{4}-\d{4}-\d{4}.*$|', $infolink, $ids);
+  // widgets need the first three quadruples of the serialNo
+  preg_match('|^https://www\.easy-booking\.at/preview/?.*&*cid=(\d{1,5}).*&serialNo=(\d{4}-\d{4}-\d{4})-\d{4}-\d{4}-\d{4}-\d{4}.*$|', $infolink, $ids);
   \Drupal::service('config.factory')
-    ->getEditable('system.site')
-    ->set('easybooking.info_link', $infolink)
-    ->set('easybooking.customer_id', $ids[1])
-    ->set('easybooking.serial_nr', $ids[2])
+    ->getEditable('ebr_accommodation_easybooking.settings')
+    ->set('info_link', $infolink)
+    ->set('customer_id', $ids[1])
+    ->set('serial_nr', $ids[2])
     ->save();
 }
 
@@ -153,7 +154,8 @@ function ebr_accommodation_easybooking_site_settings_validate(&$form, FormStateI
     );
     return;
   }
-  if (!preg_match('|^https://www\.easy-booking\.at/preview/\?.*&cid=\d{1,5}.*&serialNo=\d{4}-\d{4}-\d{4}-\d{4}-\d{4}-\d{4}-\d{4}.*$|', $infolink)) {
+  // the infolink "serialNo" has 7 quadruples, but the widgets later on will only use the first 3 quadruples
+  if (!preg_match('|^https://www\.easy-booking\.at/preview/?.*&*cid=\d{1,5}.*&serialNo=\d{4}-\d{4}-\d{4}-\d{4}-\d{4}-\d{4}-\d{4}.*$|', $infolink)) {
     $form_state->setErrorByName(
       'easybooking][info_link',
       t('@fieldname must be a link in the form of %url',

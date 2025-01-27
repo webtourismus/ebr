@@ -48,7 +48,7 @@ class Seekda {
    * Return the propery code for all Seekda Channel manager queries.
    */
   public function getPropertyCode(): string {
-    return $this->configFactory->get('system.site')->get('seekda.property_code');
+    return $this->configFactory->get('ebr_accommodation_seekda.settings')->get('property_code');
   }
 
 }

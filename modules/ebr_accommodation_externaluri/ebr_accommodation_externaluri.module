@@ -54,9 +54,9 @@ function ebr_accommodation_externaluri_entity_bundle_field_info(EntityTypeInterf
  * Implements hook_form_FORM_ID_alter().
  */
 function ebr_accommodation_externaluri_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
-  $config = \Drupal::configFactory()->getEditable('system.site');
-  $bookLink = $config->get('ebr_external_uri.book');
-  $enquiryLink = $config->get('ebr_external_uri.enquiry');
+  $config = \Drupal::configFactory()->getEditable('ebr_accommodation_externaluri.settings');
+  $bookLink = $config->get('book');
+  $enquiryLink = $config->get('enquiry');
 
   if ($bookLink) {
     \Drupal::service('ebr.service')->renderRule(
@@ -96,7 +96,7 @@ function ebr_accommodation_externaluri_form_system_site_information_settings_alt
     ]),
     '#placeholder' => 'https://www.external-booking-tool.com?category={{ node.remote_id.value }}&lang={{ language.id() }}',
     '#required' => FALSE,
-    '#default_value' => $bookLink,
+    '#config_target' => 'ebr_accommodation_externaluri.settings:book',
     '#link_type' => LinkItemInterface::LINK_EXTERNAL,
     /**
      * URL max length is 2048, but this URL string actually is a Twig template and might contain Twig logic
@@ -113,7 +113,7 @@ function ebr_accommodation_externaluri_form_system_site_information_settings_alt
     ]),
     '#placeholder' => 'https://www.external-enquiry-tool.com?category={{ node.remote_id.value }}&lang={{ language.id() }}',
     '#required' => FALSE,
-    '#default_value' => $enquiryLink,
+    '#config_target' => 'ebr_accommodation_externaluri.settings:enquiry',
     '#link_type' => LinkItemInterface::LINK_EXTERNAL,
     /**
      * URL max length is 2048, but this URL string actually is a Twig template and might contain Twig logic
@@ -123,18 +123,6 @@ function ebr_accommodation_externaluri_form_system_site_information_settings_alt
     '#maxlength' => 4000,
   ];
   $form['#validate'][] = 'ebr_accommodation_externaluri_site_settings_validate';
-  $form['#submit'][] = 'ebr_accommodation_externaluri_site_settings_submit';
-}
-
-/**
- * Submit form callback for system site settings form.
- */
-function ebr_accommodation_externaluri_site_settings_submit(&$form, FormStateInterface $form_state): void {
-  \Drupal::service('config.factory')
-    ->getEditable('system.site')
-    ->set('ebr_external_uri.book', $form_state->getValue(['ebr_external_uri', 'book']))
-    ->set('ebr_external_uri.enquiry', $form_state->getValue(['ebr_external_uri', 'enquiry']))
-    ->save();
 }
 
 /**

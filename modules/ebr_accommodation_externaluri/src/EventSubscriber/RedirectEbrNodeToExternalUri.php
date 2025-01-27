@@ -66,8 +66,8 @@ class RedirectEbrNodeToExternalUri implements EventSubscriberInterface {
       return;
     }
 
-    $externalBookUri = $this->config->get('system.site')->get('ebr_external_uri.book');
-    $externalEnquiryUri = $this->config->get('system.site')->get('ebr_external_uri.enquiry');
+    $externalBookUri = $this->config->get('ebr_accommodation_externaluri.settings')->get('book');
+    $externalEnquiryUri = $this->config->get('ebr_accommodation_externaluri.settings')->get('enquiry');
 
     if (empty($externalBookUri) && empty($externalEnquiryUri)) {
       return;

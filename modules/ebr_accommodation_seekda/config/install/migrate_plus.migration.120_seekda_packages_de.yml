@@ -231,3 +231,8 @@ destination:
 migration_dependencies:
   required:
     - 100_seekda_rooms_de
+
+dependencies:
+  enforced:
+    module:
+      - ebr_accommodation_seekda

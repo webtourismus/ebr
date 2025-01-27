@@ -64,7 +64,7 @@ class RedirectBookNodeToKube implements EventSubscriberInterface {
       return;
     }
 
-    $kubeDomain = $this->config->get('system.site')->get('seekda.kube_domain');
+    $kubeDomain = $this->config->get('ebr_accommodation_seekda.settings')->get('kube_domain');
     if (empty($kubeDomain)) {
       return;
     }

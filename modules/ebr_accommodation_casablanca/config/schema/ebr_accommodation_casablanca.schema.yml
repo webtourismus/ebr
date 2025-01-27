@@ -1,10 +1,7 @@
-system.site:
+ebr_accommodation_casablanca.settings:
   type: config_object
+  label: 'Casablanca settings'
   mapping:
-    casablanca:
-      type: mapping
-      label: 'Casablanca'
-      mapping:
-        info_link:
-          type: uri
-          label: 'Web widgets info link'
+    info_link:
+      type: uri
+      label: 'Web widgets info link'

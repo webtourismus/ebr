@@ -51,14 +51,14 @@ abstract class AccommodationEasybooking extends AccommodationBase implements Wid
    * Return the customer ID (cid) for EasyBooking Widgets.
    */
   public function getCustomerId(): string {
-    return \Drupal::configFactory()->get('system.site')->get('easybooking.customer_id');
+    return \Drupal::configFactory()->get('ebr_accommodation_easybooking.settings')->get('customer_id');
   }
 
   /**
    * Return the serial number (serialNr) for EasyBooking Widgets.
    */
   public function getSerialNr(): string {
-    return \Drupal::configFactory()->get('system.site')->get('easybooking.serial_nr');
+    return \Drupal::configFactory()->get('ebr_accommodation_easybooking.settings')->get('serial_nr');
   }
 
   /**
