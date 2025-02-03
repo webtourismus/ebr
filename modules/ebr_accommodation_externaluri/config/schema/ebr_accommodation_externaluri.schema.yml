@@ -4,6 +4,8 @@ ebr_accommodation_externaluri.settings:
     book:
       type: uri
       label: 'Redirect book node to external URI'
+      nullable: true
     enquiry:
       type: uri
       label: 'Redirect enquiry node to external URI'
+      nullable: true
