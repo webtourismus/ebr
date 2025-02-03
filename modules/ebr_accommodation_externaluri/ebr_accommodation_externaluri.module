@@ -7,6 +7,7 @@
 
 declare(strict_types = 1);
 
+use Drupal\Core\Form\ConfigTarget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
 use Drupal\ebr_accommodation_externaluri\Entity\AccommodationExternalUri;
@@ -96,7 +97,11 @@ function ebr_accommodation_externaluri_form_system_site_information_settings_alt
     ]),
     '#placeholder' => 'https://www.external-booking-tool.com?category={{ node.remote_id.value }}&lang={{ language.id() }}',
     '#required' => FALSE,
-    '#config_target' => 'ebr_accommodation_externaluri.settings:book',
+    '#config_target' => new ConfigTarget(
+      'ebr_accommodation_externaluri.settings',
+      'book',
+      toConfig: static fn (string $value) => $value ?: NULL,
+    ),
     '#link_type' => LinkItemInterface::LINK_EXTERNAL,
     /**
      * URL max length is 2048, but this URL string actually is a Twig template and might contain Twig logic
@@ -113,7 +118,11 @@ function ebr_accommodation_externaluri_form_system_site_information_settings_alt
     ]),
     '#placeholder' => 'https://www.external-enquiry-tool.com?category={{ node.remote_id.value }}&lang={{ language.id() }}',
     '#required' => FALSE,
-    '#config_target' => 'ebr_accommodation_externaluri.settings:enquiry',
+    '#config_target' => new ConfigTarget(
+      'ebr_accommodation_externaluri.settings',
+      'enquiry',
+      toConfig: static fn (string $value) => $value ?: NULL,
+    ),
     '#link_type' => LinkItemInterface::LINK_EXTERNAL,
     /**
      * URL max length is 2048, but this URL string actually is a Twig template and might contain Twig logic
