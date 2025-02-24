@@ -10,6 +10,7 @@ use Drupal\ebr\EntityBusinessrules;
 use Drupal\entity_clone\Event\EntityCloneEvent;
 use Drupal\entity_clone\Event\EntityCloneEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 
 class EbrEntityCloneEventSubscriber implements EventSubscriberInterface {
 
@@ -33,14 +34,15 @@ class EbrEntityCloneEventSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * An example event subscriber.
-   *
-   * Dispatched before an entity is cloned and saved.
+   * Clear EBR fields on the cloned target.
    *
    * @see \Drupal\entity_clone\Event\EntityCloneEvents::PRE_CLONE
    */
   public function clearEbrFields(EntityCloneEvent $event): void {
     $newEntity = $event->getClonedEntity();
+    if (!($newEntity instanceof FieldableEntityInterface)) {
+      return;
+    }
     $fieldsToClear = [
       EntityBusinessrules::FIELD_INTERNAL_ID,
       EntityBusinessrules::FIELD_REMOTE_ID,
