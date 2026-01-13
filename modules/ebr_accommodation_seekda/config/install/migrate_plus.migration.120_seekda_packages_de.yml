@@ -154,7 +154,7 @@ process:
           -
             plugin: entity_generate
             entity_type: file
-            bundle: 1
+            bundle: '1'
             bundle_key: status
             value_key: uri
             ignore_case: false
