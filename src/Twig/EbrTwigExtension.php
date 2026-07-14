@@ -33,14 +33,18 @@ class EbrTwigExtension extends AbstractExtension {
     ?string $langCode = NULL,
     bool $checkAccess = FALSE
   ): ?EntityInterface {
-    $entity = $this->ebr->getEntity($entityTypeId, $internalId);
+    $entity = $this->ebr->getEntity($entityTypeId, $internalIdi, $langCode);
+
     if (!$entity) {
       return NULL;
     }
+
     $access = $checkAccess ? $entity->access('view', NULL, TRUE) : AccessResult::allowed();
+
     if (!$access->isAllowed()) {
       return NULL;
     }
+
     return $entity;
   }
 }
