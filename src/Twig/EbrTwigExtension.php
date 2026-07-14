@@ -33,7 +33,7 @@ class EbrTwigExtension extends AbstractExtension {
     ?string $langCode = NULL,
     bool $checkAccess = FALSE
   ): ?EntityInterface {
-    $entity = $this->ebr->getEntity($entityTypeId, $internalIdi, $langCode);
+    $entity = $this->ebr->getEntity($entityTypeId, $internalId, $langCode);
 
     if (!$entity) {
       return NULL;
