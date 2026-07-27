@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\ebr_accommodation_seekda\Entity;
 
+use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
 use Drupal\ebr\Entity\WidgetableInterface;
@@ -89,14 +90,14 @@ abstract class AccommodationSeekda extends AccommodationBase implements Widgetab
   public function getRenderedWidget(string $widgetId, string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
     $field = $this->getWidgetFieldnames()[$widgetId] ?? NULL;
     if (empty($field)) {
-      NULL;
+      return NULL;
     }
     $displayOptions = $this->entityTypeManager()
       ->getStorage('entity_view_display')
       ->load("node.{$this->bundle()}.{$viewMode}")
       ?->getComponent($field);
     if (is_null($displayOptions)) {
-      NULL;
+      return NULL;
     }
     $build = $this->entityTypeManager()->getViewBuilder('node')->viewField(
       $field,

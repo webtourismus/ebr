@@ -36,7 +36,7 @@ function ebr_accommodation_seekda_entity_bundle_info_alter(array &$bundles): voi
 /**
  * Implements hook_entity_bundle_field_info().
  */
-function ebr_accommodation_seekda_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+function ebr_accommodation_seekda_entity_bundle_field_info(EntityTypeInterface $entity_type, string $bundle, array $base_field_definitions): array {
   $fields = [];
 
   // Whether the hook implementation was called for our group type.
@@ -51,7 +51,7 @@ function ebr_accommodation_seekda_entity_bundle_field_info(EntityTypeInterface $
     $fields[EntityBusinessrules::FIELD_REMOTE_DATASOURCE] = $field;
   }
 
-  $propertyCode = \Drupal::configFactory()->get('ebr_accommodation_seekda.settings')->get('property_code');
+  $propertyCode = \Drupal::config('ebr_accommodation_seekda.settings')->get('property_code');
 
   if ($entity_type->id() == 'node' &&
     $bundle == AccommodationBase::BUNDLE_ROOM &&
@@ -131,7 +131,7 @@ function ebr_accommodation_seekda_form_system_site_information_settings_alter(&$
         "@pms" => AccommodationSeekda::NAME,
       ]),
   );
-  $config = \Drupal::configFactory()->getEditable('ebr_accommodation_seekda.settings');
+  $config = \Drupal::config('ebr_accommodation_seekda.settings');
   $propertyCode = $config->get('property_code');
   $kubeDomain = $config->get('kube_domain');
   $form['seekda'] = [
@@ -206,22 +206,28 @@ function ebr_accommodation_seekda_site_settings_validate(&$form, FormStateInterf
 function ebr_accommodation_seekda_theme($existing, $type, $theme, $path) {
   $suggestions = [];
   $datasource = AccommodationSeekda::DATASOURCE;
-  $siteConfig = \Drupal::configFactory()->getEditable('ebr_accommodation_seekda.settings');
-  $propertyCode = $siteConfig->get('property_code');
-  $apiToken = \Drupal::service('seekda.service')->getAccessToken();
-  $seekdaConfig = \Drupal::configFactory()->getEditable('ebr_accommodation_seekda.settings');
-  $days = $seekdaConfig->get('jsonapi_months') * 30;
   foreach (AccommodationSeekda::getDefaultWidgets() as $widgetType) {
     $suggestions["{$datasource}_{$widgetType}"] = [
       'variables' => [
         'label' => NULL,
         'widget_type' => $widgetType,
         'entity' => NULL,
-        'endpoint' => "https://switch.seekda.com/switch/latest/json/offersOverview.json?skd-property-code={$propertyCode}&token={$apiToken}&skd-overview-type=rate&skd-channel-id=IBE&skd-overview-length={$days}",
+        'endpoint' => NULL,
       ],
     ];
   }
   return $suggestions;
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for seekda_calendar.
+ */
+function ebr_accommodation_seekda_preprocess_seekda_calendar(array &$variables): void {
+  $config = \Drupal::config('ebr_accommodation_seekda.settings');
+  $propertyCode = $config->get('property_code');
+  $apiToken = \Drupal::service('seekda.service')->getAccessToken();
+  $days = $config->get('jsonapi_months') * 30;
+  $variables['endpoint'] = "https://switch.seekda.com/switch/latest/json/offersOverview.json?skd-property-code={$propertyCode}&token={$apiToken}&skd-overview-type=rate&skd-channel-id=IBE&skd-overview-length={$days}";
 }
 
 
@@ -273,15 +279,18 @@ function ebr_accommodation_seekda_migration_130_seekda_packages_en(): array {
  * @internal
  */
 function _ebr_accommodation_seekda_migration_seekda(string $langcode, bool $packages = FALSE): array {
-  $seekdaConfig = \Drupal::configFactory()->getEditable('ebr_accommodation_seekda.settings');
+  $seekdaConfig = \Drupal::config('ebr_accommodation_seekda.settings');
   $propertyCode = $seekdaConfig->get('property_code');
   $apiToken = \Drupal::service('seekda.service')->getAccessToken();
   $months = $seekdaConfig->get('jsonapi_months');
-  $packages = var_export($packages, true);
-  $url = "https://switch.seekda.com/switch/latest/json/ratesAverage.json?skd-property-code={$propertyCode}&token={$apiToken}&skd-language-code={$langcode}&skd-packages={$packages}&skd-months={$months}";
+  $packagesString = $packages ? 'true' : 'false';
+  $url = "https://switch.seekda.com/switch/latest/json/ratesAverage.json?skd-property-code={$propertyCode}&token={$apiToken}&skd-language-code={$langcode}&skd-packages={$packagesString}&skd-months={$months}";
   return [$url];
 }
 
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for node forms.
+ */
 function ebr_accommodation_seekda_form_node_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
   if (!in_array($form_id, ['node_room_form', 'node_room_edit_form', 'node_package_form', 'node_package_edit_form'])) {
     return;
@@ -290,10 +299,10 @@ function ebr_accommodation_seekda_form_node_form_alter(array &$form, FormStateIn
   if (!$node->get(EntityBusinessrules::FIELD_REMOTE_ID)->value || $node->get(EntityBusinessrules::FIELD_REMOTE_DATASOURCE)->value != AccommodationSeekda::DATASOURCE) {
     return;
   }
-  $migration = match($node->bundle()) {
+  $migration = match ($node->bundle()) {
     'room' => \Drupal::entityTypeManager()->getStorage('migration')->load('100_seekda_rooms_de'),
     'package' => \Drupal::entityTypeManager()->getStorage('migration')->load('120_seekda_packages_de'),
-    'default' => NULL,
+    default => NULL,
   };
   if (!($migration instanceof MigrationEntityInterface)) {
     return;
@@ -322,11 +331,14 @@ function ebr_accommodation_seekda_form_node_form_alter(array &$form, FormStateIn
   $form = $formIntro + $form;
 }
 
+/**
+ * Implements hook_cron().
+ */
 function ebr_accommodation_seekda_cron() {
   $requestTime = \Drupal::service('datetime.time')->getRequestTime();
-  $config = \Drupal::configFactory()->getEditable('ebr_accommodation_seekda.settings');
+  $config = \Drupal::config('ebr_accommodation_seekda.settings');
   $allowedEnvs = $config->get('cron_allowed_environments');
-  if (!in_array($_ENV['ENV'], $allowedEnvs)) {
+  if (!in_array($_ENV['ENV'] ?? '', $allowedEnvs)) {
     return;
   }
 
@@ -357,7 +369,7 @@ function ebr_accommodation_seekda_cron() {
       \Drupal::state()->set("ebr_accommodation_seekda.last_cron_start.{$migrationId}", $requestTime);
       // All packages are set unpublished after an import to disable (but not delete) unavailable packages.
       // To re-enable active packages, all imported rows must get a new changed timestamp.
-      if (strpos($migration->id(), '_seekda_packages_') == 3) {
+      if (strpos($migration->id(), '_seekda_packages_') === 3) {
         $migration->getIdMap()->prepareUpdate();
       }
       $executable = new \Drupal\migrate_tools\MigrateExecutable($migration, new \Drupal\migrate\MigrateMessage());
@@ -376,12 +388,12 @@ function ebr_accommodation_seekda_cron() {
       $mailMessage = t(
         'The import @migration_id on @site_name has failed multiple times. The last successful import was on @date.',
         ['@migration_id' => $migrationId,
-          '@site_name' => \Drupal::configFactory()->get('system.site')->get('name'),
+          '@site_name' => \Drupal::config('system.site')->get('name'),
           '@date' => date('Y-m-d H:i:s', (int) $lastSuccessfulImport),
         ]
       );
       $mailParams = [
-        'from' => \Drupal::configFactory()->get('system.site')->get('mail'),
+        'from' => \Drupal::config('system.site')->get('mail'),
         'context' => [
           'subject' => t('Warning: Migration @migration_id failed', [
             '@migration_id' => $migrationId,
@@ -395,7 +407,7 @@ function ebr_accommodation_seekda_cron() {
         \Drupal::languageManager()->getDefaultLanguage()->getId(),
         $mailParams,
         NULL,
-        FALSE,
+        TRUE,
       );
       \Drupal::state()->set("ebr_accommodation_seekda.last_cron_mail.{$migrationId}", $requestTime);
     }
