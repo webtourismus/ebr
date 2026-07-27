@@ -377,7 +377,7 @@ function ebr_accommodation_seekda_cron() {
         'The import @migration_id on @site_name has failed multiple times. The last successful import was on @date.',
         ['@migration_id' => $migrationId,
           '@site_name' => \Drupal::configFactory()->get('system.site')->get('name'),
-          '@date' => date('Y-m-d H:i:s', $lastSuccessfulImport),
+          '@date' => date('Y-m-d H:i:s', (int) $lastSuccessfulImport),
         ]
       );
       $mailParams = [
