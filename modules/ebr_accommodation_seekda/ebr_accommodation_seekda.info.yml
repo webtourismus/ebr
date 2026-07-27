@@ -1,6 +1,6 @@
 name: 'EBR Accommodation: Seekda CM'
 type: module
-description: 'Imports Seekda CM data and provides contextual call-to-action links for accommodation entites.'
+description: 'Imports Seekda CM data and provides contextual call-to-action links for accommodation entities.'
 package: Entity business rules
 core_version_requirement: ^10.3 || ^11
 dependencies:

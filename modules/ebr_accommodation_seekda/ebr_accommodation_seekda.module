@@ -5,21 +5,20 @@
  * Main module file.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
-use Drupal\ebr_accommodation\Entity\AccommodationBase;
-use Drupal\ebr_accommodation_seekda\Entity\AccommodationSeekda;
-use Drupal\ebr_accommodation_seekda\Entity\RoomSeekda;
-use Drupal\ebr_accommodation_seekda\Entity\PackageSeekda;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\link\LinkItemInterface;
-use Drupal\ebr\EntityBusinessrules;
-use Drupal\migrate_plus\Entity\MigrationInterface as MigrationEntityInterface;
-use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\ebr\Entity\WidgetableInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\ebr\EntityBusinessrules;
+use Drupal\ebr_accommodation\Entity\AccommodationBase;
+use Drupal\ebr_accommodation_seekda\Entity\AccommodationSeekda;
+use Drupal\ebr_accommodation_seekda\Entity\PackageSeekda;
+use Drupal\ebr_accommodation_seekda\Entity\RoomSeekda;
+use Drupal\link\LinkItemInterface;
+use Drupal\migrate_plus\Entity\MigrationInterface as MigrationEntityInterface;
 
 /**
  * Implements hook_entity_bundle_info_alter().
@@ -40,21 +39,21 @@ function ebr_accommodation_seekda_entity_bundle_field_info(EntityTypeInterface $
   $fields = [];
 
   // Whether the hook implementation was called for our group type.
-  if ($entity_type->id() == 'node' &&
-    in_array($bundle, [AccommodationBase::BUNDLE_PACKAGE, AccommodationBase::BUNDLE_ROOM]) &&
+  if ($entity_type->id() === 'node' &&
+    in_array($bundle, [AccommodationBase::BUNDLE_PACKAGE, AccommodationBase::BUNDLE_ROOM], TRUE) &&
     !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE])
   ) {
-    // Overrride base ebr_accommodation field.
+    // Override base ebr_accommodation field.
     $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE], $bundle);
     $field->setDefaultValue(AccommodationSeekda::DATASOURCE);
-    $field->setDescription(t('If value is "<code>@remote_datasource</code>", rooms and packages with an "<code>remote_id</code>" receive a booking link.', ["@remote_datasource" => AccommodationSeekda::DATASOURCE]));
+    $field->setDescription(t('If value is "<code>@remote_datasource</code>", rooms and packages with an "<code>remote_id</code>" receive a booking link.', ['@remote_datasource' => AccommodationSeekda::DATASOURCE]));
     $fields[EntityBusinessrules::FIELD_REMOTE_DATASOURCE] = $field;
   }
 
   $propertyCode = \Drupal::config('ebr_accommodation_seekda.settings')->get('property_code');
 
-  if ($entity_type->id() == 'node' &&
-    $bundle == AccommodationBase::BUNDLE_ROOM &&
+  if ($entity_type->id() === 'node' &&
+    $bundle === AccommodationBase::BUNDLE_ROOM &&
     !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE]) &&
     $propertyCode
   ) {
@@ -74,8 +73,8 @@ function ebr_accommodation_seekda_entity_bundle_field_info(EntityTypeInterface $
   }
 
   if (
-    $entity_type->id() == 'node' &&
-    $bundle == AccommodationBase::BUNDLE_PACKAGE &&
+    $entity_type->id() === 'node' &&
+    $bundle === AccommodationBase::BUNDLE_PACKAGE &&
     !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE]) &&
     $propertyCode
   ) {
@@ -94,9 +93,9 @@ function ebr_accommodation_seekda_entity_bundle_field_info(EntityTypeInterface $
     $fields[EntityBusinessrules::FIELD_REMOTE_ID] = $field;
   }
 
-  // seekda rates as flatpickr calendar with prices
-  if ($entity_type->id() == 'node' &&
-    in_array($bundle, [AccommodationBase::BUNDLE_ROOM, AccommodationBase::BUNDLE_PACKAGE]) &&
+  // Seekda rates as flatpickr calendar with prices.
+  if ($entity_type->id() === 'node' &&
+    in_array($bundle, [AccommodationBase::BUNDLE_ROOM, AccommodationBase::BUNDLE_PACKAGE], TRUE) &&
     !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE]) &&
     $propertyCode
   ) {
@@ -120,15 +119,15 @@ function ebr_accommodation_seekda_entity_bundle_field_info(EntityTypeInterface $
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function ebr_accommodation_seekda_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
+function ebr_accommodation_seekda_form_system_site_information_settings_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
   \Drupal::service('ebr.service')->renderRule(
     $form,
     'accommodation',
     t('Accommodation'),
     t('Node types "<code>room</code>" where field "<code>remote_datasource</code>" is "<code>@remote_datasource</code>", will receive extra fields showing web widgets by @pms.',
       [
-        "@remote_datasource" => AccommodationSeekda::DATASOURCE,
-        "@pms" => AccommodationSeekda::NAME,
+        '@remote_datasource' => AccommodationSeekda::DATASOURCE,
+        '@pms' => AccommodationSeekda::NAME,
       ]),
   );
   $config = \Drupal::config('ebr_accommodation_seekda.settings');
@@ -164,7 +163,7 @@ function ebr_accommodation_seekda_form_system_site_information_settings_alter(&$
 /**
  * Validate form callback for system site settings form.
  */
-function ebr_accommodation_seekda_site_settings_validate(&$form, FormStateInterface $form_state): void {
+function ebr_accommodation_seekda_site_settings_validate(array &$form, FormStateInterface $form_state): void {
   $propertyCode = $form_state->getValue(['seekda', 'property_code']);
   $kubeDomain = $form_state->getValue(['seekda', 'kube_domain']);
   if (empty($propertyCode)) {
@@ -187,7 +186,7 @@ function ebr_accommodation_seekda_site_settings_validate(&$form, FormStateInterf
     );
   }
   $domain = parse_url($kubeDomain);
-  if (($domain['scheme'] ?? '') != 'https' || empty($domain['host'])) {
+  if (($domain['scheme'] ?? '') !== 'https' || empty($domain['host'])) {
     $form_state->setErrorByName(
       'seekda][kube_domain',
       t('@fieldname must be a link in the form of %url',
@@ -203,7 +202,7 @@ function ebr_accommodation_seekda_site_settings_validate(&$form, FormStateInterf
 /**
  * Implements hook_theme().
  */
-function ebr_accommodation_seekda_theme($existing, $type, $theme, $path) {
+function ebr_accommodation_seekda_theme(array $existing, string $type, string $theme, string $path): array {
   $suggestions = [];
   $datasource = AccommodationSeekda::DATASOURCE;
   foreach (AccommodationSeekda::getDefaultWidgets() as $widgetType) {
@@ -223,26 +222,21 @@ function ebr_accommodation_seekda_theme($existing, $type, $theme, $path) {
  * Implements hook_preprocess_HOOK() for seekda_calendar.
  */
 function ebr_accommodation_seekda_preprocess_seekda_calendar(array &$variables): void {
-  $config = \Drupal::config('ebr_accommodation_seekda.settings');
-  $propertyCode = $config->get('property_code');
-  $apiToken = \Drupal::service('seekda.service')->getAccessToken();
-  $days = $config->get('jsonapi_months') * 30;
-  $variables['endpoint'] = "https://switch.seekda.com/switch/latest/json/offersOverview.json?skd-property-code={$propertyCode}&token={$apiToken}&skd-overview-type=rate&skd-channel-id=IBE&skd-overview-length={$days}";
+  $variables['endpoint'] = \Drupal::service('ebr_accommodation_seekda.seekda')->getCalendarEndpoint();
 }
-
 
 /**
  * Implements hook_theme_suggestions_HOOK().
  */
-function ebr_accommodation_seekda_theme_suggestions_widget_calendar(array $variables) {
+function ebr_accommodation_seekda_theme_suggestions_widget_calendar(array $variables): array {
   $node = $variables['entity'];
   $widgetType = $variables['widget_type'];
   $datasource = AccommodationSeekda::DATASOURCE;
 
-  $suggestions = [];
-  $suggestions[] = "{$datasource}_{$widgetType}__{$node->bundle()}";
-  $suggestions[] = "{$datasource}_{$widgetType}__{$node->id()}";
-  return $suggestions;
+  return [
+    "{$datasource}_{$widgetType}__{$node->bundle()}",
+    "{$datasource}_{$widgetType}__{$node->id()}",
+  ];
 }
 
 /**
@@ -279,24 +273,18 @@ function ebr_accommodation_seekda_migration_130_seekda_packages_en(): array {
  * @internal
  */
 function _ebr_accommodation_seekda_migration_seekda(string $langcode, bool $packages = FALSE): array {
-  $seekdaConfig = \Drupal::config('ebr_accommodation_seekda.settings');
-  $propertyCode = $seekdaConfig->get('property_code');
-  $apiToken = \Drupal::service('seekda.service')->getAccessToken();
-  $months = $seekdaConfig->get('jsonapi_months');
-  $packagesString = $packages ? 'true' : 'false';
-  $url = "https://switch.seekda.com/switch/latest/json/ratesAverage.json?skd-property-code={$propertyCode}&token={$apiToken}&skd-language-code={$langcode}&skd-packages={$packagesString}&skd-months={$months}";
-  return [$url];
+  return \Drupal::service('ebr_accommodation_seekda.seekda')->getMigrationUrls($langcode, $packages);
 }
 
 /**
  * Implements hook_form_BASE_FORM_ID_alter() for node forms.
  */
 function ebr_accommodation_seekda_form_node_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
-  if (!in_array($form_id, ['node_room_form', 'node_room_edit_form', 'node_package_form', 'node_package_edit_form'])) {
+  if (!in_array($form_id, ['node_room_form', 'node_room_edit_form', 'node_package_form', 'node_package_edit_form'], TRUE)) {
     return;
   }
   $node = $form_state->getFormObject()->getEntity();
-  if (!$node->get(EntityBusinessrules::FIELD_REMOTE_ID)->value || $node->get(EntityBusinessrules::FIELD_REMOTE_DATASOURCE)->value != AccommodationSeekda::DATASOURCE) {
+  if (!$node->get(EntityBusinessrules::FIELD_REMOTE_ID)->value || $node->get(EntityBusinessrules::FIELD_REMOTE_DATASOURCE)->value !== AccommodationSeekda::DATASOURCE) {
     return;
   }
   $migration = match ($node->bundle()) {
@@ -326,7 +314,7 @@ function ebr_accommodation_seekda_form_node_form_alter(array &$form, FormStateIn
         [':link' => 'https://hotels.kognitiv.com/']
       ),
       'fields' => $fields,
-    ]
+    ],
   ];
   $form = $formIntro + $form;
 }
@@ -334,82 +322,6 @@ function ebr_accommodation_seekda_form_node_form_alter(array &$form, FormStateIn
 /**
  * Implements hook_cron().
  */
-function ebr_accommodation_seekda_cron() {
-  $requestTime = \Drupal::service('datetime.time')->getRequestTime();
-  $config = \Drupal::config('ebr_accommodation_seekda.settings');
-  $allowedEnvs = $config->get('cron_allowed_environments');
-  if (!in_array($_ENV['ENV'] ?? '', $allowedEnvs)) {
-    return;
-  }
-
-  $query = \Drupal::entityQuery('migration')
-    ->accessCheck(FALSE)
-    ->condition('migration_group', 'seekda')
-    ->condition('status', true)
-    ->sort('id');
-  $migrationIds = $query->execute();
-
-  foreach ($migrationIds as $migrationId) {
-    /** @var \Drupal\migrate\Plugin\Migration $migration */
-    $migration = \Drupal::service('plugin.manager.migration')->createInstance($migrationId);
-    $lastSuccessfulImport = \Drupal::keyValue('migrate_last_imported')->get($migrationId, 0) / 1000;
-    if ($requestTime < $lastSuccessfulImport + $config->get('cron_interval')) {
-      continue;
-    }
-
-    if ($migration->getStatus() != MigrationInterface::STATUS_IDLE) {
-      $lastCronStart = \Drupal::state()->get("ebr_accommodation_seekda.last_cron_start.{$migrationId}", 0);
-      // temporary errors or timeouts from the remote API might have incorrectly left a migration in running state
-      if ($requestTime > $lastCronStart + $config->get('cron_max_runtime')) {
-        $migration->setStatus(MigrationInterface::STATUS_IDLE);
-      }
-    }
-    $result = MigrationInterface::RESULT_SKIPPED;
-    if ($migration->getStatus() == MigrationInterface::STATUS_IDLE) {
-      \Drupal::state()->set("ebr_accommodation_seekda.last_cron_start.{$migrationId}", $requestTime);
-      // All packages are set unpublished after an import to disable (but not delete) unavailable packages.
-      // To re-enable active packages, all imported rows must get a new changed timestamp.
-      if (strpos($migration->id(), '_seekda_packages_') === 3) {
-        $migration->getIdMap()->prepareUpdate();
-      }
-      $executable = new \Drupal\migrate_tools\MigrateExecutable($migration, new \Drupal\migrate\MigrateMessage());
-      $result = $executable->import();
-    }
-    if ($result == MigrationInterface::RESULT_COMPLETED) {
-      continue;
-    }
-
-    // error handling starts here
-    $lastCronMail = \Drupal::state()->get("ebr_accommodation_seekda.last_cron_mail.{$migrationId}", 0);
-    if ($requestTime >= $lastSuccessfulImport + $config->get('cron_warningmail_after') &&
-      $requestTime >= $lastCronMail + $config->get('cron_warningmail_repeat') &&
-      !empty($config->get('cron_warningmail_to'))
-    ) {
-      $mailMessage = t(
-        'The import @migration_id on @site_name has failed multiple times. The last successful import was on @date.',
-        ['@migration_id' => $migrationId,
-          '@site_name' => \Drupal::config('system.site')->get('name'),
-          '@date' => date('Y-m-d H:i:s', (int) $lastSuccessfulImport),
-        ]
-      );
-      $mailParams = [
-        'from' => \Drupal::config('system.site')->get('mail'),
-        'context' => [
-          'subject' => t('Warning: Migration @migration_id failed', [
-            '@migration_id' => $migrationId,
-          ]),
-          'message' => $mailMessage,
-        ],
-      ];
-      \Drupal::service('plugin.manager.mail')->mail('system',
-        'mail',
-        $config->get('cron_warningmail_to'),
-        \Drupal::languageManager()->getDefaultLanguage()->getId(),
-        $mailParams,
-        NULL,
-        TRUE,
-      );
-      \Drupal::state()->set("ebr_accommodation_seekda.last_cron_mail.{$migrationId}", $requestTime);
-    }
-  }
+function ebr_accommodation_seekda_cron(): void {
+  \Drupal::service('ebr_accommodation_seekda.cron')->run();
 }

@@ -1,23 +1,26 @@
 services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  Drupal\ebr_accommodation_seekda\Seekda: ~
+  ebr_accommodation_seekda.seekda:
+    alias: Drupal\ebr_accommodation_seekda\Seekda
+
+  Drupal\ebr_accommodation_seekda\SeekdaCron: ~
+  ebr_accommodation_seekda.cron:
+    alias: Drupal\ebr_accommodation_seekda\SeekdaCron
+
+  Drupal\ebr_accommodation_seekda\EventSubscriber\MigrationPackagePublishStatus: ~
+  Drupal\ebr_accommodation_seekda\EventSubscriber\RedirectBookNodeToKube: ~
+
+  # Backward-compatible aliases for the previous service IDs.
   seekda.service:
-    class: Drupal\ebr_accommodation_seekda\Seekda
-    arguments:
-      - '@entity_type.manager'
-      - '@config.factory'
+    alias: Drupal\ebr_accommodation_seekda\Seekda
+    deprecated: 'The "%alias_id%" service is deprecated. Use "ebr_accommodation_seekda.seekda" or "%service_id%" instead.'
   seekda.migration_package_publish_status:
-    class: Drupal\ebr_accommodation_seekda\EventSubscriber\MigrationPackagePublishStatus
-    tags:
-      - { name: event_subscriber }
-    arguments:
-      - '@entity_type.manager'
-      - '@keyvalue'
-      - '@config.factory'
+    alias: Drupal\ebr_accommodation_seekda\EventSubscriber\MigrationPackagePublishStatus
+    deprecated: 'The "%alias_id%" service is deprecated. Use "%service_id%" instead.'
   seekda.request_subscriber:
-    class: Drupal\ebr_accommodation_seekda\EventSubscriber\RedirectBookNodeToKube
-    arguments:
-      - '@redirect.checker'
-      - '@config.factory'
-      - '@ebr.service'
-      - '@path.validator'
-    tags:
-      - { name: event_subscriber }
+    alias: Drupal\ebr_accommodation_seekda\EventSubscriber\RedirectBookNodeToKube
+    deprecated: 'The "%alias_id%" service is deprecated. Use "%service_id%" instead.'

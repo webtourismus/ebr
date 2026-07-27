@@ -56,7 +56,7 @@
       startDate = new Date();
       {# normalize all times to 12:00 to avoid problems with timezones or summertime -#}
       startDate.setHours(12,0,0,0);
-      let endpoint = `{{ endpoint|raw }}&skd-language-code=${document.documentElement.getAttribute('lang')}&skd-start-date=${startDate.toISOString().substring(0,10)}`;
+      let endpoint = `{{ endpoint|e('js') }}&skd-language-code=${document.documentElement.getAttribute('lang')}&skd-start-date=${startDate.toISOString().substring(0,10)}`;
       let json = await( await fetch(endpoint) ).json();
       let remoteId = '{{- entity.get("remote_id").value -}}';
       {% if entity.bundle() == 'package' -%}
