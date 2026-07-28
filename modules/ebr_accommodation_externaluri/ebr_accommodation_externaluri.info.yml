@@ -6,3 +6,4 @@ core_version_requirement: ^10.3 || ^11
 dependencies:
   - ebr:ebr
   - ebr:ebr_accommodation
+  - redirect:redirect

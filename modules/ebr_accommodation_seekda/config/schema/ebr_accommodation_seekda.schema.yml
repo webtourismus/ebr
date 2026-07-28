@@ -19,7 +19,7 @@ ebr_accommodation_seekda.settings:
       type: sequence
       sequence:
         type: machine_name
-        label: 'Envionment name, e.g. dev or prod'
+        label: 'Environment name, e.g. dev or prod'
     cron_max_runtime:
       type: integer
       label: 'Max runtime of cronjob (will force cronjob status back to idle)'
@@ -59,3 +59,9 @@ ebr_accommodation_seekda.settings:
         Range:
           min: 1
           max: 36
+    migration_uid:
+      type: integer
+      label: 'User ID used as owner for migrated nodes, files and media'
+      constraints:
+        Range:
+          min: 1

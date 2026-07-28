@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ebr_teaser\Entity;
 
@@ -30,7 +30,7 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function isTeaserableViewmode(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): bool {
     // A paragraph teaserable'ness is defined on bundle level, not on view mode level.
@@ -38,18 +38,18 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function isFieldSuppressed(string $fieldName): bool {
     if ($this->hasField('field_suppress_fields')) {
       $suppressedFields = array_column($this->get('field_suppress_fields')->getValue(), 'target_id');
-      return in_array("paragraph.{$this->bundle()}.{$fieldName}", $suppressedFields);
+      return in_array("paragraph.{$this->bundle()}.{$fieldName}", $suppressedFields, TRUE);
     }
     return FALSE;
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getReferencingField(): ?FieldItemListInterface {
     if ($this->hasField('field_link')) {
@@ -59,10 +59,10 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getReferencedEntity(): ?TeaserableInterface {
-    if ($this?->getReferencingField()?->isEmpty() ?? TRUE) {
+    if ($this->getReferencingField()?->isEmpty() ?? TRUE) {
       return NULL;
     }
 
@@ -70,7 +70,8 @@ trait ParagraphTeaserableTrait {
     $referencedEntity = NULL;
 
     if ($fieldItem instanceof EntityReferenceItem) {
-      $referencedEntity = $fieldItem->getEntity();
+      // EntityReferenceItem::getEntity() returns the host entity; use ->entity for the target.
+      $referencedEntity = $fieldItem->entity;
     }
     elseif ($fieldItem instanceof LinkItemInterface) {
       /**
@@ -133,15 +134,14 @@ trait ParagraphTeaserableTrait {
     $imageViewMode = NULL;
     // Teaserable paragraphs have an image ratio field, which overrides the default display settings
     // for the image field, and maps to an media entity view mode.
-    if ($ownFieldDefinition->getName() == 'field_images' &&
-      $displayOptions['type'] == 'entity_reference_entity_view' &&
+    if ($ownFieldDefinition->getName() === 'field_images' &&
+      $displayOptions['type'] === 'entity_reference_entity_view' &&
       $ownField->getEntity()->hasField('field_image_ratio') &&
       !$ownField->getEntity()->get('field_image_ratio')->isEmpty()
     ) {
       $imageViewMode = $ownField->getEntity()->get('field_image_ratio')->target_id;
       $displayOptions['settings']['view_mode'] = $imageViewMode;
     }
-
 
     if (!$ownField->isEmpty()) {
       // Case 1: render own field.
@@ -160,8 +160,8 @@ trait ParagraphTeaserableTrait {
     }
 
     $referencedFieldDefinition = $referencedField->getFieldDefinition();
-    if ( $ownFieldDefinition->getFieldStorageDefinition()->getSetting('target_type') == 'media' &&
-      $referencedFieldDefinition->getType() == 'image'
+    if ($ownFieldDefinition->getFieldStorageDefinition()->getSetting('target_type') === 'media' &&
+      $referencedFieldDefinition->getType() === 'image'
     ) {
       // If we need to render a foreign entity's plain image field, we assume there is a 1:1 mapping
       // between media entity view modes and responsive image styles
@@ -202,9 +202,12 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getTeaserTitleField(): ?FieldItemListInterface {
+    if (!$this->hasField('field_title')) {
+      return $this->getReferencedEntity()?->getTeaserTitleField();
+    }
     if ($this->get('field_title')->isEmpty() && $this->getReferencedEntity() instanceof TeaserableInterface) {
       return $this->getReferencedEntity()->getTeaserTitleField();
     }
@@ -212,9 +215,12 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getTeaserSubtitleField(): ?FieldItemListInterface {
+    if (!$this->hasField('field_subtitle')) {
+      return $this->getReferencedEntity()?->getTeaserSubtitleField();
+    }
     if ($this->get('field_subtitle')->isEmpty() && $this->getReferencedEntity() instanceof TeaserableInterface) {
       return $this->getReferencedEntity()->getTeaserSubtitleField();
     }
@@ -222,9 +228,12 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getTeaserImagesField(): ?FieldItemListInterface {
+    if (!$this->hasField('field_images')) {
+      return $this->getReferencedEntity()?->getTeaserImagesField();
+    }
     if ($this->get('field_images')->isEmpty() && $this->getReferencedEntity() instanceof TeaserableInterface) {
       return $this->getReferencedEntity()->getTeaserImagesField();
     }
@@ -232,9 +241,12 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getTeaserTextField(): ?FieldItemListInterface {
+    if (!$this->hasField('field_text')) {
+      return $this->getReferencedEntity()?->getTeaserTextField();
+    }
     if ($this->get('field_text')->isEmpty() && $this->getReferencedEntity() instanceof TeaserableInterface) {
       return $this->getReferencedEntity()->getTeaserTextField();
     }
@@ -242,10 +254,11 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getRenderedTeaserTitle(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
-    $build = $this->renderFieldWithReferenceFallback($viewMode, $this->get('field_title'), $this->getReferencedEntity()?->getTeaserTitleField());
+    $ownField = $this->hasField('field_title') ? $this->get('field_title') : NULL;
+    $build = $this->renderFieldWithReferenceFallback($viewMode, $ownField, $this->getReferencedEntity()?->getTeaserTitleField());
     if ($build['#is_teaserable'] ?? FALSE) {
       $build['#teaser_fieldname'] = 'title';
     }
@@ -253,10 +266,11 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getRenderedTeaserSubTitle(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
-    $build = $this->renderFieldWithReferenceFallback($viewMode, $this->get('field_subtitle'), $this->getReferencedEntity()?->getTeaserSubtitleField());
+    $ownField = $this->hasField('field_subtitle') ? $this->get('field_subtitle') : NULL;
+    $build = $this->renderFieldWithReferenceFallback($viewMode, $ownField, $this->getReferencedEntity()?->getTeaserSubtitleField());
     if ($build['#is_teaserable'] ?? FALSE) {
       $build['#teaser_fieldname'] = 'subtitle';
     }
@@ -264,10 +278,11 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getRenderedTeaserImages(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
-    $build = $this->renderFieldWithReferenceFallback($viewMode, $this->get('field_images'), $this->getReferencedEntity()?->getTeaserImagesField());
+    $ownField = $this->hasField('field_images') ? $this->get('field_images') : NULL;
+    $build = $this->renderFieldWithReferenceFallback($viewMode, $ownField, $this->getReferencedEntity()?->getTeaserImagesField());
     if ($build['#is_teaserable'] ?? FALSE) {
       $build['#teaser_fieldname'] = 'images';
     }
@@ -275,10 +290,11 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getRenderedTeaserText(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
-    $build = $this->renderFieldWithReferenceFallback($viewMode, $this->get('field_text'), $this->getReferencedEntity()?->getTeaserTextField());
+    $ownField = $this->hasField('field_text') ? $this->get('field_text') : NULL;
+    $build = $this->renderFieldWithReferenceFallback($viewMode, $ownField, $this->getReferencedEntity()?->getTeaserTextField());
     if ($build['#is_teaserable'] ?? FALSE) {
       $build['#teaser_fieldname'] = 'text';
     }
@@ -286,14 +302,14 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public static function getDefaultActions(): array {
     return [ReadmoreActionableInterface::ACTION_READMORE];
   }
 
-    /**
-   * {@inheritDoc}
+  /**
+   * {@inheritdoc}
    */
   public static function getDefaultActionLabel($actionId): TranslatableMarkup|string|NULL {
     return match ($actionId) {
@@ -303,11 +319,12 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
-   * @inheritDoc
+   * {@inheritdoc}
    */
   public function getActionFieldnames(?string $viewMode = NULL): array {
     $result = [];
-    if ($this->isFieldSuppressed($this->getReferencingField()->getName())) {
+    $referencingField = $this->getReferencingField();
+    if ($referencingField === NULL || $this->isFieldSuppressed($referencingField->getName())) {
       // Suppressing the link field should suppress all action links (also from a referenced entity).
       return [];
     }
@@ -336,14 +353,14 @@ trait ParagraphTeaserableTrait {
         return [];
       }
       $result = array_intersect($result, array_keys($enabledComponents));
-      uasort($result, function($a, $b) use ($enabledComponents) {
+      uasort($result, function ($a, $b) use ($enabledComponents) {
         return $enabledComponents[$a]['weight'] < $enabledComponents[$b]['weight'] ? -1 : 1;
       });
     }
     if (!empty($this->getActionUrl(ReadmoreActionableInterface::ACTION_READMORE))) {
       // Do not use the referenced read more action, because paragraphs have their own "field_link",
       // which might have extra query params.
-      $result[ReadmoreActionableInterface::ACTION_READMORE] = $this->getReferencingField()->getName();
+      $result[ReadmoreActionableInterface::ACTION_READMORE] = $referencingField->getName();
     }
     else {
       unset($result[ReadmoreActionableInterface::ACTION_READMORE]);
@@ -352,31 +369,33 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
-   * @inheritDoc
+   * {@inheritdoc}
    */
   public function getActionLabel(string $actionId): TranslatableMarkup|string|NULL {
-    if ($actionId != ReadmoreActionableInterface::ACTION_READMORE && $this->getReferencedEntity() instanceof ActionableInterface) {
+    if ($actionId !== ReadmoreActionableInterface::ACTION_READMORE && $this->getReferencedEntity() instanceof ActionableInterface) {
       return $this->getReferencedEntity()->getActionLabel($actionId);
     }
-    if ($actionId == ReadmoreActionableInterface::ACTION_READMORE && !$this->getReferencingField()->isEmpty()) {
-      return $this->getReferencingField()->first()->getTitle() ?? new TranslatableMarkup('Details');
+    $referencingField = $this->getReferencingField();
+    if ($actionId === ReadmoreActionableInterface::ACTION_READMORE && $referencingField !== NULL && !$referencingField->isEmpty()) {
+      return $referencingField->first()->getTitle() ?? new TranslatableMarkup('Details');
     }
     return NULL;
   }
 
   /**
-   * @inheritDoc
+   * {@inheritdoc}
    */
   public function getActionUrl(string $actionId): ?Url {
-    if ($actionId != ReadmoreActionableInterface::ACTION_READMORE && $this->getReferencedEntity() instanceof ActionableInterface) {
+    if ($actionId !== ReadmoreActionableInterface::ACTION_READMORE && $this->getReferencedEntity() instanceof ActionableInterface) {
       return $this->getReferencedEntity()->getActionUrl($actionId);
     }
-    if ($actionId == ReadmoreActionableInterface::ACTION_READMORE && !$this->getReferencingField()->isEmpty()) {
-      $url = $this->getReferencingField()->first()->getUrl();
+    $referencingField = $this->getReferencingField();
+    if ($actionId === ReadmoreActionableInterface::ACTION_READMORE && $referencingField !== NULL && !$referencingField->isEmpty()) {
+      $url = $referencingField->first()->getUrl();
       $url->setOption('attributes', array_merge_recursive(
         [
           'data-action-link-entity' => $this->getReferencedEntity()?->getEntityTypeId() ?? $this->getEntityTypeId(),
-          'data-action-link-bundle' => $this->getReferencedEntity()?->getEntityTypeId() ?? $this->bundle(),
+          'data-action-link-bundle' => $this->getReferencedEntity()?->bundle() ?? $this->bundle(),
           'data-action-link-type' => $actionId,
           'class' => [
             "action-link-{$actionId}",
@@ -390,16 +409,17 @@ trait ParagraphTeaserableTrait {
   }
 
   /**
-   * @inheritDoc
+   * {@inheritdoc}
    *
    * Rule: Suppressing the primary action "readmore" == suppressing "field_link" will also suppress other action links.
    */
   public function getRenderedAction(string $actionId, string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
     $fieldName = $this->getActionFieldnames($viewMode)[$actionId] ?? NULL;
-    if (empty($fieldName) || $this->isFieldSuppressed($this->getReferencingField()->getName())) {
+    $referencingField = $this->getReferencingField();
+    if (empty($fieldName) || $referencingField === NULL || $this->isFieldSuppressed($referencingField->getName())) {
       return NULL;
     }
-    if ($actionId == ReadmoreActionableInterface::ACTION_READMORE && !$this->getReferencingField()->isEmpty()) {
+    if ($actionId === ReadmoreActionableInterface::ACTION_READMORE && !$referencingField->isEmpty()) {
       $displayOptions = $this->entityTypeManager()
         ->getStorage('entity_view_display')
         ->load("paragraph.{$this->bundle()}.{$viewMode}")

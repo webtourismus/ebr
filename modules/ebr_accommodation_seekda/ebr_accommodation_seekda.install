@@ -5,19 +5,21 @@
  * Install, update and uninstall functions.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\ebr_accommodation_seekda\Entity\AccommodationSeekda;
 
 /**
  * Implements hook_install().
  */
-function ebr_accommodation_seekda_install() {
+function ebr_accommodation_seekda_install(): void {
   $datasource = AccommodationSeekda::DATASOURCE;
-  $targetDir = \Drupal::service('file_system')->realpath("public://{$datasource}/") . '/';
-  if (!file_exists($targetDir)) {
-    mkdir($targetDir, 0775);
-  }
+  $directory = "public://{$datasource}";
+  \Drupal::service('file_system')->prepareDirectory(
+    $directory,
+    FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS
+  );
   $fieldConfig = \Drupal::entityTypeManager()->getStorage('field_config')->load('node.package.field_subtitle');
   if (!empty($fieldConfig)) {
     $fieldConfig->setSetting('allowed_formats', ['basic_html']);
@@ -40,22 +42,30 @@ function ebr_accommodation_seekda_uninstall(): void {
 }
 
 /**
- * Move all configuration to ebr_accommodation_seekda.settings
+ * Move all configuration to ebr_accommodation_seekda.settings.
  */
 function ebr_accommodation_seekda_update_10001(array &$sandbox): ?string {
   $oldConfig = \Drupal::configFactory()->getEditable('system.site');
+  $newConfig = \Drupal::configFactory()->getEditable('ebr_accommodation_seekda.settings');
   if (!empty($oldConfig->get('seekda.property_code'))) {
-    $newConfig = \Drupal::configFactory()->getEditable('ebr_accommodation_seekda.settings');
     $newConfig->set('property_code', $oldConfig->get('seekda.property_code'));
-    $newConfig->save();
   }
   if (!empty($oldConfig->get('seekda.kube_domain'))) {
-    $newConfig = \Drupal::configFactory()->getEditable('ebr_accommodation_seekda.settings');
     $newConfig->set('kube_domain', $oldConfig->get('seekda.kube_domain'));
-    $newConfig->save();
   }
+  $newConfig->save();
   $oldConfig->clear('seekda');
   $oldConfig->save();
   return NULL;
 }
 
+/**
+ * Add migration_uid setting for migrated entity ownership.
+ */
+function ebr_accommodation_seekda_update_10002(): string {
+  $config = \Drupal::configFactory()->getEditable('ebr_accommodation_seekda.settings');
+  if ($config->get('migration_uid') === NULL) {
+    $config->set('migration_uid', 1)->save();
+  }
+  return t('Added migration_uid setting with default value 1.');
+}

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ebr_accommodation\Entity;
 
@@ -55,17 +55,17 @@ abstract class AccommodationBase extends Node implements ActionableInterface, Te
   public const BUNDLE_PACKAGE = 'package';
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public static function getDefaultActions(): array {
     return array_merge(static::getReadmoreActions(), [static::ACTION_BOOK, static::ACTION_ENQUIRY]);
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public static function getDefaultActionLabel(string $actionId): TranslatableMarkup|string|NULL {
-    return match($actionId) {
+    return match ($actionId) {
       static::ACTION_BOOK => new TranslatableMarkup('Book', [], ['context' => 'accommodation']),
       static::ACTION_ENQUIRY => new TranslatableMarkup('Enquiry', [], ['context' => 'anfragen']),
       default => self::getReadmoreActionLabel($actionId),
@@ -73,16 +73,16 @@ abstract class AccommodationBase extends Node implements ActionableInterface, Te
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getActionUrl(string $actionId): ?Url {
-    if (in_array($actionId, $this->getReadmoreActions())) {
+    if (in_array($actionId, $this->getReadmoreActions(), TRUE)) {
       return $this->getReadmoreActionUrl($actionId);
     }
     if ($this->get(EntityBusinessrules::FIELD_REMOTE_DATASOURCE)->isEmpty()) {
       return NULL;
     }
-    if ($actionId == static::ACTION_BOOK && $this->get(EntityBusinessrules::FIELD_REMOTE_ID)->isEmpty()) {
+    if ($actionId === static::ACTION_BOOK && $this->get(EntityBusinessrules::FIELD_REMOTE_ID)->isEmpty()) {
       return NULL;
     }
     $query = $this->entityTypeManager()->getStorage('node')->getQuery();
@@ -90,12 +90,12 @@ abstract class AccommodationBase extends Node implements ActionableInterface, Te
     $query->condition(EntityBusinessrules::FIELD_INTERNAL_ID, $actionId);
     $query->condition('status', 1);
     $query->sort('nid');
-    $nodeIds = $query->execute();
+    $nodeIds = $query->execute() ?? [];
     $nodeId = reset($nodeIds);
     if (empty($nodeId)) {
       return NULL;
     }
-    $node = Node::load($nodeId);
+    $node = $this->entityTypeManager()->getStorage('node')->load($nodeId);
     if (!($node instanceof NodeInterface)) {
       return NULL;
     }

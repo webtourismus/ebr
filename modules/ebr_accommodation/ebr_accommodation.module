@@ -5,7 +5,7 @@
  * Main module file.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
 use Drupal\ebr_accommodation\Entity\Room;

@@ -5,8 +5,9 @@
  * Main module file.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
+use Drupal\Core\Entity\EntityFormInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
@@ -16,7 +17,7 @@ use Drupal\ebr\EntityBusinessrules;
  * Implements hook_entity_base_field_info().
  */
 function ebr_internal_notes_entity_base_field_info(EntityTypeInterface $entity_type): array {
-  if ($entity_type->id() != 'node') {
+  if ($entity_type->id() !== 'node') {
     return [];
   }
   $fields = [];
@@ -43,8 +44,9 @@ function ebr_internal_notes_entity_base_field_info(EntityTypeInterface $entity_t
 /**
  * Move "internal notes" input field to the sidebar.
  */
-function ebr_internal_notes_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  if (strpos($form_id, 'node') === FALSE) {
+function ebr_internal_notes_form_alter(&$form, FormStateInterface $form_state, $form_id): void {
+  $formObject = $form_state->getFormObject();
+  if (!($formObject instanceof EntityFormInterface) || $formObject->getEntity()->getEntityTypeId() !== 'node') {
     return;
   }
 

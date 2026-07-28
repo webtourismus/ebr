@@ -8,3 +8,4 @@ cron_warningmail_to: 'entwicklung@webtourismus.at'
 cron_warningmail_repeat: 86400
 migrate_post_import_unpublish_package: 174600
 jsonapi_months: 14
+migration_uid: 1

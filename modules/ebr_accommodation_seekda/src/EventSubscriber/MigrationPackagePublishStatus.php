@@ -1,45 +1,47 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ebr_accommodation_seekda\EventSubscriber;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\ebr\EntityBusinessrules;
 use Drupal\ebr_accommodation_seekda\Entity\AccommodationSeekda;
+use Drupal\ebr_accommodation_seekda\Seekda;
 use Drupal\migrate\Event\MigrateEvents;
 use Drupal\migrate\Event\MigrateImportEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Unpublish seekda packages no longer in the JSON API source result.
+ * Unpublish Seekda packages no longer in the JSON API source result.
  */
 class MigrationPackagePublishStatus implements EventSubscriberInterface {
 
   /**
-   * The constructor.
+   * Constructs the event subscriber.
    */
   public function __construct(
-    protected EntityTypeManager $entityTypeManager,
-    protected KeyValueFactoryInterface $keyValue,
-    protected ConfigFactoryInterface $config,
-  ) { }
+    protected readonly EntityTypeManagerInterface $entityTypeManager,
+    protected readonly KeyValueFactoryInterface $keyValue,
+    protected readonly ConfigFactoryInterface $config,
+    protected readonly Seekda $seekda,
+  ) {}
 
   /**
    * {@inheritdoc}
    */
   public static function getSubscribedEvents(): array {
     return [
-      MigrateEvents::POST_IMPORT => 'unpublish'
+      MigrateEvents::POST_IMPORT => 'unpublish',
     ];
   }
 
   /**
-   * Event callback to unpublish outdated packages.
+   * Unpublishes outdated packages after a packages migration import.
    *
-   * The migration _must_ run with "update" flag for this to work.
+   * The migration _must_ run with the "update" flag for this to work.
    * Otherwise active packages will become unpublished too.
    *
    * @param \Drupal\migrate\Event\MigrateImportEvent $event
@@ -47,7 +49,7 @@ class MigrationPackagePublishStatus implements EventSubscriberInterface {
    */
   public function unpublish(MigrateImportEvent $event): void {
     $migration = $event->getMigration();
-    if (strpos($migration->id(), '_seekda_packages_') !== 3) {
+    if (!$this->seekda->isPackageMigration($migration->id())) {
       return;
     }
     $lastImportTime = round($this->keyValue->get('migrate_last_imported')->get($migration->id(), 0) / 1000);
@@ -65,13 +67,14 @@ class MigrationPackagePublishStatus implements EventSubscriberInterface {
         continue;
       }
       $packageUpdateTime = $package->get('changed')->value;
-      if ($packageUpdateTime + $unpublishGracePeriod > $lastImportTime ) {
+      if ($packageUpdateTime + $unpublishGracePeriod > $lastImportTime) {
         continue;
       }
-      // The package was not updated for "migrate_post_import_unpublish_package" seconds,
-      // therefore we assume it is no longer available for booking.
+      // The package was not updated for migrate_post_import_unpublish_package
+      // seconds, therefore we assume it is no longer available for booking.
       $package->set('status', 0);
       $package->save();
     }
   }
+
 }

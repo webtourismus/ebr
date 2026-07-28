@@ -1,6 +1,10 @@
 services:
-  ebr_accommodation.path_processor:
-    class: \Drupal\ebr_accommodation\PathProcessor\OutboundPathProcessor
-    arguments: ['@request_stack', '@entity_type.manager']
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  Drupal\ebr_accommodation\PathProcessor\OutboundPathProcessor:
     tags:
       - { name: path_processor_outbound, priority: 3000 }
+  ebr_accommodation.path_processor:
+    alias: Drupal\ebr_accommodation\PathProcessor\OutboundPathProcessor

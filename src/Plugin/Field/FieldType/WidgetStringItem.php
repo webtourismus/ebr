@@ -1,23 +1,24 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ebr\Plugin\Field\FieldType;
 
+use Drupal\Core\Field\Attribute\FieldType;
 use Drupal\Core\Field\Plugin\Field\FieldType\StringLongItem;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ebr\EntityBusinessrules;
 
 /**
  * Renders a web widget by using the computed value as Twig template name.
- *
- * @FieldType(
- *   id = "widget_string",
- *   label = @Translation("Web widget"),
- *   description = @Translation("A computed, contextual web widget."),
- *   default_widget = "string_textarea",
- *   default_formatter = "widget_string",
- * )
  */
+#[FieldType(
+  id: 'widget_string',
+  label: new TranslatableMarkup('Web widget'),
+  description: new TranslatableMarkup('A computed, contextual web widget.'),
+  default_widget: 'string_textarea',
+  default_formatter: 'widget_string',
+)]
 class WidgetStringItem extends StringLongItem {
 
   /**
@@ -61,22 +62,27 @@ class WidgetStringItem extends StringLongItem {
   /**
    * Calculates the value of the field and sets it.
    */
-  protected function ensureCalculated() {
+  protected function ensureCalculated(): void {
     if (!$this->isCalculated) {
-      /** @var \Drupal\ebr\Entity\WidgetableInterface $entity */
       $entity = $this->getEntity();
       if (!$entity->isNew()) {
         $widgetType = $this->getSetting('widget_type');
-        $datasource = $entity->get(EntityBusinessrules::FIELD_REMOTE_DATASOURCE)->value;
-        $remoteId = $entity->get(EntityBusinessrules::FIELD_REMOTE_ID)->value;
         $value = [
           'value' => NULL,
         ];
-        if ($widgetType && $datasource && $remoteId) {
-          $value = [
+        if (
+          $widgetType &&
+          $entity->hasField(EntityBusinessrules::FIELD_REMOTE_DATASOURCE) &&
+          $entity->hasField(EntityBusinessrules::FIELD_REMOTE_ID)
+        ) {
+          $datasource = $entity->get(EntityBusinessrules::FIELD_REMOTE_DATASOURCE)->value;
+          $remoteId = $entity->get(EntityBusinessrules::FIELD_REMOTE_ID)->value;
+          if ($datasource && $remoteId) {
             // The value is the name of the twig template containing the widget code.
-            'value' => "{$datasource}_{$widgetType}",
-          ];
+            $value = [
+              'value' => "{$datasource}_{$widgetType}",
+            ];
+          }
         }
         $this->setValue($value);
       }

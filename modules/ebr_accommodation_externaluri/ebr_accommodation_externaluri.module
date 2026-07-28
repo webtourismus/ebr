@@ -5,7 +5,7 @@
  * Main module file.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\Core\Form\ConfigTarget;
 use Drupal\Core\Form\FormStateInterface;
@@ -33,15 +33,15 @@ function ebr_accommodation_externaluri_entity_bundle_info_alter(array &$bundles)
 /**
  * Implements hook_entity_bundle_field_info().
  */
-function ebr_accommodation_externaluri_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+function ebr_accommodation_externaluri_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions): array {
   $fields = [];
 
   // Whether the hook implementation was called for our group type.
-  if ($entity_type->id() == 'node' &&
-    in_array($bundle, [AccommodationBase::BUNDLE_PACKAGE, AccommodationBase::BUNDLE_ROOM]) &&
+  if ($entity_type->id() === 'node' &&
+    in_array($bundle, [AccommodationBase::BUNDLE_PACKAGE, AccommodationBase::BUNDLE_ROOM], TRUE) &&
     !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE])
   ) {
-    // Overrride base ebr_accommodation field.
+    // Override base ebr_accommodation field.
     $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE], $bundle);
     $field->setDefaultValue(AccommodationExternalUri::DATASOURCE);
     $field->setDescription(t('If value is "<code>@remote_datasource</code>" and "<code>External URI</code>" is configured in site settings, rooms and packages with a "<code>remote_id</code>" receive an externally redirected action link.', ["@remote_datasource" => AccommodationExternalUri::DATASOURCE]));
@@ -54,8 +54,8 @@ function ebr_accommodation_externaluri_entity_bundle_field_info(EntityTypeInterf
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function ebr_accommodation_externaluri_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
-  $config = \Drupal::configFactory()->getEditable('ebr_accommodation_externaluri.settings');
+function ebr_accommodation_externaluri_form_system_site_information_settings_alter(&$form, $form_state, $form_id): void {
+  $config = \Drupal::configFactory()->get('ebr_accommodation_externaluri.settings');
   $bookLink = $config->get('book');
   $enquiryLink = $config->get('enquiry');
 
@@ -151,11 +151,11 @@ function ebr_accommodation_externaluri_site_settings_validate(&$form, FormStateI
   // Suppress error messages due {{Twig}} variables in URI.
   $formErrors = $form_state->getErrors();
   $looksLikeErrorFromTwigVariableInUri = FALSE;
-  if ($bookLink && isset($formErrors['ebr_external_uri][book']) && strpos($bookLink, '{{') && strpos($bookLink, '}}')) {
+  if ($bookLink && isset($formErrors['ebr_external_uri][book']) && str_contains($bookLink, '{{') && str_contains($bookLink, '}}')) {
     $looksLikeErrorFromTwigVariableInUri = TRUE;
     unset($formErrors['ebr_external_uri][book']);
   }
-  if ($enquiryLink && isset($formErrors['ebr_external_uri][enquiry']) && strpos($enquiryLink, '{{') && strpos($enquiryLink, '}}')) {
+  if ($enquiryLink && isset($formErrors['ebr_external_uri][enquiry']) && str_contains($enquiryLink, '{{') && str_contains($enquiryLink, '}}')) {
     $looksLikeErrorFromTwigVariableInUri = TRUE;
     unset($formErrors['ebr_external_uri][enquiry']);
   }
@@ -166,4 +166,3 @@ function ebr_accommodation_externaluri_site_settings_validate(&$form, FormStateI
     }
   }
 }
-

@@ -1,40 +1,37 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ebr\EventSubscriber;
 
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\ebr\EntityBusinessrules;
 use Drupal\entity_clone\Event\EntityCloneEvent;
 use Drupal\entity_clone\Event\EntityCloneEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Drupal\Core\Entity\FieldableEntityInterface;
 
+/**
+ * Clears EBR identity fields when cloning entities.
+ *
+ * Registered only when the entity_clone module is installed.
+ *
+ * @see \Drupal\ebr\EbrServiceProvider
+ */
 class EbrEntityCloneEventSubscriber implements EventSubscriberInterface {
 
   use StringTranslationTrait;
 
   /**
-   * The messenger.
-   *
-   * @var \Drupal\Core\Messenger\MessengerInterface
+   * Constructs the event subscriber.
    */
-  protected MessengerInterface $messenger;
+  public function __construct(
+    protected readonly MessengerInterface $messenger,
+  ) {}
 
   /**
-   * Constructs event subscriber.
-   *
-   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
-   *   The messenger.
-   */
-  public function __construct(MessengerInterface $messenger) {
-    $this->messenger = $messenger;
-  }
-
-  /**
-   * Clear EBR fields on the cloned target.
+   * Clears EBR fields on the cloned target.
    *
    * @see \Drupal\entity_clone\Event\EntityCloneEvents::PRE_CLONE
    */
@@ -62,9 +59,9 @@ class EbrEntityCloneEventSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents(): array {
-    $events[EntityCloneEvents::PRE_CLONE][] = ['clearEbrFields'];
-    return $events;
+    return [
+      EntityCloneEvents::PRE_CLONE => ['clearEbrFields'],
+    ];
   }
 
 }
-

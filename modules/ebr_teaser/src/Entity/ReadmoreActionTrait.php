@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ebr_teaser\Entity;
 
@@ -15,14 +15,14 @@ use Drupal\ebr\Entity\ActionableInterface;
 trait ReadmoreActionTrait {
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public static function getDefaultActions(): array {
     return [ReadmoreActionableInterface::ACTION_READMORE];
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public static function getDefaultActionLabel(string $actionId): TranslatableMarkup|string|NULL {
     return match ($actionId) {
@@ -32,7 +32,7 @@ trait ReadmoreActionTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getActionFieldnames(?string $viewMode = NULL): array {
     $result = [];
@@ -58,7 +58,7 @@ trait ReadmoreActionTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getActionLabel(string $actionId): TranslatableMarkup|string|NULL {
     if ($this->getActionUrl($actionId)) {
@@ -68,7 +68,7 @@ trait ReadmoreActionTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getActionUrl(string $actionId): ?Url {
     if ($actionId != ReadmoreActionableInterface::ACTION_READMORE) {
@@ -94,7 +94,7 @@ trait ReadmoreActionTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getRenderedAction(string $actionId, string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
     $fieldName = $this->getActionFieldnames($viewMode)[$actionId] ?? NULL;

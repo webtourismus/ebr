@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\ebr_accommodation_externaluri\EventSubscriber;
 
 use Drupal\Component\Utility\DeprecationHelper;
@@ -7,34 +9,36 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Path\PathValidatorInterface;
-use Drupal\Core\Render\Renderer;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Url;
 use Drupal\ebr\EntityBusinessrules;
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
 use Drupal\node\NodeInterface;
 use Drupal\redirect\RedirectChecker;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Redirects the booking node to the Kube domain.
+ * Redirects book/enquiry nodes to a configured external URI.
  */
 class RedirectEbrNodeToExternalUri implements EventSubscriberInterface {
 
   /**
-   * @inheritDoc
+   * Constructs the event subscriber.
    */
   public function __construct(
-    protected RedirectChecker $checker,
-    protected ConfigFactoryInterface $config,
-    protected EntityBusinessrules $ebr,
-    protected PathValidatorInterface $pathValidator,
-    protected EntityTypeManagerInterface $entityTypeManager,
-    protected LanguageManagerInterface $languageManager,
-    protected Renderer $renderer,
-  ) { }
+    protected readonly RedirectChecker $checker,
+    protected readonly ConfigFactoryInterface $config,
+    #[Autowire(service: 'ebr.service')]
+    protected readonly EntityBusinessrules $ebr,
+    protected readonly PathValidatorInterface $pathValidator,
+    protected readonly EntityTypeManagerInterface $entityTypeManager,
+    protected readonly LanguageManagerInterface $languageManager,
+    protected readonly RendererInterface $renderer,
+  ) {}
 
   /**
    * Handles the redirect if applicable.
@@ -42,7 +46,7 @@ class RedirectEbrNodeToExternalUri implements EventSubscriberInterface {
    * @param \Symfony\Component\HttpKernel\Event\RequestEvent $event
    *   The event to process.
    */
-  public function onKernelRequestCheckRedirect(RequestEvent $event) {
+  public function onKernelRequestCheckRedirect(RequestEvent $event): void {
     // Get a clone of the request. During inbound processing the request
     // can be altered. Allowing this here can lead to unexpected behavior.
     // For example the path_processor.files inbound processor provided by
@@ -62,7 +66,7 @@ class RedirectEbrNodeToExternalUri implements EventSubscriberInterface {
     }
 
     $requestedNodeId = $url->getRouteParameters()['node'] ?? NULL;
-    if ($url->getRouteName() != 'entity.node.canonical' || empty($requestedNodeId)) {
+    if ($url->getRouteName() !== 'entity.node.canonical' || empty($requestedNodeId)) {
       return;
     }
 
@@ -76,16 +80,17 @@ class RedirectEbrNodeToExternalUri implements EventSubscriberInterface {
     $bookingNode = $this->ebr->getEntity('node', AccommodationBase::ACTION_BOOK);
     $enquiryNode = $this->ebr->getEntity('node', AccommodationBase::ACTION_ENQUIRY);
 
-    if (!in_array($requestedNodeId, [$bookingNode?->id(), $enquiryNode?->id()])) {
+    if (!in_array($requestedNodeId, [$bookingNode?->id(), $enquiryNode?->id()], TRUE)) {
       return;
     }
 
     $redirectUrl = NULL;
-    if ($externalBookUri && $bookingNode instanceof NodeInterface && $bookingNode->id() == $requestedNodeId) {
+    $action = NULL;
+    if ($externalBookUri && $bookingNode instanceof NodeInterface && $bookingNode->id() === $requestedNodeId) {
       $redirectUrl = $externalBookUri;
       $action = AccommodationBase::ACTION_BOOK;
     }
-    elseif ($externalEnquiryUri && $enquiryNode instanceof NodeInterface && $enquiryNode->id() == $requestedNodeId) {
+    elseif ($externalEnquiryUri && $enquiryNode instanceof NodeInterface && $enquiryNode->id() === $requestedNodeId) {
       $redirectUrl = $externalEnquiryUri;
       $action = AccommodationBase::ACTION_ENQUIRY;
     }
@@ -95,8 +100,8 @@ class RedirectEbrNodeToExternalUri implements EventSubscriberInterface {
     }
 
     $sourceNodeId = $request->query->get('package') ?? $request->query->get('room');
-    // load via tenary operator to avoid assert() errors on dev environment
-    $sourceNode = $sourceNodeId ? $sourceNode = $this->entityTypeManager->getStorage('node')->load($sourceNodeId) : NULL;
+    // Load via ternary to avoid assert() errors on a dev environment.
+    $sourceNode = $sourceNodeId ? $this->entityTypeManager->getStorage('node')->load($sourceNodeId) : NULL;
 
     $queryString = $request->getQueryString() ?? '';
     if ($sourceNode) {
@@ -104,7 +109,7 @@ class RedirectEbrNodeToExternalUri implements EventSubscriberInterface {
       $queryString = preg_replace("/&?{$sourceNode->bundle()}={$sourceNode->id()}/", '', $queryString);
     }
     if ($queryString) {
-      $redirectUrl .= (strpos($redirectUrl, '?') === FALSE ? '?' : '&') . $queryString;
+      $redirectUrl .= (!str_contains($redirectUrl, '?') ? '?' : '&') . $queryString;
     }
 
     $build = [
@@ -125,9 +130,8 @@ class RedirectEbrNodeToExternalUri implements EventSubscriberInterface {
       );
     }
     catch (\Exception $exception) {
-      /* fail silently, just pass the url as is */
+      /* Fail silently, just pass the url as is. */
     }
-
 
     $response = new TrustedRedirectResponse($redirectUrl, 307);
     $event->setResponse($response);
@@ -136,10 +140,11 @@ class RedirectEbrNodeToExternalUri implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
-    // This needs to run before Redirect module
-    $events[KernelEvents::REQUEST][] = ['onKernelRequestCheckRedirect', 34];
-    return $events;
+  public static function getSubscribedEvents(): array {
+    // This needs to run before Redirect module.
+    return [
+      KernelEvents::REQUEST => ['onKernelRequestCheckRedirect', 34],
+    ];
   }
 
 }

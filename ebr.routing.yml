@@ -6,4 +6,4 @@ ebr.redirect_link_template:
     _controller: '\Drupal\ebr\Controller\EbrController::doRedirection'
     link_template: 'canonical'
   requirements:
-    _access: 'TRUE'
+    _permission: 'access content'

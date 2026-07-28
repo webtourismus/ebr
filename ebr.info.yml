@@ -1,6 +1,6 @@
 name: Entity business rules
 type: module
-description: 'Adds base fields "remote_id", "remote_datasource", "internal_id" to nodes, terms and media to provide business rules like contextual action links for entites.'
+description: 'Adds base fields "remote_id", "remote_datasource", "internal_id" to nodes, terms, media and block content to provide business rules like contextual action links for entities.'
 package: Entity business rules
 core_version_requirement: ^10.3 || ^11
 version: 1.7.4

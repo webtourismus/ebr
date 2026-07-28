@@ -1,21 +1,22 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ebr_accommodation_easybooking\Entity;
 
+use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ebr\Entity\WidgetableInterface;
 use Drupal\ebr\EntityBusinessrules;
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
 
 /**
-* Business rules for accomodation node bundles "room" and "package" with Easybooking PMS.
-  */
+ * Business rules for accommodation node bundles with EasyBooking PMS.
+ */
 abstract class AccommodationEasybooking extends AccommodationBase implements WidgetableInterface {
 
   /**
-   * The "remote_datasource" field value for entites from EasyBooking PMS.
+   * The "remote_datasource" field value for entities from EasyBooking PMS.
    */
   public const DATASOURCE = 'easybooking';
 
@@ -35,7 +36,7 @@ abstract class AccommodationEasybooking extends AccommodationBase implements Wid
   public const WIDGET_AVAILABILITY = 'availability';
 
   /**
-   * The availability web widget from EasyBooking PMS software.
+   * The price comparison web widget from EasyBooking PMS software.
    */
   public const WIDGET_PRICECOMPARISON = 'pricecomparison';
 
@@ -48,24 +49,24 @@ abstract class AccommodationEasybooking extends AccommodationBase implements Wid
   public const INFOLINK_PREFIX = 'https://www.easy-booking.at/preview/';
 
   /**
-   * Return the customer ID (cid) for EasyBooking Widgets.
+   * Returns the customer ID (cid) for EasyBooking Widgets.
    */
   public function getCustomerId(): string {
-    return \Drupal::configFactory()->get('ebr_accommodation_easybooking.settings')->get('customer_id');
+    return (string) (\Drupal::config('ebr_accommodation_easybooking.settings')->get('customer_id') ?? '');
   }
 
   /**
-   * Return the serial number (serialNr) for EasyBooking Widgets.
+   * Returns the serial number (serialNr) for EasyBooking Widgets.
    */
   public function getSerialNr(): string {
-    return \Drupal::configFactory()->get('ebr_accommodation_easybooking.settings')->get('serial_nr');
+    return (string) (\Drupal::config('ebr_accommodation_easybooking.settings')->get('serial_nr') ?? '');
   }
 
   /**
-   * Given a ISO2 langcode, return the numeric language ID for EasyBooking Widgets.
+   * Given an ISO2 langcode, return the numeric language ID for EasyBooking Widgets.
    */
   public static function getWidgetLangId(string $langcode): int {
-    return match($langcode) {
+    return match ($langcode) {
       'en' => 1,
       'de' => 2,
       'nl' => 3,
@@ -78,7 +79,7 @@ abstract class AccommodationEasybooking extends AccommodationBase implements Wid
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public static function getDefaultWidgets(): array {
     return [
@@ -89,22 +90,23 @@ abstract class AccommodationEasybooking extends AccommodationBase implements Wid
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public static function getDefaultWidgetLabel(string $widgetId): ?TranslatableMarkup {
     return match ($widgetId) {
       self::WIDGET_RATES => new TranslatableMarkup('Prices'),
       self::WIDGET_AVAILABILITY => new TranslatableMarkup('Availability'),
       self::WIDGET_PRICECOMPARISON => new TranslatableMarkup('Comparison of prices'),
+      default => NULL,
     };
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getWidgetFieldnames(): array {
     $result = [];
-    if ($this->get(EntityBusinessrules::FIELD_REMOTE_DATASOURCE)->value == AccommodationEasybooking::DATASOURCE &&
+    if ($this->get(EntityBusinessrules::FIELD_REMOTE_DATASOURCE)->value === AccommodationEasybooking::DATASOURCE &&
       !$this->get(EntityBusinessrules::FIELD_REMOTE_ID)->isEmpty()
     ) {
       foreach ($this->getDefaultWidgets() as $widgetId) {
@@ -115,7 +117,7 @@ abstract class AccommodationEasybooking extends AccommodationBase implements Wid
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getWidgetLabel(string $widgetId): ?TranslatableMarkup {
     if (array_key_exists($widgetId, $this->getWidgetFieldnames())) {
@@ -125,7 +127,7 @@ abstract class AccommodationEasybooking extends AccommodationBase implements Wid
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getWidgetVariables(string $widgetId): array {
     if (array_key_exists($widgetId, $this->getWidgetFieldnames())) {
@@ -133,28 +135,30 @@ abstract class AccommodationEasybooking extends AccommodationBase implements Wid
         'customer_id' => $this->getCustomerId(),
         'serial_nr' => $this->getSerialNr(),
         'lang_id' => $this->getWidgetLangId($this->languageManager()->getCurrentLanguage()->getId()),
+        'langcode' => $this->languageManager()->getCurrentLanguage()->getId(),
+        'arrival_date_iso' => (new \DateTimeImmutable('today'))->format('Y-m-d'),
       ];
     }
     return [];
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getRenderedWidget(string $widgetId, string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
     $field = $this->getWidgetFieldnames()[$widgetId] ?? NULL;
     if (empty($field)) {
-      NULL;
+      return NULL;
     }
     $displayOptions = $this->entityTypeManager()
       ->getStorage('entity_view_display')
       ->load("node.{$this->bundle()}.{$viewMode}")
       ?->getComponent($field);
-    if (is_null($displayOptions)) {
-      NULL;
+    if ($displayOptions === NULL) {
+      return NULL;
     }
     $build = $this->entityTypeManager()->getViewBuilder('node')->viewField(
-      $field,
+      $this->get($field),
       $displayOptions
     );
     $build['#widget_type'] = $widgetId;

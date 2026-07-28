@@ -60,8 +60,12 @@ process:
     plugin: default_value
     default_value: de
   uid:
-    plugin: default_value
-    default_value: 1
+    plugin: callback
+    callable:
+      - '\Drupal\ebr_accommodation_seekda\Seekda'
+      - migrationOwnerUid
+    unpack_source: true
+    source: [  ]
   status:
     plugin: default_value
     default_value: 1
