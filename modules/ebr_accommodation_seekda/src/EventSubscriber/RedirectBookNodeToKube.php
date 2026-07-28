@@ -72,12 +72,16 @@ class RedirectBookNodeToKube implements EventSubscriberInterface {
       return;
     }
 
-    $redirectUrl = $kubeDomain . '?' . $request->getQueryString();
+    $queryString = $request->getQueryString();
+    $redirectUrl = $kubeDomain;
+    if ($queryString) {
+      $redirectUrl .= '?' . $queryString;
+    }
 
     preg_match('#^/([a-zA-Z]{2})(/.+)#', $path, $matches);
     $possiblyALangCode = strtolower($matches[1] ?? '');
     if ($possiblyALangCode !== '') {
-      $redirectUrl .= "&skd-language-code={$possiblyALangCode}";
+      $redirectUrl .= (str_contains($redirectUrl, '?') ? '&' : '?') . "skd-language-code={$possiblyALangCode}";
     }
 
     $response = new TrustedRedirectResponse($redirectUrl, 307);

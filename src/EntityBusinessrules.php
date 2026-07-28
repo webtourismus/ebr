@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ebr;
 
@@ -20,7 +20,7 @@ class EntityBusinessrules {
    * Entity types having fields allowing custom business rules.
    *
    * @internal This is intentionally protected to potentially allow other
-   * modules to decorate this serivce and the corresponding getter.
+   * modules to decorate this service and the corresponding getter.
    */
   protected const ENTITY_TYPES = ['node', 'media', 'taxonomy_term', 'block_content'];
 
@@ -40,9 +40,11 @@ class EntityBusinessrules {
   public const FIELD_REMOTE_DATASOURCE = 'remote_datasource';
 
   /**
-   * The interal_notes field name.
+   * The internal_notes field name.
    *
-   * @see ebr_interal_nodes.module
+   * Constant name kept for API compatibility with existing callers.
+   *
+   * @see ebr_internal_notes.module
    */
   public const FIELD_INTERAL_NOTES = 'internal_notes';
 
@@ -177,8 +179,8 @@ class EntityBusinessrules {
    *   The language code for the entity. Defaults to current content language.
    * @return EntityInterface|null
    */
-  public function getEntity(string $entityTypeId, string $internalId, string $langCode = NULL): ?EntityInterface {
-    if (!in_array($entityTypeId, $this->getEntityTypes()) || empty($entityTypeId) || empty($internalId)) {
+  public function getEntity(string $entityTypeId, string $internalId, ?string $langCode = NULL): ?EntityInterface {
+    if (!in_array($entityTypeId, $this->getEntityTypes(), TRUE) || $entityTypeId === '' || $internalId === '') {
       return NULL;
     }
     $entities = $this->entityTypeManager->getStorage($entityTypeId)->loadByProperties([

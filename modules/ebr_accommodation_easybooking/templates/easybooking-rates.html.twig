@@ -12,10 +12,10 @@
           localeId: "{{- entity.getWidgetLangId(langcode) -}}",
           loadCSS : true,
           arrivalDate : "{{ arrival_date_iso }}",
-          category : "{{ entity.get('remote_id').0.value }}",
+          category : "{{ entity.get('remote_id').0.value|e('js') }}",
           showAvailability: false,
-          enquiryPage : "{{- entity.getActionUrl('enquiry').toString ?? 'popup' -}}",
-          bookingPage : "{{- entity.getActionUrl('book').toString ?? 'popup' -}}",
+          enquiryPage : "{{- entity.getActionUrl('enquiry')?.toString ?? 'popup' -}}",
+          bookingPage : "{{- entity.getActionUrl('book')?.toString ?? 'popup' -}}",
           bookingEngine: 2
         });
       } else { setTimeout(ebPricesLoadedCheck, 200); }

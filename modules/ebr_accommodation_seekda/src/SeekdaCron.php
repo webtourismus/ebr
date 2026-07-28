@@ -47,7 +47,7 @@ class SeekdaCron {
     $requestTime = $this->time->getRequestTime();
     $config = $this->configFactory->get('ebr_accommodation_seekda.settings');
     $allowedEnvs = $config->get('cron_allowed_environments') ?? [];
-    if (!in_array($_ENV['ENV'] ?? '', $allowedEnvs, TRUE)) {
+    if (!in_array(getenv('ENV') ?: ($_ENV['ENV'] ?? ''), $allowedEnvs, TRUE)) {
       return;
     }
 

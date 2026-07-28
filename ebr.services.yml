@@ -1,14 +1,16 @@
 services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  Drupal\ebr\EntityBusinessrules: ~
   ebr.service:
-    class: Drupal\ebr\EntityBusinessrules
-    arguments: ['@entity_type.manager', '@entity.repository']
-  ebr.entity_clone_event_subscriber:
-    class: Drupal\ebr\EventSubscriber\EbrEntityCloneEventSubscriber
-    arguments: ['@messenger']
-    tags:
-     - { name: event_subscriber }
-  ebr.twig_extension:
-    class: Drupal\ebr\Twig\EbrTwigExtension
-    arguments: ['@ebr.service']
+    alias: Drupal\ebr\EntityBusinessrules
+  ebr.entity_business_rules:
+    alias: Drupal\ebr\EntityBusinessrules
+
+  Drupal\ebr\Twig\EbrTwigExtension:
     tags:
       - { name: twig.extension }
+  ebr.twig_extension:
+    alias: Drupal\ebr\Twig\EbrTwigExtension

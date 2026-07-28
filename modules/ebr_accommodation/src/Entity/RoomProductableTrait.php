@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ebr_accommodation\Entity;
 
@@ -14,7 +14,7 @@ trait RoomProductableTrait {
   use ProductableTrait;
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getProductFieldnames(?string $viewMode = NULL): array {
     return $this->getFilteredAndSortedProductFields(

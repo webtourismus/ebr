@@ -1,6 +1,11 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
+
+/**
+ * @file
+ * Main module file.
+ */
 
 use Drupal\ebr_popup\Plugin\Derivative\PopupEditLinkDeriver;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -10,7 +15,7 @@ use Drupal\block_content\BlockContentForm;
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function ebr_popup_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
+function ebr_popup_form_system_site_information_settings_alter(&$form, $form_state, $form_id): void {
   \Drupal::service('ebr.service')->renderRule(
     $form,
     'popup_edit_link',
@@ -26,7 +31,7 @@ function ebr_popup_form_system_site_information_settings_alter(&$form, $form_sta
 /**
  * Implements hook_entity_base_field_info_alter().
  */
-function ebr_popup_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
+function ebr_popup_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type): void {
   if ($entity_type->id() !== 'block_content' || empty($fields['status'])) {
     return;
   }
@@ -34,18 +39,22 @@ function ebr_popup_entity_base_field_info_alter(&$fields, EntityTypeInterface $e
   $fields['uuid']->setDisplayConfigurable('form', TRUE);
 }
 
-function ebr_popup_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+/**
+ * Implements hook_form_alter().
+ */
+function ebr_popup_form_alter(&$form, FormStateInterface $form_state, $form_id): void {
   if (!($form_state->getFormObject() instanceof BlockContentForm)) {
     return;
   }
   if (!array_key_exists('uuid', $form)) {
     return;
   }
-  if (!in_array('administrator', \Drupal::currentUser()->getRoles())) {
-    $form['uuid']['#access'] = FALSE;
+  $isAdministrator = in_array('administrator', \Drupal::currentUser()->getRoles(), TRUE);
+  $form['uuid']['#access'] = $isAdministrator;
+  if (!$isAdministrator) {
+    return;
   }
   $form['uuid']['#group'] = 'machine_data';
-  $form['uuid']['#access'] = TRUE;
   $form['uuid']['widget'][0]['value']['#disabled'] = FALSE;
   $form['uuid']['widget'][0]['value']['#attributes']['readonly'] = 'readonly';
   $form['uuid']['widget'][0]['value']['#description'] = t('Do <b><u>not</u></b> edit. Change <b><u>only</u></b> to sync between dev and prod environment. Use the browser\'s Web developer tool to remove <tt>readonly</tt> attribute in HTML form source if you really need to change this field.');

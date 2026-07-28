@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ebr_popup\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
-use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -19,32 +19,25 @@ class PopupEditLinkDeriver extends DeriverBase implements ContainerDeriverInterf
   public const POPUP_PREFIX = 'popup_';
 
   /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * Constructs a PopupEditLinkDeriver.
    */
-  protected $entityTypeManager;
+  public function __construct(
+    protected EntityTypeManagerInterface $entityTypeManager,
+  ) {}
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
-    $this->entityTypeManager = $entity_type_manager;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public static function create(ContainerInterface $container, $base_plugin_id) {
+  public static function create(ContainerInterface $container, $base_plugin_id): static {
     return new static(
       $container->get('entity_type.manager')
     );
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
-  public function getDerivativeDefinitions($base_plugin_definition) {
+  public function getDerivativeDefinitions($base_plugin_definition): array {
     $links = [];
 
     $query = $this->entityTypeManager->getStorage('block_content')->getQuery();
@@ -69,7 +62,7 @@ class PopupEditLinkDeriver extends DeriverBase implements ContainerDeriverInterf
           'attributes' => [
             'class' => ['before:![mask-image:url(/libraries/fa6/svgs/regular/bell.svg)]'],
           ],
-        ]
+        ],
       ] + $base_plugin_definition;
     }
 

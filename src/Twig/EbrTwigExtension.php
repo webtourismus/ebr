@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\ebr\Twig;
 
 use Drupal\Core\Access\AccessResult;
@@ -8,12 +10,17 @@ use Drupal\ebr\EntityBusinessrules;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
+/**
+ * Twig helpers for loading EBR entities by internal_id.
+ */
 class EbrTwigExtension extends AbstractExtension {
 
   /**
-   * {@inheritdoc}
+   * Constructs the Twig extension.
    */
-  public function __construct(protected EntityBusinessrules $ebr) { }
+  public function __construct(
+    protected readonly EntityBusinessrules $ebr,
+  ) {}
 
   /**
    * {@inheritdoc}
@@ -23,15 +30,15 @@ class EbrTwigExtension extends AbstractExtension {
   }
 
   /**
-   * Returns the entity for the given interal_id.
+   * Returns the entity for the given internal_id.
    *
-   * @see Drupal\ebr\EntityBusinessrules::getEntity()
+   * @see \Drupal\ebr\EntityBusinessrules::getEntity()
    */
   public function getEntity(
     string $entityTypeId,
     string $internalId,
     ?string $langCode = NULL,
-    bool $checkAccess = FALSE
+    bool $checkAccess = TRUE,
   ): ?EntityInterface {
     $entity = $this->ebr->getEntity($entityTypeId, $internalId, $langCode);
 
@@ -47,4 +54,5 @@ class EbrTwigExtension extends AbstractExtension {
 
     return $entity;
   }
+
 }

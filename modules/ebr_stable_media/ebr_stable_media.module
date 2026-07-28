@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 /**
  * @file
@@ -14,8 +14,8 @@ use Drupal\ebr_stable_media\Plugin\Derivative\StableMediaEditLinkDeriver;
 /**
  * Implements hook_page_attachments_alter().
  */
-function ebr_stable_media_page_attachments_alter(&$page) {
-  if (_gin_toolbar_gin_is_active()) {
+function ebr_stable_media_page_attachments_alter(&$page): void {
+  if (function_exists('_gin_toolbar_gin_is_active') && _gin_toolbar_gin_is_active()) {
     $page['#attached']['library'][] = 'ebr_stable_media/toolbar';
   }
 }
@@ -23,7 +23,7 @@ function ebr_stable_media_page_attachments_alter(&$page) {
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function ebr_stable_media_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
+function ebr_stable_media_form_system_site_information_settings_alter(&$form, $form_state, $form_id): void {
   \Drupal::service('ebr.service')->renderRule(
     $form,
     'stable_media_link',
@@ -45,17 +45,17 @@ function ebr_stable_media_form_system_site_information_settings_alter(&$form, $f
 /**
  * Implements hook_form_alter().
  */
-function ebr_stable_media_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+function ebr_stable_media_form_alter(&$form, FormStateInterface $form_state, $form_id): void {
   if (!($form_state->getFormObject() instanceof EntityFormInterface)) {
     return;
   }
   $entity = $form_state->getFormObject()->getEntity();
-  if ($form_id != "media_{$entity->bundle()}_edit_form") {
+  if ($form_id !== "media_{$entity->bundle()}_edit_form") {
     return;
   }
   if (!$entity->hasField('internal_id') ||
     $entity->get('internal_id')->isEmpty() ||
-    strpos($entity->get('internal_id')->value, StableMediaEditLinkDeriver::STABLE_MEDIA_PREFIX) !== 0
+    !str_starts_with($entity->get('internal_id')->value, StableMediaEditLinkDeriver::STABLE_MEDIA_PREFIX)
   ) {
     return;
   }

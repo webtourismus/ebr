@@ -1,20 +1,20 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ebr_accommodation_casablanca\Entity;
 
+use Drupal\Core\Url;
 use Drupal\ebr\EntityBusinessrules;
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
-use Drupal\Core\Url;
 
 /**
- * Business rules for accomodation node bundles "room" and "package" with Casablanca PMS.
+ * Business rules for accommodation node bundles with Casablanca PMS.
  */
 abstract class AccommodationCasablanca extends AccommodationBase {
 
   /**
-   * The "remote_datasource" field value for entites from Casablanca PMS.
+   * The "remote_datasource" field value for entities from Casablanca PMS.
    */
   public const DATASOURCE = 'casablanca';
 
@@ -32,22 +32,22 @@ abstract class AccommodationCasablanca extends AccommodationBase {
   public const INFOLINK_PREFIX = 'https://booking.casablanca.at/Info/';
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getActionUrl(string $actionId): ?Url {
     $url = parent::getActionUrl($actionId);
-    if (is_null($url) ||
+    if ($url === NULL ||
       $this->get(EntityBusinessrules::FIELD_REMOTE_ID)->isEmpty() ||
-      $this->get(EntityBusinessrules::FIELD_REMOTE_DATASOURCE)->value != static::DATASOURCE
+      $this->get(EntityBusinessrules::FIELD_REMOTE_DATASOURCE)->value !== static::DATASOURCE
     ) {
       return $url;
     }
 
-    $queryParams = $url->getOption('query');
-    if ($this->bundle() == static::BUNDLE_PACKAGE) {
+    $queryParams = $url->getOption('query') ?? [];
+    if ($this->bundle() === static::BUNDLE_PACKAGE) {
       $queryParams['casapackage'] = $this->get(EntityBusinessrules::FIELD_REMOTE_ID)->value;
     }
-    if ($this->bundle() == static::BUNDLE_ROOM) {
+    if ($this->bundle() === static::BUNDLE_ROOM) {
       $queryParams['casaroomtype'] = $this->get(EntityBusinessrules::FIELD_REMOTE_ID)->value;
     }
     $url->setOption('query', $queryParams);

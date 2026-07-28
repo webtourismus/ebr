@@ -46,6 +46,7 @@ abstract class AccommodationSeekda extends AccommodationBase implements Widgetab
   public static function getDefaultWidgetLabel($widgetType): TranslatableMarkup {
     return match ($widgetType) {
       self::WIDGET_CALENDAR => new TranslatableMarkup('Prices & Availability'),
+      default => new TranslatableMarkup('Widget'),
     };
   }
 

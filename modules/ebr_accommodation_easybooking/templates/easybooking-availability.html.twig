@@ -10,7 +10,7 @@
           customerId: "{{- drupal_config('ebr_accommodation_easybooking.settings', 'customer_id') -}}",
           serialNo: "{{- drupal_config('ebr_accommodation_easybooking.settings', 'serial_nr') -}}",
           localeId: "{{- entity.getWidgetLangId(langcode) -}}",
-          categories: "{{ entity.get('remote_id').0.value }}",
+          categories: "{{ entity.get('remote_id').0.value|e('js') }}",
           startDate: "default",
           showForm: true
         });

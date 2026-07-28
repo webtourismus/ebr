@@ -1,10 +1,10 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ebr_accommodation\PathProcessor;
 
-use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\PathProcessor\OutboundPathProcessorInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Url;
@@ -22,22 +22,12 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class OutboundPathProcessor implements OutboundPathProcessorInterface {
 
   /**
-   * The request stack.
+   * Constructs the path processor.
    */
-  protected RequestStack $requestStack;
-
-  /**
-   * The entity type manager.
-   */
-  protected EntityTypeManager $entityTypeManager;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(RequestStack $requestStack, EntityTypeManager $entityTypeManager) {
-    $this->requestStack = $requestStack;
-    $this->entityTypeManager = $entityTypeManager;
-  }
+  public function __construct(
+    protected readonly RequestStack $requestStack,
+    protected readonly EntityTypeManagerInterface $entityTypeManager,
+  ) {}
 
   /**
    * {@inheritdoc}
@@ -46,7 +36,7 @@ class OutboundPathProcessor implements OutboundPathProcessorInterface {
     if (empty($request)) {
       $request = $this->requestStack->getCurrentRequest();
     }
-    $contextNode = $request->attributes->get('node');
+    $contextNode = $request?->attributes->get('node');
 
     if (is_numeric($contextNode)) {
       $contextNode = $this->entityTypeManager->getStorage('node')->load($contextNode);
@@ -56,14 +46,12 @@ class OutboundPathProcessor implements OutboundPathProcessorInterface {
       return $path;
     }
 
-    $actionId = NULL;
-    $actionUrl = NULL;
     foreach ($contextNode->getActionFieldnames() as $actionId => $actionField) {
       $actionUrl = $contextNode->getActionUrl($actionId);
       if (!($actionUrl instanceof Url)) {
-        return $path;
+        continue;
       }
-      if (ltrim($path, '/') == $actionUrl->getInternalPath()) {
+      if (ltrim($path, '/') === $actionUrl->getInternalPath()) {
         if ($bubbleable_metadata) {
           $bubbleable_metadata->addCacheableDependency($contextNode);
         }

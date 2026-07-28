@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 /**
  * @file
@@ -47,7 +47,7 @@ function _install_ebr_base_fields_by_entity_type(EntityTypeInterface $entity_typ
   $fields = [];
   $fields[EntityBusinessrules::FIELD_INTERNAL_ID] = BaseFieldDefinition::create('string')
     ->setLabel(t('Internal ID'))
-    ->setDescription(t('An unique machine name to mark special entities used elsewhere in code or templates.'))
+    ->setDescription(t('A unique machine name to mark special entities used elsewhere in code or templates.'))
     ->setTranslatable(FALSE)
     ->setRevisionable(FALSE)
     ->setRequired(FALSE)
@@ -166,18 +166,18 @@ function ebr_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   }
 
   if (isset($form['actions']['delete']) &&
-      ebr_entity_access($entity, 'delete',\Drupal::currentUser()) == AccessResult::forbidden()
+      ebr_entity_access($entity, 'delete', \Drupal::currentUser())->isForbidden()
   ) {
     $form['actions']['delete']['#access'] = FALSE;
   }
 }
 
 /**
- * Prevents UID 1 from deleting entities with "internal_id".
+ * Prevents deletion of entities with "internal_id".
  */
-function _ebr_delete_validation(&$form, FormStateInterface $form_state) {
+function _ebr_delete_validation(array &$form, FormStateInterface $form_state): void {
   $entity = $form_state->getFormObject()->getEntity();
-  if ($entity->get(EntityBusinessrules::FIELD_INTERNAL_ID)->isEmpty()) {
+  if (!$entity->hasField(EntityBusinessrules::FIELD_INTERNAL_ID) || $entity->get(EntityBusinessrules::FIELD_INTERNAL_ID)->isEmpty()) {
     return;
   }
 

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ebr_teaser\Entity;
 
@@ -16,7 +16,7 @@ trait NodeTeaserableTrait {
   use StringTranslationTrait;
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function isTeaserableViewmode(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): bool {
     return strpos($viewMode, TeaserableInterface::TEASER_VIEWMODE_PREFIX) === 0;
@@ -30,14 +30,14 @@ trait NodeTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getTeaserTitleField(): ?FieldItemListInterface {
     return $this->get('title');
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getTeaserSubtitleField(): ?FieldItemListInterface {
     if ($this->hasField('field_subtitle')) {
@@ -47,7 +47,7 @@ trait NodeTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getTeaserImagesField(): ?FieldItemListInterface {
     if ($this->hasField('field_images')) {
@@ -57,7 +57,7 @@ trait NodeTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getTeaserTextField(): ?FieldItemListInterface {
     if ($this->hasField('body')) {
@@ -67,7 +67,7 @@ trait NodeTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function renderField(string $viewMode, ?FieldItemListInterface $field) {
     if (!$field instanceof FieldItemListInterface) {
@@ -103,7 +103,7 @@ trait NodeTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getRenderedTeaserTitle(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
     $build = $this->renderField($viewMode, $this->getTeaserTitleField());
@@ -114,7 +114,7 @@ trait NodeTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getRenderedTeaserSubTitle(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
     $build = $this->renderField($viewMode, $this->getTeaserSubtitleField());
@@ -125,7 +125,7 @@ trait NodeTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getRenderedTeaserImages(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
     $build = $this->renderField($viewMode, $this->getTeaserImagesField());
@@ -136,7 +136,7 @@ trait NodeTeaserableTrait {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getRenderedTeaserText(string $viewMode = EntityDisplayRepositoryInterface::DEFAULT_DISPLAY_MODE): ?array {
     $build = $this->renderField($viewMode, $this->getTeaserTextField());

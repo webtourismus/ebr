@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\ebr_teaser\Entity;
 
@@ -17,7 +17,7 @@ class ParagraphTeaserBase extends Paragraph implements ParagraphTeaserableInterf
   use ProductableTrait;
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getProductFieldnames(?string $viewMode = NULL): array {
     if ($this->getReferencedEntity() instanceof ProductableInterface) {

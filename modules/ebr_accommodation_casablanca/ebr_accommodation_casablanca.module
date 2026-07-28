@@ -5,7 +5,7 @@
  * Main module file.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
 use Drupal\ebr_accommodation_casablanca\Entity\AccommodationCasablanca;
@@ -32,21 +32,21 @@ function ebr_accommodation_casablanca_entity_bundle_info_alter(array &$bundles):
 /**
  * Implements hook_entity_bundle_field_info().
  */
-function ebr_accommodation_casablanca_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions) {
+function ebr_accommodation_casablanca_entity_bundle_field_info(EntityTypeInterface $entity_type, $bundle, array $base_field_definitions): array {
   $fields = [];
 
   // Whether the hook implementation was called for our group type.
-  if ($entity_type->id() == 'node' &&
-    in_array($bundle, [AccommodationBase::BUNDLE_PACKAGE, AccommodationBase::BUNDLE_ROOM]) &&
+  if ($entity_type->id() === 'node' &&
+    in_array($bundle, [AccommodationBase::BUNDLE_PACKAGE, AccommodationBase::BUNDLE_ROOM], TRUE) &&
     !empty($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE])
   ) {
-    // Overrride base ebr_accommodation field.
+    // Override base ebr_accommodation field.
     $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_DATASOURCE], $bundle);
     $field->setDefaultValue(AccommodationCasablanca::DATASOURCE);
     $field->setDescription(t('If value is "<code>@remote_datasource</code>", rooms and packages with an "<code>remote_id</code>" receive a booking link.', ["@remote_datasource" => AccommodationCasablanca::DATASOURCE]));
     $fields[EntityBusinessrules::FIELD_REMOTE_DATASOURCE] = $field;
 
-    $config = \Drupal::configFactory()->getEditable('ebr_accommodation_casablanca.settings');
+    $config = \Drupal::configFactory()->get('ebr_accommodation_casablanca.settings');
     $infolink = $config->get('info_link');
     if ($infolink) {
       $field = BaseFieldOverride::createFromBaseFieldDefinition($base_field_definitions[EntityBusinessrules::FIELD_REMOTE_ID], $bundle);
@@ -71,7 +71,7 @@ function ebr_accommodation_casablanca_entity_bundle_field_info(EntityTypeInterfa
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function ebr_accommodation_casablanca_form_system_site_information_settings_alter(&$form, $form_state, $form_id) {
+function ebr_accommodation_casablanca_form_system_site_information_settings_alter(&$form, $form_state, $form_id): void {
   \Drupal::service('ebr.service')->renderRule(
     $form,
     'accommodation',
@@ -82,12 +82,12 @@ function ebr_accommodation_casablanca_form_system_site_information_settings_alte
       "@pms" => AccommodationCasablanca::NAME,
     ]),
   );
-  $config = \Drupal::configFactory()->getEditable('ebr_accommodation_casablanca.settings');
+  $config = \Drupal::configFactory()->get('ebr_accommodation_casablanca.settings');
   $infolink = $config->get('info_link');
   $form['casablanca'] = [
     '#type' => 'details',
     '#title' => AccommodationCasablanca::NAME,
-    '#open' => strpos($infolink ?? '', AccommodationCasablanca::INFOLINK_PREFIX) !== 0,
+    '#open' => !str_starts_with($infolink ?? '', AccommodationCasablanca::INFOLINK_PREFIX),
     '#tree' => TRUE,
   ];
   $form['casablanca']['info_link'] = [
