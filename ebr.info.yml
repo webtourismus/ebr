@@ -9,3 +9,4 @@ version: 1.7.4
 configure: system.site_information_settings
 dependencies:
   - drupal:link
+  - entity_clone
