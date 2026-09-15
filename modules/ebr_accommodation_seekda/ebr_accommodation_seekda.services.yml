@@ -17,10 +17,10 @@ services:
   # Backward-compatible aliases for the previous service IDs.
   seekda.service:
     alias: Drupal\ebr_accommodation_seekda\Seekda
-    deprecated: 'The "%alias_id%" service is deprecated. Use "ebr_accommodation_seekda.seekda" or "%service_id%" instead.'
+    deprecated: 'The "%alias_id%" service is deprecated. Use "ebr_accommodation_seekda.seekda" or "Drupal\ebr_accommodation_seekda\Seekda" instead.'
   seekda.migration_package_publish_status:
     alias: Drupal\ebr_accommodation_seekda\EventSubscriber\MigrationPackagePublishStatus
-    deprecated: 'The "%alias_id%" service is deprecated. Use "%service_id%" instead.'
+    deprecated: 'The "%alias_id%" service is deprecated. Use "Drupal\ebr_accommodation_seekda\EventSubscriber\MigrationPackagePublishStatus" instead.'
   seekda.request_subscriber:
     alias: Drupal\ebr_accommodation_seekda\EventSubscriber\RedirectBookNodeToKube
-    deprecated: 'The "%alias_id%" service is deprecated. Use "%service_id%" instead.'
+    deprecated: 'The "%alias_id%" service is deprecated. Use "Drupal\ebr_accommodation_seekda\EventSubscriber\RedirectBookNodeToKube" instead.'

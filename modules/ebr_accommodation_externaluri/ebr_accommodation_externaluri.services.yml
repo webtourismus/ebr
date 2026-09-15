@@ -10,4 +10,4 @@ services:
   # Backward-compatible alias for the previous (misspelled) service ID.
   ebr_exteral_uri.request_subscriber:
     alias: Drupal\ebr_accommodation_externaluri\EventSubscriber\RedirectEbrNodeToExternalUri
-    deprecated: 'The "%alias_id%" service is deprecated. Use "ebr_accommodation_externaluri.request_subscriber" or "%service_id%" instead.'
+    deprecated: 'The "%alias_id%" service is deprecated. Use "ebr_accommodation_externaluri.request_subscriber" or "Drupal\ebr_accommodation_externaluri\EventSubscriber\RedirectEbrNodeToExternalUri" instead.'
