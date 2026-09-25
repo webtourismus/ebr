@@ -97,15 +97,28 @@ function ebr_teaser_entity_bundle_field_info(EntityTypeInterface $entity_type, $
 /**
  * Implements hook_preprocess_node().
  */
-function ebr_teaser_preprocess_node(&$variables):void {
-  _ebr_teaser_prepocess_teaserable_entity($variables, $variables['node']);
+function ebr_teaser_preprocess_node(&$variables): void {
+  $node = $variables['node'] ?? $variables['elements']['#node'] ?? NULL;
+  if (!$node instanceof ContentEntityInterface) {
+    return;
+  }
+  $variables['node'] = $node;
+  $variables['view_mode'] ??= $variables['elements']['#view_mode'] ?? 'default';
+  _ebr_teaser_prepocess_teaserable_entity($variables, $node);
 }
 
 /**
  * Implements hook_preprocess_paragraph().
  */
 function ebr_teaser_preprocess_paragraph(&$variables): void {
-  _ebr_teaser_prepocess_teaserable_entity($variables, $variables['paragraph']);
+  $paragraph = $variables['paragraph'] ?? $variables['elements']['#paragraph'] ?? NULL;
+  if (!$paragraph instanceof ContentEntityInterface) {
+    return;
+  }
+  // Ensure downstream preprocess/templates always see the entity variable.
+  $variables['paragraph'] = $paragraph;
+  $variables['view_mode'] ??= $variables['elements']['#view_mode'] ?? 'default';
+  _ebr_teaser_prepocess_teaserable_entity($variables, $paragraph);
 }
 
 /**
