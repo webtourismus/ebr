@@ -1,5 +1,10 @@
 # CHANGES
 
+##### 2026-11-03 1.7.14
+
+- BUGFIX: ebr_accommodation_seekda: update 10002 returns a plain string instead of
+  `t()`, matching its `string` return type.
+
 ##### 2026-11-02 1.7.13
 
 - BUGFIX: Version in ebr.info.yml matches the release.

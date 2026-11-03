@@ -67,5 +67,5 @@ function ebr_accommodation_seekda_update_10002(): string {
   if ($config->get('migration_uid') === NULL) {
     $config->set('migration_uid', 1)->save();
   }
-  return t('Added migration_uid setting with default value 1.');
+  return 'Added migration_uid setting with default value 1.';
 }
