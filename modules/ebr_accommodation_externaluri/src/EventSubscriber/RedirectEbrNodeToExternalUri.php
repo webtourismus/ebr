@@ -125,8 +125,8 @@ class RedirectEbrNodeToExternalUri implements EventSubscriberInterface {
       $redirectUrl = DeprecationHelper::backwardsCompatibleCall(
         currentVersion: \Drupal::VERSION,
         deprecatedVersion: '10.3',
-        currentCallable: fn() => trim($this->renderer->renderInIsolation($build)),
-        deprecatedCallable: fn() => trim($this->renderer->renderPlain($build)),
+        currentCallable: fn() => trim((string) $this->renderer->renderInIsolation($build)),
+        deprecatedCallable: fn() => trim((string) $this->renderer->renderPlain($build)),
       );
     }
     catch (\Exception $exception) {

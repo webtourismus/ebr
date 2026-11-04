@@ -1,5 +1,10 @@
 # CHANGES
 
+##### 2026-11-04 1.7.15
+
+- BUGFIX: ebr_accommodation_externaluri: TypeError in trim() when redirecting
+  to the external URI, the rendered URL is cast to a string.
+
 ##### 2026-11-03 1.7.14
 
 - BUGFIX: ebr_accommodation_seekda: update 10002 returns a plain string instead of
