@@ -15,7 +15,9 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\ebr\EntityBusinessrules;
+use Drupal\ebr\Twig\EbrTwigExtension;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Twig\TwigFilter;
 
 /**
  * Adds the base fields "remote_id", "remote_datasource" and "internal_id" to entity types.
@@ -252,4 +254,24 @@ function ebr_field_formatter_info_alter(array &$info) {
  */
 function ebr_field_widget_info_alter(array &$info) {
   $info['link_default']['field_types'][] = 'action_link';
+}
+
+/**
+ * Implements hook_twig_tweak_filters_alter().
+ *
+ * Makes the "entity_url" and "entity_link" filters of Twig Tweak null-safe:
+ * ebr() returns NULL for missing or inaccessible (e.g. unpublished) entities,
+ * then {{ ebr('media', 'logo')|entity_url }} renders an empty string instead
+ * of failing.
+ */
+function ebr_twig_tweak_filters_alter(array &$filters): void {
+  $replacements = [
+    'entity_url' => [EbrTwigExtension::class, 'entityUrl'],
+    'entity_link' => [EbrTwigExtension::class, 'entityLink'],
+  ];
+  foreach ($filters as $key => $filter) {
+    if ($filter instanceof TwigFilter && isset($replacements[$filter->getName()])) {
+      $filters[$key] = new TwigFilter($filter->getName(), $replacements[$filter->getName()]);
+    }
+  }
 }

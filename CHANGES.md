@@ -1,5 +1,12 @@
 # CHANGES
 
+##### 2026-11-10 1.7.16
+
+- BUGFIX: The Twig Tweak filters `entity_url` and `entity_link` render an empty
+  string instead of failing when the entity is NULL, e.g. when `ebr()` returns
+  nothing for a missing or unpublished entity. Since 1.7.10 `ebr()` checks view
+  access by default.
+
 ##### 2026-11-04 1.7.15
 
 - BUGFIX: ebr_accommodation_externaluri: TypeError in trim() when redirecting

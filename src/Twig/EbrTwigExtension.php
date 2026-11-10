@@ -6,6 +6,8 @@ namespace Drupal\ebr\Twig;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
 use Drupal\ebr\EntityBusinessrules;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -53,6 +55,32 @@ class EbrTwigExtension extends AbstractExtension {
     }
 
     return $entity;
+  }
+
+  /**
+   * Null-safe replacement of Twig Tweak's "entity_url" filter.
+   *
+   * @return \Drupal\Core\Url|string
+   *   The URL of the entity, or an empty string without an entity.
+   *
+   * @see \Drupal\twig_tweak\TwigTweakExtension::entityUrl()
+   * @see ebr_twig_tweak_filters_alter()
+   */
+  public static function entityUrl(?EntityInterface $entity, string $rel = 'canonical', array $options = []): Url|string {
+    return $entity ? $entity->toUrl($rel, $options) : '';
+  }
+
+  /**
+   * Null-safe replacement of Twig Tweak's "entity_link" filter.
+   *
+   * @return \Drupal\Core\Link|string
+   *   The link to the entity, or an empty string without an entity.
+   *
+   * @see \Drupal\twig_tweak\TwigTweakExtension::entityLink()
+   * @see ebr_twig_tweak_filters_alter()
+   */
+  public static function entityLink(?EntityInterface $entity, ?string $text = NULL, string $rel = 'canonical', array $options = []): Link|string {
+    return $entity ? $entity->toLink($text, $rel, $options) : '';
   }
 
 }
