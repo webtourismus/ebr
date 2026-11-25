@@ -9,3 +9,7 @@ cron_warningmail_repeat: 86400
 migrate_post_import_unpublish_package: 174600
 jsonapi_months: 14
 migration_uid: 1
+api_token: '42'
+search_id: website
+calendar_cache_max_age: 3600
+cron_retry_interval: 3600

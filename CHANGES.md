@@ -1,5 +1,33 @@
 # CHANGES
 
+##### 2026-11-25 1.7.17
+
+ebr_accommodation_seekda:
+
+- FEATURE: The prices and availability calendar loads its data from Drupal
+  (`/seekda/offers-overview/{langcode}`) instead of from seekda in the
+  visitor's browser. Drupal fetches the data from seekda and caches it
+  (setting `calendar_cache_max_age`, default 1 hour). Visitors' browsers no
+  longer connect to seekda, and page views no longer count against the seekda
+  API quota (1,200 requests per day and property). If seekda cannot be
+  reached, the calendar shows a short note instead of staying empty.
+  Overridden calendar templates keep working.
+- FEATURE: A failed import is retried after `cron_retry_interval` (default 1
+  hour) instead of on every cron run, e.g. while seekda answers "429 Too Many
+  Requests". A failing import no longer stops the other imports of the same
+  cron run.
+- FEATURE: If a package import returns no packages, packages are not
+  unpublished (a warning is logged). Protects against outages or wrong
+  configuration at seekda.
+- FEATURE: The redirect to the booking engine always passes the page language
+  (`skd-language-code`), also for the default language without a path prefix,
+  and adds a booking source (`skd-search-id`, setting "Booking source", default
+  "website", empty to disable). Existing parameters are not overwritten.
+- TASK: The API token is a setting (`api_token`, default "42"). Links and help
+  texts point to hotels.seekda.com, "Seekda Channel Manager" is now "seekda
+  Hotel Manager".
+- Update 10003 adds the new settings with their defaults.
+
 ##### 2026-11-10 1.7.16
 
 - BUGFIX: The Twig Tweak filters `entity_url` and `entity_link` render an empty

@@ -12,12 +12,22 @@ use Drupal\ebr_accommodation_seekda\Entity\AccommodationSeekda;
 use Drupal\ebr_accommodation_seekda\Seekda;
 use Drupal\migrate\Event\MigrateEvents;
 use Drupal\migrate\Event\MigrateImportEvent;
+use Drupal\migrate\Event\MigratePostRowSaveEvent;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Unpublish Seekda packages no longer in the JSON API source result.
  */
 class MigrationPackagePublishStatus implements EventSubscriberInterface {
+
+  /**
+   * Number of rows saved by the running import, keyed by migration ID.
+   *
+   * @var array<string, int>
+   */
+  protected array $savedRows = [];
 
   /**
    * Constructs the event subscriber.
@@ -27,6 +37,8 @@ class MigrationPackagePublishStatus implements EventSubscriberInterface {
     protected readonly KeyValueFactoryInterface $keyValue,
     protected readonly ConfigFactoryInterface $config,
     protected readonly Seekda $seekda,
+    #[Autowire(service: 'logger.channel.ebr_accommodation_seekda')]
+    protected readonly LoggerInterface $logger,
   ) {}
 
   /**
@@ -34,8 +46,25 @@ class MigrationPackagePublishStatus implements EventSubscriberInterface {
    */
   public static function getSubscribedEvents(): array {
     return [
+      MigrateEvents::PRE_IMPORT => 'resetSavedRows',
+      MigrateEvents::POST_ROW_SAVE => 'countSavedRow',
       MigrateEvents::POST_IMPORT => 'unpublish',
     ];
+  }
+
+  /**
+   * Starts counting the saved rows of an import.
+   */
+  public function resetSavedRows(MigrateImportEvent $event): void {
+    $this->savedRows[$event->getMigration()->id()] = 0;
+  }
+
+  /**
+   * Counts a saved row of the running import.
+   */
+  public function countSavedRow(MigratePostRowSaveEvent $event): void {
+    $migrationId = $event->getMigration()->id();
+    $this->savedRows[$migrationId] = ($this->savedRows[$migrationId] ?? 0) + 1;
   }
 
   /**
@@ -50,6 +79,13 @@ class MigrationPackagePublishStatus implements EventSubscriberInterface {
   public function unpublish(MigrateImportEvent $event): void {
     $migration = $event->getMigration();
     if (!$this->seekda->isPackageMigration($migration->id())) {
+      return;
+    }
+    // An empty result usually means a problem at seekda (outage, wrong
+    // configuration), not that every package has ended. Keep the packages
+    // published; they are checked again after the next import.
+    if (($this->savedRows[$migration->id()] ?? 0) === 0) {
+      $this->logger->warning('The import @migration returned no packages. Packages were not unpublished.', ['@migration' => $migration->id()]);
       return;
     }
     $lastImportTime = round($this->keyValue->get('migrate_last_imported')->get($migration->id(), 0) / 1000);

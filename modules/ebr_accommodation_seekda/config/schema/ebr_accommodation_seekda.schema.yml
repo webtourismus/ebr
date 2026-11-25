@@ -65,3 +65,24 @@ ebr_accommodation_seekda.settings:
       constraints:
         Range:
           min: 1
+    api_token:
+      type: string
+      label: 'Token for the seekda JSON APIs'
+    search_id:
+      type: string
+      label: 'Booking source passed to KUBE as skd-search-id (empty to disable)'
+      nullable: true
+    calendar_cache_max_age:
+      type: integer
+      label: 'Cache the prices and availability of the calendar for X seconds'
+      constraints:
+        Range:
+          min: 60
+          max: 86400
+    cron_retry_interval:
+      type: integer
+      label: 'Wait X seconds before retrying a failed import'
+      constraints:
+        Range:
+          min: 300
+          max: 86400

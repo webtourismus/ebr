@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace Drupal\ebr_accommodation_seekda\EventSubscriber;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Path\PathValidatorInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Url;
 use Drupal\ebr\EntityBusinessrules;
 use Drupal\ebr_accommodation\Entity\AccommodationBase;
+use Drupal\ebr_accommodation_seekda\Seekda;
 use Drupal\node\NodeInterface;
 use Drupal\redirect\RedirectChecker;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -31,6 +34,8 @@ class RedirectBookNodeToKube implements EventSubscriberInterface {
     #[Autowire(service: 'ebr.service')]
     protected readonly EntityBusinessrules $ebr,
     protected readonly PathValidatorInterface $pathValidator,
+    protected readonly LanguageManagerInterface $languageManager,
+    protected readonly Seekda $seekda,
   ) {}
 
   /**
@@ -72,17 +77,20 @@ class RedirectBookNodeToKube implements EventSubscriberInterface {
       return;
     }
 
-    $queryString = $request->getQueryString();
-    $redirectUrl = $kubeDomain;
-    if ($queryString) {
-      $redirectUrl .= '?' . $queryString;
+    // Pass on all query parameters (dates, room or package, promotion code,
+    // tracking parameters). KUBE keeps unknown parameters.
+    $query = $request->query->all();
+    // The language of the page, also for the default language without a
+    // path prefix.
+    if (!isset($query['skd-language-code'])) {
+      $query['skd-language-code'] = $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_URL)->getId();
     }
-
-    preg_match('#^/([a-zA-Z]{2})(/.+)#', $path, $matches);
-    $possiblyALangCode = strtolower($matches[1] ?? '');
-    if ($possiblyALangCode !== '') {
-      $redirectUrl .= (str_contains($redirectUrl, '?') ? '&' : '?') . "skd-language-code={$possiblyALangCode}";
+    // The booking source, shown in the seekda reservations.
+    $searchId = $this->seekda->getSearchId();
+    if ($searchId !== '' && !isset($query['skd-search-id'])) {
+      $query['skd-search-id'] = $searchId;
     }
+    $redirectUrl = $kubeDomain . (str_contains($kubeDomain, '?') ? '&' : '?') . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
 
     $response = new TrustedRedirectResponse($redirectUrl, 307);
     $event->setResponse($response);

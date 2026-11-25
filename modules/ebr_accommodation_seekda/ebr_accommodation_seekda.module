@@ -65,8 +65,8 @@ function ebr_accommodation_seekda_entity_bundle_field_info(EntityTypeInterface $
           ->getStorage($entity_type->getBundleEntityType())
           ->load($bundle)
           ->label(),
-        '@url' => "https://hotels.kognitiv.com/master/hotel/{$propertyCode}/categories",
-        '@short_url' => 'hotels.kognitiv.com > Property > Room types',
+        '@url' => "https://hotels.seekda.com/master/hotel/{$propertyCode}/categories",
+        '@short_url' => 'hotels.seekda.com > Property > Room types',
       ]
     ));
     $fields[EntityBusinessrules::FIELD_REMOTE_ID] = $field;
@@ -86,8 +86,8 @@ function ebr_accommodation_seekda_entity_bundle_field_info(EntityTypeInterface $
           ->getStorage($entity_type->getBundleEntityType())
           ->load($bundle)
           ->label(),
-        '@url' => "https://hotels.kognitiv.com/master/hotel/{$propertyCode}/offers",
-        '@short_url' => 'hotels.kognitiv.com > Marketing > Offers',
+        '@url' => "https://hotels.seekda.com/master/hotel/{$propertyCode}/offers",
+        '@short_url' => 'hotels.seekda.com > Marketing > Offers',
       ]
     ));
     $fields[EntityBusinessrules::FIELD_REMOTE_ID] = $field;
@@ -142,7 +142,7 @@ function ebr_accommodation_seekda_form_system_site_information_settings_alter(ar
   $form['seekda']['property_code'] = [
     '#type' => 'textfield',
     '#title' => t('Seekda property code'),
-    '#description' => t('You can find your property code at hotels.kognitiv.com, on the top right of the screen, in brackets next to your company name.'),
+    '#description' => t('You can find your property code at hotels.seekda.com, on the top right of the screen, in brackets next to your company name.'),
     '#placeholder' => 'S012345',
     '#pattern' => '[a-zA-Z0-9_\-]+',
     '#required' => TRUE,
@@ -151,11 +151,20 @@ function ebr_accommodation_seekda_form_system_site_information_settings_alter(ar
   $form['seekda']['kube_domain'] = [
     '#type' => 'url',
     '#title' => t('KUBE Domain'),
-    '#description' => t('You can find your domain at hotels.kognitiv.com > Booking Engine > Overview > Edit (pencil icon).'),
+    '#description' => t('You can find your domain at hotels.seekda.com > Booking Engine > Overview > Edit (pencil icon).'),
     '#placeholder' => 'https://booking.your-domain.com',
     '#required' => TRUE,
     '#config_target' => 'ebr_accommodation_seekda.settings:kube_domain',
     '#link_type' => LinkItemInterface::LINK_EXTERNAL,
+  ];
+  $form['seekda']['search_id'] = [
+    '#type' => 'textfield',
+    '#title' => t('Booking source'),
+    '#description' => t('Passed to the booking engine as "skd-search-id", so bookings from the website can be identified in the seekda reservations. Leave empty to disable.'),
+    '#placeholder' => 'website',
+    '#pattern' => '[a-zA-Z0-9_\-]*',
+    '#maxlength' => 64,
+    '#config_target' => 'ebr_accommodation_seekda.settings:search_id',
   ];
   $form['#validate'][] = 'ebr_accommodation_seekda_site_settings_validate';
 }
@@ -222,7 +231,8 @@ function ebr_accommodation_seekda_theme(array $existing, string $type, string $t
  * Implements hook_preprocess_HOOK() for seekda_calendar.
  */
 function ebr_accommodation_seekda_preprocess_seekda_calendar(array &$variables): void {
-  $variables['endpoint'] = \Drupal::service('ebr_accommodation_seekda.seekda')->getCalendarEndpoint();
+  $langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
+  $variables['endpoint'] = \Drupal::service('ebr_accommodation_seekda.seekda')->getCalendarEndpoint($langcode);
 }
 
 /**
@@ -310,8 +320,8 @@ function ebr_accommodation_seekda_form_node_form_alter(array &$form, FormStateIn
     '#template' => '<div class="messages messages--status"><p>{{ message }}<br>{{ fields|join(", ") }}</p></div>',
     '#context' => [
       'message' => t(
-        'The following fields are imported from <a href=":link" target="_blank">Seekda Channel Manager</a> and must be edited there:',
-        [':link' => 'https://hotels.kognitiv.com/']
+        'The following fields are imported from <a href=":link" target="_blank">seekda Hotel Manager</a> and must be edited there:',
+        [':link' => 'https://hotels.seekda.com/']
       ),
       'fields' => $fields,
     ],

@@ -17,6 +17,8 @@ use Drupal\migrate\MigrateMessage;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Plugin\MigrationPluginManagerInterface;
 use Drupal\migrate_tools\MigrateExecutable;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Runs Seekda migration imports on cron and warns on repeated failures.
@@ -38,6 +40,8 @@ class SeekdaCron {
     protected readonly MailManagerInterface $mailManager,
     protected readonly LanguageManagerInterface $languageManager,
     protected readonly Seekda $seekda,
+    #[Autowire(service: 'logger.channel.ebr_accommodation_seekda')]
+    protected readonly LoggerInterface $logger,
   ) {}
 
   /**
@@ -68,6 +72,12 @@ class SeekdaCron {
       if ($requestTime < $lastSuccessfulImport + $config->get('cron_interval')) {
         continue;
       }
+      // After a failed import, wait before trying again. Otherwise every cron
+      // run repeats the request, e.g. while seekda answers "429 Too Many
+      // Requests" (quota: 1,200 requests per day and property).
+      if ($requestTime < $this->state->get("ebr_accommodation_seekda.next_attempt.{$migrationId}", 0)) {
+        continue;
+      }
 
       if ($migration->getStatus() !== MigrationInterface::STATUS_IDLE) {
         $lastCronStart = $this->state->get("ebr_accommodation_seekda.last_cron_start.{$migrationId}", 0);
@@ -87,8 +97,28 @@ class SeekdaCron {
         if ($this->seekda->isPackageMigration($migration->id())) {
           $migration->getIdMap()->prepareUpdate();
         }
-        $executable = new MigrateExecutable($migration, new MigrateMessage());
-        $result = $executable->import();
+        try {
+          $executable = new MigrateExecutable($migration, new MigrateMessage());
+          $result = $executable->import();
+        }
+        catch (\Throwable $e) {
+          // E.g. checking the dependencies of a migration counts the source rows
+          // of the required migration, which requests seekda again. Do not let
+          // one failing import stop the others.
+          $this->logger->error('Import @migration failed: @message', [
+            '@migration' => $migrationId,
+            '@message' => $e->getMessage(),
+          ]);
+          $migration->setStatus(MigrationInterface::STATUS_IDLE);
+          $result = MigrationInterface::RESULT_FAILED;
+        }
+        if ($result === MigrationInterface::RESULT_COMPLETED) {
+          $this->state->delete("ebr_accommodation_seekda.next_attempt.{$migrationId}");
+        }
+        else {
+          $retryInterval = (int) ($config->get('cron_retry_interval') ?: 3600);
+          $this->state->set("ebr_accommodation_seekda.next_attempt.{$migrationId}", $requestTime + $retryInterval);
+        }
       }
 
       if ($result === MigrationInterface::RESULT_COMPLETED) {

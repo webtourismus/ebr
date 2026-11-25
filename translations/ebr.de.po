@@ -248,20 +248,20 @@ msgid "Seekda property code"
 msgstr "Seekda Unterkunfts-Code"
 
 #: modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:144
-msgid "You can find your property code at hotels.kognitiv.com, on the top right of the screen, in brackets next to your company name."
-msgstr "Sie finden Ihren Unterkunfts-Code unter hotels.kognitiv.com, rechts oben am Bildschirm, in Klammern neben Ihrem Firmennamen."
+msgid "You can find your property code at hotels.seekda.com, on the top right of the screen, in brackets next to your company name."
+msgstr "Sie finden Ihren Unterkunfts-Code unter hotels.seekda.com, rechts oben am Bildschirm, in Klammern neben Ihrem Firmennamen."
 
 #: modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:153
-msgid "You can find your domain at hotels.kognitiv.com > Booking Engine > Overview > Edit (pencil icon)."
-msgstr "Sie finden Ihre Domain hotels.kognitiv.com > Booking Engines > Übersicht > Bearbeiten (Bleistift-Icon)."
+msgid "You can find your domain at hotels.seekda.com > Booking Engine > Overview > Edit (pencil icon)."
+msgstr "Sie finden Ihre Domain unter hotels.seekda.com > Booking Engines > Übersicht > Bearbeiten (Bleistift-Icon)."
 
 #: modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:196
 msgid "In field @label only letters, numbers, underscore and minus are allowed."
 msgstr "Im Feld @label sind nur Buchstaben, Ziffern, Unterstrich und Minus erlaubt."
 
 #: modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:326
-msgid "The following fields are imported from <a href=\":link\" target=\"_blank\">Seekda Channel Manager</a> and must be edited there:"
-msgstr "Die folgenden Felder werden vom <a href=\":link\" target=\"_blank\">Seekda Channel Manager</a> importiert und müssen dort bearbeitet werden:"
+msgid "The following fields are imported from <a href=\":link\" target=\"_blank\">seekda Hotel Manager</a> and must be edited there:"
+msgstr "Die folgenden Felder werden aus dem <a href=\":link\" target=\"_blank\">seekda Hotel Manager</a> importiert und müssen dort bearbeitet werden:"
 
 #: modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module:381
 msgid "The import @migration_id on @site_name has failed multiple times. The last successful import was on @date."
@@ -509,3 +509,15 @@ msgstr "Anfrage URI"
 #: modules/contrib/ebr/modules/ebr_accommodation_externaluri/ebr_accommodation_externaluri.module
 msgid "An external URI to which the interal \"<code>@action</code>\" node will be redirected to. You can use Twig variables (Entity) \"<code>{{ node }}</code>\", (string) \"<code>{{ action }}</code>\" and (LanguageManager) \"<code>{{ language }}</code>\"."
 msgstr "Eine externe URI zu welcher die interne \"<code>@action</code>\" Seite weitergeleitet wird. Sie können die Twig Variablen (Entity) \"<code>{{ node }}</code>\", (string) \"<code>{{ action }}</code>\" und (LanguageManager) \"<code>{{ language }}</code>\" verwenden."
+
+#: modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module
+msgid "Booking source"
+msgstr "Buchungsquelle"
+
+#: modules/contrib/ebr/modules/ebr_accommodation_seekda/ebr_accommodation_seekda.module
+msgid "Passed to the booking engine as \"skd-search-id\", so bookings from the website can be identified in the seekda reservations. Leave empty to disable."
+msgstr "Wird als \"skd-search-id\" an die Buchungsstrecke übergeben, damit Buchungen über die Website in den seekda-Reservierungen erkennbar sind. Leer lassen zum Deaktivieren."
+
+#: modules/contrib/ebr/modules/ebr_accommodation_seekda/templates/seekda-calendar.html.twig
+msgid "Prices and availability are currently not available."
+msgstr "Preise und Verfügbarkeiten sind derzeit nicht abrufbar."

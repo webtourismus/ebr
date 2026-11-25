@@ -3,6 +3,12 @@ services:
     autowire: true
     autoconfigure: true
 
+  logger.channel.ebr_accommodation_seekda:
+    class: Drupal\Core\Logger\LoggerChannel
+    factory: ['@logger.factory', 'get']
+    arguments: ['ebr_accommodation_seekda']
+    autowire: false
+
   Drupal\ebr_accommodation_seekda\Seekda: ~
   ebr_accommodation_seekda.seekda:
     alias: Drupal\ebr_accommodation_seekda\Seekda

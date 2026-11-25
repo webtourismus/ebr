@@ -1,0 +1,7 @@
+ebr_accommodation_seekda.offers_overview:
+  path: '/seekda/offers-overview/{langcode}'
+  defaults:
+    _controller: '\Drupal\ebr_accommodation_seekda\Controller\OffersOverviewController::get'
+  requirements:
+    _access: 'TRUE'
+    langcode: '[a-z]{2}(-[a-z]+)?'

@@ -10,6 +10,7 @@
       startDate: undefined,
       endDate: undefined,
       firstAvailableDate: undefined,
+      unavailable: false,
       availabilities: {},
       {# By default prices are rounded to nearest integer due limited space. -#}
       {% block price_formatter -%}
@@ -39,7 +40,9 @@
             }
           },
         });
-        flatpickrInstance.jumpToDate(new Date($data.firstAvailableDate), true);
+        if ($data.firstAvailableDate) {
+          flatpickrInstance.jumpToDate(new Date($data.firstAvailableDate), true);
+        }
         this.$watch('$store.breakpoint', (breakpoint) => {
           let m = (breakpoint == 'xs' ? 1 : 2);
           if (flatpickrInstance.config['showMonths'] != m) {
@@ -56,13 +59,28 @@
       startDate = new Date();
       {# normalize all times to 12:00 to avoid problems with timezones or summertime -#}
       startDate.setHours(12,0,0,0);
-      let endpoint = `{{ endpoint|e('js') }}&skd-language-code=${document.documentElement.getAttribute('lang')}&skd-start-date=${startDate.toISOString().substring(0,10)}`;
-      let json = await( await fetch(endpoint) ).json();
+      {# The data is loaded from Drupal, which fetches and caches it from seekda. -#}
+      let endpoint = '{{ endpoint|e('js') }}';
+      let json = null;
+      try {
+        let response = await fetch(endpoint);
+        json = response.ok ? await response.json() : null;
+      } catch (e) {
+        json = null;
+      }
+      if (!json?.overview?.entities) {
+        unavailable = true;
+        return;
+      }
+      {# Prices and availabilities are daily arrays starting at the overview start date. -#}
+      let baseDate = json.overview.startDate ? new Date(json.overview.startDate + 'T12:00:00') : new Date();
+      baseDate.setHours(12,0,0,0);
       let remoteId = '{{- entity.get("remote_id").value -}}';
+      let rates = [];
       {% if entity.bundle() == 'package' -%}
-        let rates = json.overview.entities.filter(rate => (rate.isPackage == true && rate.rate_code == remoteId));
+        rates = json.overview.entities.filter(rate => (rate.isPackage == true && rate.rate_code == remoteId));
       {% elseif entity.bundle() == 'room' -%}
-        let rates = json.overview.entities.filter(rate => (rate.isPackage == false && rate.room_code == remoteId));
+        rates = json.overview.entities.filter(rate => (rate.isPackage == false && rate.room_code == remoteId));
       {% endif -%}
       {# By default prices in packages are per person and prices in rooms are per day. -#}
       {% block price_divisor -%}
@@ -77,9 +95,8 @@
       rates.forEach((rate, i) => {
         let priceDivisor = getPriceDivisor(rate);
         rate.prices.forEach((price, j) => {
-          let currentDay = new Date();
-          currentDay.setDate(currentDay.getDate() + j);
-          currentDay.setHours(12,0,0,0);
+          let currentDay = new Date(baseDate);
+          currentDay.setDate(baseDate.getDate() + j);
           currentDay = currentDay.toISOString().substring(0,10);
           availabilities[currentDay] = availabilities[currentDay] ?? {
             date: currentDay,
@@ -98,9 +115,8 @@
           }
         });
       });
-      endDate = new Date();
-      endDate.setHours(12,0,0,0);
-      endDate.setDate(endDate.getDate() + Object.keys(availabilities).length);
+      endDate = new Date(baseDate);
+      endDate.setDate(baseDate.getDate() + Object.keys(availabilities).length);
       if (window.flatpickr) {
         runFlatpickr();
       } else {
@@ -108,6 +124,7 @@
       }
     })()">
     <input type="hidden" class="hidden" x-ref="flatpickr" name="dummy_flatpickr_anchor" />
+    <p class="seekda-availabilities-unavailable" x-show="unavailable" x-cloak>{{ 'Prices and availability are currently not available.'|t }}</p>
   </div>
 {% endblock %}
 

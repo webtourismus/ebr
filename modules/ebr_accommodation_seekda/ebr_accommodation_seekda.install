@@ -69,3 +69,25 @@ function ebr_accommodation_seekda_update_10002(): string {
   }
   return 'Added migration_uid setting with default value 1.';
 }
+
+/**
+ * Add settings for the API token, booking source, calendar cache and retries.
+ */
+function ebr_accommodation_seekda_update_10003(): string {
+  $config = \Drupal::configFactory()->getEditable('ebr_accommodation_seekda.settings');
+  $defaults = [
+    'api_token' => '42',
+    'search_id' => 'website',
+    'calendar_cache_max_age' => 3600,
+    'cron_retry_interval' => 3600,
+  ];
+  $added = [];
+  foreach ($defaults as $key => $value) {
+    if ($config->get($key) === NULL) {
+      $config->set($key, $value);
+      $added[] = $key;
+    }
+  }
+  $config->save();
+  return $added ? 'Added settings: ' . implode(', ', $added) . '.' : 'Settings already present.';
+}
