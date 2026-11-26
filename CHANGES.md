@@ -1,5 +1,13 @@
 # CHANGES
 
+##### 2026-11-26 1.7.18
+
+- BUGFIX: ebr_accommodation_seekda: `skd-room-view` / `skd-package-view` is
+  only added to the "Book" link. On the page of a room or package, it was added
+  to every link to the page itself, including the canonical URL, the hreflang
+  links, the language switcher and the schema.org URLs. Enquiry links no longer
+  get it either.
+
 ##### 2026-11-25 1.7.17
 
 ebr_accommodation_seekda:

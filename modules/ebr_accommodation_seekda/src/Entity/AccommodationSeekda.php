@@ -115,7 +115,11 @@ abstract class AccommodationSeekda extends AccommodationBase implements Widgetab
    */
   public function getActionUrl(string $actionId): ?Url {
     $url = parent::getActionUrl($actionId);
+    // Only the booking engine needs the room or package. On the "Read more"
+    // URL, the OutboundPathProcessor would add it to every link to the node on
+    // its own page, including the canonical and hreflang links.
     if ($url === NULL ||
+      $actionId !== static::ACTION_BOOK ||
       $this->get(EntityBusinessrules::FIELD_REMOTE_ID)->isEmpty() ||
       $this->get(EntityBusinessrules::FIELD_REMOTE_DATASOURCE)->value !== static::DATASOURCE
     ) {
